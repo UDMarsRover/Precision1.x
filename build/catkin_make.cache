@@ -1,0 +1,2 @@
+
+-DCATKIN_DEVEL_PREFIX=/home/engineer/precision1/devel -DCMAKE_INSTALL_PREFIX=/home/engineer/precision1/install -G Unix Makefiles
