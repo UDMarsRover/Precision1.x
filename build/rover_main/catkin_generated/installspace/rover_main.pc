@@ -1,0 +1,8 @@
+prefix=/home/engineer/precision1/install
+
+Name: rover_main
+Description: Description of rover_main
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
