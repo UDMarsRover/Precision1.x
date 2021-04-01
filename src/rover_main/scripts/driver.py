@@ -15,7 +15,7 @@ def takeInCommnad(dataIn):
     pub.publish(commandIn)
     rate.sleep() #Not sure what this does, find out..
     
-def takeInMotorData(dataIn)
+def takeInMotorData(dataIn):
     rospy.loginfo(dataIn.data) #for now, just log Arduino responce
 
 
