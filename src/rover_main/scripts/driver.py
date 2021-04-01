@@ -3,7 +3,7 @@
 import rospy
 from std_msgs.msg import String
 
-rospy.init_node('driver')
+rospy.init_node('driver', anonymous = True)
 
 
 # this function handles input from the control device
