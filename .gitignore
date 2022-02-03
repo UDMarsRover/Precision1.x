@@ -1,0 +1,7 @@
+# Random Mac Files
+.DS_Store
+
+# Ros Build Files (Must be rebuilt on every computer)
+devel/
+build/
+.catkin_workspace
