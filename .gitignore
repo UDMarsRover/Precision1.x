@@ -1,6 +1,9 @@
 # Random Mac Files
 .DS_Store
 
+# Visual Studio Files
+.vscode
+
 # Ros Build Files (Must be rebuilt on every computer)
 devel/
 build/
