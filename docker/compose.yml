@@ -1,0 +1,22 @@
+version: '1.29'
+services:
+  ros:
+    build:
+      dockerfile: ./Dockerfile
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      - "ROS_IP=192.0.1.2"
+    networks:
+      rosnet:
+        ipv4_address: 192.0.1.2
+    #devices:
+      #TBD -  For USB Inputs and 
+
+networks:
+  rosnet:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 192.0.1.0/24
+         gateway: 192.0.1.1
