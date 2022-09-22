@@ -7,6 +7,9 @@
 # Visual Studio Files
 .vscode
 
+# Docker COnfig File
+branch.txt
+
 # Ros Build Files (Must be rebuilt on every computer)
 devel/
 build/
