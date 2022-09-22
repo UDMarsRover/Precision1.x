@@ -8,7 +8,7 @@
 .vscode
 
 # Docker COnfig File
-branch.txt
+docker/branch.txt
 
 # Ros Build Files (Must be rebuilt on every computer)
 devel/
