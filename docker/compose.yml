@@ -1,18 +1,36 @@
-version: '1.29'
+version: '3'
 services:
-  ros:
+
+  # Define our service (container) for ROS Master Node
+  ros_master:
+
+    # Define where Docker Composde should get the image from
     build:
       dockerfile: ./Dockerfile
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
+    
+
+    stdin_open: true        # docker run -i
+    tty: true               # docker run -t
+
+    # Set enviornment variables
     environment:
-      - "ROS_IP=192.0.1.2"
+      - "ROS_IP=192.0.1.2"  # The IP address of out ROS Master Node
+
+    # Attach the network card to the container
     networks:
       rosnet:
         ipv4_address: 192.0.1.2
+
+    # The startup command for this service, run the entrypoint script then run roscore command
+    command: sh /home/udmrt/entrypoint.sh roscore
     #devices:
       #TBD -  For USB Inputs and 
 
+  # Define additional containers here under the services header
+
+
+
+# Virtual Network card for systems
 networks:
   rosnet:
     driver: bridge
