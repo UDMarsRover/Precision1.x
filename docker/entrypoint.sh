@@ -4,9 +4,9 @@
 source /opt/ros/melodic/setup.bash
 
 # Get the most recent version of the repo from the set branch
-cd /home/udmrt/
+cd /home/udmrt/precision1
 branch=cat branch.txt
-git clone https://github.com/UDMarsRover/precision1.git
+git pull
 git checkout $branch
 git pull
 
