@@ -22,7 +22,7 @@ services:
         ipv4_address: 192.0.1.2
 
     # The startup command for this service, run the entrypoint script then run roscore command
-    command: sh /home/udmrt/entrypoint.sh roscore
+    command: roscore
     #devices:
       #TBD -  For USB Inputs and 
 
