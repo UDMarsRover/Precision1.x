@@ -23,6 +23,8 @@ services:
 
     # The startup command for this service, run the entrypoint script then run roscore command
     command: roscore
+    volumes:
+      - ./../src:/home/udmrt/precision1/src
     #devices:
       #TBD -  For USB Inputs and 
 
