@@ -22,10 +22,14 @@ class UDMRTDataBuffer:
         self.__batteryTempData__ = ""
         self.__voltageConverterTempData__ = ""
         self.__currentConversionData__ = ""
+        self.__ultrasonicSensor1Data__ = ""
+        self.__ultrasonicSensor2Data__ = ""
+        self.__ultrasonicSensor3Data__ = ""
+        self.__ultrasonicSensor4Data__ = ""
         
-        self.messageOut = ""
+        self.__messageOut__ = ""
         
-    #Getter and setter methods... lots of them
+    #Getter and setter methods... lots of them...
     
     def setErrorMessageData(self, str):
         self.__errorMessageData__ = str
@@ -129,31 +133,61 @@ class UDMRTDataBuffer:
     def getCurrentConversionData(self):
         return self.__currentConversionData__
     
-    def composemessageOut(self):
-        
-        
-        #Concatenate all of the variables together into one messageOut
-        self.messageOut += self.getErrorMessageData
-        self.messageOut += self.getDriveMotor1Data
-        self.messageOut += self.getDriveMotor2Data
-        self.messageOut += self.getDriveMotor3Data
-        self.messageOut += self.getDriveMotor4Data
-        self.messageOut += self.getArmMotor1Data
-        self.messageOut += self.getArmMotor2Data
-        self.messageOut += self.getArmMotor3Data
-        self.messageOut += self.getArmMotor4Data
-        self.messageOut += self.getArmMotor5Data
-        self.messageOut += self.getArmMotor6Data
-        self.messageOut += self.getGyroscopeData
-        self.messageOut += self.getBoxTempData
-        self.messageOut += self.getBusMonitorData
-        self.messageOut += self.getBatteryTempData
-        self.messageOut += self.getVoltageConverterTempData
-        self.messageOut += self.getCurrentConversionData
+    def setUltrasonicSensor1Data(self, str):
+        self.__ultrasonicSensor1Data__ = str
     
-    def decomposemessageOut(self, str):
+    def getUltrasonicSensor1Data(self):
+        return self.__ultrasonicSensor1Data__
+    
+    def setUltrasonicSensor2Data(self, str):
+        self.__ultrasonicSensor2Data__ = str
+    
+    def getUltrasonicSensor2Data(self):
+        return self.__ultrasonicSensor2Data__
+    
+    def setUltrasonicSensor3Data(self, str):
+        self.__ultrasonicSensor3Data__ = str
+    
+    def getUltrasonicSensor3Data(self):
+        return self.__ultrasonicSensor3Data__
+    
+    def setUltrasonicSensor4Data(self, str):
+        self.__ultrasonicSensor4Data__ = str
+    
+    def getUltrasonicSensor4Data(self):
+        return self.__ultrasonicSensor4Data__
+    
+    
+    def composeMessageOut(self):
         
-        #Update values of messageOut variables
+        #Concatenate all of the variables together into one __messageOut__
+        self.__messageOut__ += self.getErrorMessageData()
+        self.__messageOut__ += self.getDriveMotor1Data()
+        self.__messageOut__ += self.getDriveMotor2Data()
+        self.__messageOut__ += self.getDriveMotor3Data()
+        self.__messageOut__ += self.getDriveMotor4Data()
+        self.__messageOut__ += self.getArmMotor1Data()
+        self.__messageOut__ += self.getArmMotor2Data()
+        self.__messageOut__ += self.getArmMotor3Data()
+        self.__messageOut__ += self.getArmMotor4Data()
+        self.__messageOut__ += self.getArmMotor5Data()
+        self.__messageOut__ += self.getArmMotor6Data()
+        self.__messageOut__ += self.getGyroscopeData()
+        self.__messageOut__ += self.getBoxTempData()
+        self.__messageOut__ += self.getBusMonitorData()
+        self.__messageOut__ += self.getBatteryTempData()
+        self.__messageOut__ += self.getVoltageConverterTempData()
+        self.__messageOut__ += self.getCurrentConversionData()
+        self.__messageOut__ += self.getUltrasonicSensor1Data()
+        self.__messageOut__ += self.getUltrasonicSensor2Data()
+        self.__messageOut__ += self.getUltrasonicSensor3Data()
+        self.__messageOut__ += self.getUltrasonicSensor4Data()
+        
+        return self.__messageOut__
+    
+    def decomposeMessageOut(self, str):
+        
+        #Update values of __messageOut__ variables
         self.setErrorMessageData(str[0:1])
         self.setDriveMotor1Data(str[2:4])
         self.setDriveMotor2Data(str[5:7])
@@ -171,6 +205,10 @@ class UDMRTDataBuffer:
         self.setBatteryTempData(str[54:56])
         self.setVoltageConverterTempData(str[57:59])
         self.setCurrentConversionData(str[60:63])
+        self.setUltrasonicSensor1Data(str[64:67])
+        self.setUltrasonicSensor1Data(str[68:71])
+        self.setUltrasonicSensor1Data(str[72:75])
+        self.setUltrasonicSensor1Data(str[76:79])
     
     #Checking for any errors
     def checkForError(self, str):
