@@ -6,7 +6,7 @@ services:
 
     # Define where Docker Composde should get the image from
     build:
-      dockerfile: ./Dockerfile
+      dockerfile: ./RoverMain
     
 
     stdin_open: true        # docker run -i
@@ -22,9 +22,13 @@ services:
         ipv4_address: 192.0.1.2
 
     # The startup command for this service, run the entrypoint script then run roscore command
-    command: roscore
+    command: /bin/bash -c   "source /opt/ros/noetic/setup.bash && \
+                            cd /home/udmrt/precision1 && \
+                            catkin_make && \
+                            source ./devel/setup.bash &&\
+                            roscore"
     volumes:
-      - ./../src:/home/udmrt/precision1/src
+      - ./../../precision1 :/home/udmrt/precision1
     #devices:
       #TBD -  For USB Inputs and 
 
