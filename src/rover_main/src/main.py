@@ -23,7 +23,7 @@ if __name__ == '__main__':
         dataIn = comms.readData()
         print(dataIn)
         if comms.error != None :
-            print("execption founds")
+            print("Exception found: ")
             print(comms.error)
             sys.exit()
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
         comms.writeData()
         if comms.error != None :
-            print("execption found")
+            print("Exception found: ")
             print(comms.error)
             sys.exit()
     

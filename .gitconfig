@@ -1,9 +1,0 @@
-[user]
-email = greg.molskow@gmail.com
-name = Greg Molskow
-
-[github]
-user = gregmolskow
-
-[core]
-sshCommand = "ssh -i ~/.ssh/gregmolskow"
