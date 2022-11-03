@@ -1,0 +1,12 @@
+<html>
+  <head>
+    
+    <title>Pi Video Surveillance</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+  </head>
+  <body>
+
+    <img class="stream" src="{{ url_for('video_feed') }}" style="width: 100%; ">
+
+  </body>
+</html>
