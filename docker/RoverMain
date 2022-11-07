@@ -4,11 +4,7 @@
 # The goal of this image is to create a developemnt enviornment for 
 # UDMRT that already has ROS and all of the required packages installed.
 
-FROM ros:noetic AS presision1
-
-
-# Define the gitHub branch to pull from.
-#ARG branch="Kaiden"
+FROM ros:noetic AS presision1_main_v1.0
 
 # Install OS tools
 RUN apt-get update && \
@@ -21,10 +17,6 @@ RUN pip install pyserial && \
     pip install opencv-python && \
     rosdep update
 
-# Create a user and usergroup for club
-#RUN groupadd udmrt && \
-#    useradd -m udmrt -g udmrt
-
 
 # Install code from git and update local repo to correct branch
 WORKDIR /home/udmrt
@@ -32,15 +24,4 @@ WORKDIR /home/udmrt
 RUN mkdir /home/udmrt/precision1
 RUN mkdir /home/udmrt/precision1/src
 
-# Build ROS project from branch
-#RUN /bin/bash -c    "source /opt/ros/noetic/setup.bash && \
-#                    cd /home/udmrt/precision1 && \
-#                    catkin_make && \
-#                    source ./devel/setup.bash"
 
-# Update ownership for files in the udmrt home dir
-#RUN chown -R udmrt /home/udmrt && \
-#    chmod g+rw -R /home/udmrt
-
-# Switch user to udmrt user to insure no root access is given
-#USER root

@@ -1,52 +1,36 @@
 #! Dockerfile
 #
+
 # This file was created by Greg Molskow for the use of UDMRT club members
 # The goal of this image is to create a developemnt enviornment for 
 # UDMRT that already has ROS and all of the required packages installed.
 
-FROM ros:noetic AS presision1
 
-
-# Define the gitHub branch to pull from.
-<<<<<<< HEAD
-ARG branch="Kaiden"
-=======
-ARG branch="john"
->>>>>>> origin/john
+######## Create the main image for the system ########
+FROM ros:noetic AS rover_dev_main_v1.0
 
 # Install OS tools
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install git -y && \
-    apt-get install python3-pip -y
+    apt-get install python3-pip -y && \
+    apt-get install ros-noetic-cv-bridge -y 
 
 # Install and Update Development/ROS tools
 RUN pip install pyserial && \
+    pip install opencv-python && \
     rosdep update
-
-# Create a user and usergroup for club
-RUN groupadd udmrt && \
-    useradd -m udmrt -g udmrt
 
 
 # Install code from git and update local repo to correct branch
 WORKDIR /home/udmrt
-RUN git clone https://github.com/UDMarsRover/precision1.git && \
-    cd precision1 && \
-    git pull && \
-    git checkout $branch &&\
-    git pull
+
+RUN mkdir /home/udmrt/precision1
+RUN mkdir /home/udmrt/precision1/src
+
+######## Create the image for the auxillary devices ######## 
+FROM rover_dev_main_v1.0 AS rover_aux
 
 
-# Build ROS project from branch
-RUN /bin/bash -c    "source /opt/ros/noetic/setup.bash && \
-                    cd /home/udmrt/precision1 && \
-                    catkin_make && \
-                    source ./devel/setup.bash"
-
-# Update ownership for files in the udmrt home dir
-RUN chown -R udmrt /home/udmrt && \
-    chmod g+rw -R /home/udmrt
-
-# Switch user to udmrt user to insure no root access is given
-USER udmrt
+######## Create the image for the host devices ########
+FROM rover_dev_main_v1.0 AS rover_host
