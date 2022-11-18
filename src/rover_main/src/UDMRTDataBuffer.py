@@ -35,8 +35,11 @@ class UDMRTDataBuffer:
         
     #Getter and setter methods... lots of them...
     
-    def setErrorMessageData(self, str):
-        self.__errorMessageData__ = str
+    def setErrorMessageData(self):
+        # Do some logic for determining error code 
+
+        strOut = "NULL"
+        self.__errorMessageData__ = strOut
     
     def getErrorMessageData(self):
         return self.__errorMessageData__
@@ -71,7 +74,7 @@ class UDMRTDataBuffer:
     def getArmMotor6Data(self):
         return self.__armMotor6__
     
-    def getGyroscopeMotorData(self):
+    def getGyroscopeData(self):
         return self.__gyroscopeData__
     
     def getBoxTempData(self):
@@ -101,14 +104,16 @@ class UDMRTDataBuffer:
     def getUltrasonicSensor4Data(self):
         return self.__ultrasonicSensor4Data__
     
-    def setDriveMotorData(self, str):
+    def setDriveMotorData(self, dataIn):
+        str = dataIn.data
         self.__driveMotorErrorData__ = str[0:2]
         self.__driveMotor1Data__ = str[2:5]
         self.__driveMotor2Data__ = str[5:8]
         self.__driveMotor3Data__ = str[8:11]
         self.__driveMotor4Data__ = str[11:14]
         
-    def setArmMotorData(self, str):
+    def setArmMotorData(self, dataIn):
+        str = dataIn.data
         self.__armMotorErrorData__ = str[0:2]
         self.__armMotor1Data__ = str[2:7]
         self.__armMotor2Data__ = str[7:12]
@@ -117,7 +122,8 @@ class UDMRTDataBuffer:
         self.__armMotor5Data__ = str[22:27]
         self.__armMotor6Data__ = str[27:32]
         
-    def setEmoData(self, str):
+    def setEmoData(self, dataIn):
+        str = dataIn.data
         self.__emoErrorData__ = str[0:2]
         self.__gyroscopeData__ = str[2:5]
         self.__boxTempData__ = str[5:8]

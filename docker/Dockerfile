@@ -6,8 +6,22 @@
 # UDMRT that already has ROS and all of the required packages installed.
 
 
+<<<<<<< HEAD
 ######## Create the main image for the system ########
 FROM ros:noetic AS rover_dev_main_v1.0
+=======
+
+# Define the gitHub branch to pull from.
+<<<<<<< HEAD
+<<<<<<< HEAD
+ARG branch="paul"
+=======
+ARG branch="Kaiden"
+>>>>>>> master
+=======
+ARG branch="john"
+>>>>>>> john
+>>>>>>> origin/paul
 
 # Install OS tools
 RUN apt-get update && \
