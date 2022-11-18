@@ -5,6 +5,10 @@
 
 #include <ros.h>
 #include <std_msgs/String.h>
+#include <Arduino_HTS221.h>
+#define GREEN 23
+#define RED 22
+#define BLUE 24
 
 // Declare 
 
@@ -17,33 +21,68 @@ int errorCodesLength = 0;
 ros::NodeHandle nh;
 std_msgs::String str_data;
 ros::Publisher sensordata("sensordata", &str_data);
+String err = "FF";
+
 
 // method that updates the errorCodes array
-void updateErrorCode(std::string newError);
+//void updateErrorCode(std::string newError);
 
 
 
 void setup() {
   // setup
-
+  digitalWrite(RED, HIGH);
+  digitalWrite(BLUE, LOW);
+  digitalWrite(GREEN, HIGH);
+  
 }
 
 void loop() {
-  std::string sensorData = gyroscopeData() + boxTemperatureData() + ultrasonicData() + busMonitorData() + batteryTempData() + voltageConverterTempData() + GPSData();
+  //std::string sensorData = gyroscopeData() + boxTemperatureData() + ultrasonicData() + busMonitorData() + batteryTempData() + voltageConverterTempData() + GPSData();
+  String temp = boxTemperatureData();
+   if (temp != "3B") {
+    digitalWrite(RED, HIGH);
+    digitalWrite(BLUE, HIGH);
+    digitalWrite(GREEN, LOW);
+  }
+  else {
+    digitalWrite(RED, LOW);
+    digitalWrite(BLUE, HIGH);
+    digitalWrite(GREEN, HIGH);
+  }
   
 }
 
 
 
-
-std::string gyroscopeData() {
-
-}
-
-std::string boxTemperatureData() {
+/*
+String gyroscopeData() {
 
 }
+*/
 
+String boxTemperatureData() {
+  if (HTS.begin()){
+    float currTemp = HTS.readTemperature();
+    // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
+    String temp_reading = (String)(currTemp * 10);
+    //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
+
+    // Returns the temperature
+    return temp_reading.substring(0, 3);
+  }
+  return "3B";//could not init
+}
+
+String startTemperatureSensor() {
+  // Tests if the temperature sensor is able to be initialized
+  if (!HTS.begin()) {
+    // Temperature sensor was unable to begin
+    return "3B";
+  }
+  return "FF";
+}
+/*
 std::string ultrasonicData() {
 
 }
@@ -67,6 +106,7 @@ std::string GPSData() {
 std::string getErrorCode() {
 
 }
+*/
 
 void updateErrorCode(std::string newError) {
   // This makes sure the errorCodesLength never exceeds 8 before the for loop
@@ -81,8 +121,8 @@ void updateErrorCode(std::string newError) {
 
   // sets the first error in the errorCodes array as the new error
   errorCodes[0] = newError;
-  }
 }
+
 
 // test for different sensors
 // use this within each method for the sensors
