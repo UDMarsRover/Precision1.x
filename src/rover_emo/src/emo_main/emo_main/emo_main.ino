@@ -6,14 +6,16 @@
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <Arduino_HTS221.h>
+#include <Arduino_LSM9DS1.h>
 #define GREEN 23
 #define RED 22
 #define BLUE 24
 
 // Declare 
-
+float acelX, acelY, acelZ; 
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
+
 
 std::string errorCodes[] = {"FF", "FF", "FF", "FF", "FF", "FF", "FF"};
 int errorCodesLength = 0;
@@ -55,11 +57,19 @@ void loop() {
 
 
 
-/*
-String gyroscopeData() {
 
+String gyroscopeData() {
+  if (!IMU.begin()) {
+    return "2C";//Could not initialize
+  }
+  if (IMU.gyroscopeAvailable()) {
+    IMU.readAcceleration(acelX, acelY, acelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
+  }
+  String acelXmap = (String)map(acelX*100, -100, 100, 0, 360);
+  String acelYmap = (String)map(acelY*100, -100, 100, 0, 360);
+  return acelXmap + "," + acelYmap;
 }
-*/
+
 
 String boxTemperatureData() {
   if (HTS.begin()){

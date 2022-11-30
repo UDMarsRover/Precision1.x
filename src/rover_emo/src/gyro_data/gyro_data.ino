@@ -65,11 +65,19 @@ void gyroscope() { //returns 3 hex digits
   }
   */
   Serial.print(acelX);
-  Serial.print(", ");
-  Serial.print(acelY);
-  Serial.print(", ");
-  Serial.println(acelZ);
+  Serial.print(",");
+  Serial.println(acelY);
+  String X = (String)map(acelX*100, -100, 100, 0, 360);
+  String Y = (String)map(acelY*100, -100, 100, 0, 360);
+  Serial.print(X);
+  Serial.print(",");
+  Serial.println(Y);
+  /*
+  String gyro_reading_X = (String)(acelX);
+  String gyro_reading_Y = (String)(acelY);
 
+  Serial.println(gyro_reading_X.substring(0,4) + "," + gyro_reading_Y.substring(0,4));
+  */
   delay(500);
 
 }
