@@ -66,7 +66,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(80)
 
     rospy.loginfo("Create the camera_image publisher.")
-    publisher = rospy.Publisher('camera_image', Image, queue_size=10)
+    publisher = rospy.Publisher('CameraToBase', Image, queue_size=10)
 
     while not rospy.is_shutdown():
         while not workQueue.empty():
