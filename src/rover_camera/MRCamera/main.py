@@ -7,34 +7,37 @@ from cv_bridge import CvBridge
 import numpy as np
 
 class Camera:
-    def __init__(self):
-        self.fps = 20
+    def __init__(self, fps=20, width=320, height=240):
+        # Setup camera
+        self.fps = fps
         self.camera = cv2.VideoCapture(-1, cv2.CAP_V4L)
-        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-        self.camera.set(cv2.CAP_PROP_FPS, 20)
-        print("camera created.")
-        print(self.camera.isOpened())
+        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.camera.set(cv2.CAP_PROP_FPS, fps)
+        self.fps = fps
+        # Set the ros node
+        rospy.init_node('camera_node')
     
     def run(self): 
-        rate = rospy.Rate(80)
+        # Set ros rate to match camera rate
+        rate = rospy.Rate(self.fps)
         bridge = CvBridge()
-        publisher = rospy.Publisher('camera_image', Image, queue_size=10)
+        # Instantiate publisher
+        publisher = rospy.Publisher('CameraToBridge', Image, queue_size=10)
+        # Loop to publish images
         while (self.camera is not None and self.camera.isOpened()):
+            # Get single frame from camera
             ret, frame = self.camera.read()
             if ret is not None:
+                # Publish that camera as 
                 publisher.publish(bridge.cv2_to_imgmsg(frame, encoding="passthrough"))
+                # Wait amount of time set by ros rate
                 rate.sleep()
-        print(self.camera.isOpened())
+        # Release camera when finished
         self.camera.release()
 
 if __name__ == '__main__':
-    rospy.init_node('camera_node')
-    print("running")
+    # New camera
     camera = Camera()
-    print("fps: ", camera.fps)
+    # Run the camera
     camera.run()
-
-
-
-
