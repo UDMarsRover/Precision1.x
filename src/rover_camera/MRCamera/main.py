@@ -30,7 +30,7 @@ class Camera:
             ret, frame = self.camera.read()
             if ret is not None:
                 # Publish that camera as 
-                publisher.publish(bridge.cv2_to_imgmsg(frame, encoding="passthrough"))
+                publisher.publish(bridge.cv2_to_imgmsg(frame, encoding="bgr8"))
                 # Wait amount of time set by ros rate
                 rate.sleep()
         # Release camera when finished
@@ -41,3 +41,5 @@ if __name__ == '__main__':
     camera = Camera()
     # Run the camera
     camera.run()
+
+    

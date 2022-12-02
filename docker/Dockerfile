@@ -8,16 +8,18 @@ FROM ros:noetic AS presision1
 
 
 # Define the gitHub branch to pull from.
-ARG branch="Greg"
+ARG branch="Ryan"
 
 # Install OS tools
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install git -y && \
+    apt-get install ros-noetic-cv-bridge -y && \
     apt-get install python3-pip -y
 
 # Install and Update Development/ROS tools
 RUN pip install pyserial && \
+    pip install opencv-python &&\
     rosdep update
 
 # Create a user and usergroup for club
