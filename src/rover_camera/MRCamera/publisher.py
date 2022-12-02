@@ -48,8 +48,6 @@ def createImageObject(frame):
 
 
 if __name__ == '__main__':
-    # Configuration
-    FPS = 20
 
     rospy.loginfo("Initiate the work queue and the camera.")
     workQueue = queue.Queue()
@@ -63,7 +61,7 @@ if __name__ == '__main__':
     # ROS setting
     rospy.loginfo("Initiate the camera_node.")
     rospy.init_node('camera_node')
-    rate = rospy.Rate(80)
+    rate = rospy.Rate(5)
 
     rospy.loginfo("Create the camera_image publisher.")
     publisher = rospy.Publisher('CameraToBase', Image, queue_size=10)
