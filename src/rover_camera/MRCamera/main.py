@@ -9,7 +9,7 @@ import numpy as np
 class Camera:
     def __init__(self, fps=20, width=320, height=240):
         # Setup camera
-        self.fps = fps
+        self.fps = ros.rate
         self.camera = cv2.VideoCapture(-1, cv2.CAP_V4L)
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
