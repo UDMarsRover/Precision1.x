@@ -8,17 +8,13 @@ import numpy as np
 
 class Camera:
     def __init__(self, fps=20, width=320, height=240):
-<<<<<<< HEAD
-=======
         # Setup camera
->>>>>>> 3e6fed363ee962b718c2be4c1aea6baaca7d1e02
         self.fps = fps
         self.camera = cv2.VideoCapture(-1, cv2.CAP_V4L)
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.camera.set(cv2.CAP_PROP_FPS, fps)
         self.fps = fps
-<<<<<<< HEAD
         rospy.init_node('camera_node')
 
     def run(self): 
@@ -36,7 +32,6 @@ class Camera:
 if __name__ == '__main__':
     camera = Camera()
     camera.run()
-=======
         # Set the ros node
         rospy.init_node('camera_node')
     
@@ -65,4 +60,3 @@ if __name__ == '__main__':
     camera.run()
 
     
->>>>>>> 3e6fed363ee962b718c2be4c1aea6baaca7d1e02
