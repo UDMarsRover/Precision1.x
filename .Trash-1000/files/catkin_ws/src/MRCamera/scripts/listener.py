@@ -19,12 +19,12 @@ class ServeCamera():
 
         def on_image(msg):
             self.frame
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
             self.frame = cv2.imencode(".jpg", cv_image)[1].tobytes()
             self.event.set()
 
         Thread(target=lambda: rospy.init_node('cam_listener', disable_signals=True)).start()
-        rospy.Subscriber("CameraToBase", Image, on_image)
+        rospy.Subscriber("camera_image", Image, on_image)
 
         app = Flask(__name__)
 
