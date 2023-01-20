@@ -1,41 +1,36 @@
-#!/usr/bin/env python3
 import time
 import rospy
 import sys
-from std_msgs.msg import String as rosstring
+from std_msgs.msg import String
 from communications import Communications
+import rover as Presision1
 
-pushTopic = 'RoverToBase'
-count = 0
-pub = rospy.Publisher(pushTopic, rosstring, queue_size=1)
-rospy.init_node('RoverMain')
-
+# Define the port fro the USB antenna 
 comPort = "/dev/ttyUSB0"
-comms = Communications('RoverComs', serialPort = comPort)
-rate = rospy.Rate(10)               # Set the refresh rate
+
+# Create a rover instance
+p1 = Presision1()
 
 
+
+
+
+
+# The main Loop
 if __name__ == '__main__':
+
+    # While roscore is running
     while not rospy.is_shutdown():
-        #Check the comms topic for any ingoing or outgoing message.
-        
-        print("Data")
-        dataIn = comms.readData()
-        print(dataIn)
-        if comms.error != None :
-            print("Exception found: ")
-            print(comms.error)
-            sys.exit()
 
-        comms.DataOutBuffer = comms.DataInBuffer
+        if (p1.hasError()):
+            print(" i seem to has an ewwow :( plz hewp me :,(...."+p1.getError())
 
-        comms.writeData()
-        if comms.error != None :
-            print("Exception found: ")
-            print(comms.error)
-            sys.exit()
-    
+        print("Main loop yo")
 
+        rospy.spin()
 
-
-
+    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
