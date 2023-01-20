@@ -14,6 +14,7 @@ FROM ros:noetic AS rover_dev_main_v1.0
 # Define the gitHub branch to pull from.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ARG branch="paul"
 =======
 ARG branch="Kaiden"
@@ -22,17 +23,30 @@ ARG branch="Kaiden"
 ARG branch="john"
 >>>>>>> john
 >>>>>>> origin/paul
+=======
+ARG branch="Ryan"
+
+>>>>>>> master
 
 # Install OS tools
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install git -y && \
+<<<<<<< HEAD
     apt-get install python3-pip -y && \
     apt-get install ros-noetic-cv-bridge -y 
 
 # Install and Update Development/ROS tools
 RUN pip install pyserial && \
     pip install opencv-python && \
+=======
+    apt-get install ros-noetic-cv-bridge -y && \
+    apt-get install python3-pip -y
+
+# Install and Update Development/ROS tools
+RUN pip install pyserial && \
+    pip install opencv-python &&\
+>>>>>>> master
     rosdep update
 
 
