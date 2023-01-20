@@ -6,37 +6,43 @@ Use Case:   To be used by the University of Dayton Mars Rover Team as a base cla
 
 import rospy
 import sys
-from Communications import Communications
 from std_msgs.msg import String
 
 import UDMRTDataBuffer as DataBuf
 
 class Rover:
 
-    def __init__(self, commsPort, refreshRate =10):
+    def __init__(self, refreshRate =10):
 
         # Initialize the Rover data buffer
-        self.dataBuf = DataBuf()
+        self.dataIn = DataBuf()
+        self.dataOut = DataBuf()
 
         # Initialize the Rover ROS_MAIN node
         rospy.init_node('rover_main', anonymous = True)
         rospy.rospy.Rate(refreshRate) #Hz
 
         # Initialize the Rover ROS Subscribers and tie them to the Data buffer
-        rospy.Subscriber('EmoToPi', String, self.dataBuf.setEmoData)
-        rospy.Subscriber('DriveToPi', String, self.dataBuf.setDriveMotorData)
-        rospy.Subscriber('ArmToPi', String, self.dataBuf.setArmMotorData)
+        rospy.Subscriber('EmoToPi', String, self.dataOut.setEmoData)
+            #Light on/off
+        rospy.Subscriber('DriveToPi', String, self.dataOut.setDriveMotorData)
+            #Speed left drive and speed right drive
+        rospy.Subscriber('ArmToPi', String, self.dataOut.setArmMotorData)
+            # 6 angles with ###.# presision
         rospy.Subscriber('BaseToRover', String, self.ingestBaseCommands)
 
-        # Initalize Rover Comms Class
-        self.comms = Communications('Rover',commsPort)
+        # Will be separate
+        #rospy.Subscriber('CameraToBase', String, self.cameraIngest)
+            
 
 
 
-    def publishDataToRover(self):
+
+
+    def publishDataToBase(self):
         pub = rospy.Publisher('RoverToBase',String, queue_size = 10)
         rospy.rospy.Rate(10) #Hz
-        command = self.dataBuf.composeMessageOut()
+        command = self.dataOut.composeMessageOut()
         rospy.loginfo("Buffer to Base:" + command)
         pub.publish(command)
         rate.sleep() #Not sure what this does, find out..
@@ -49,7 +55,14 @@ class Rover:
 
     def ingestBaseCommands(self, dataIn):
         # Take in data from base and do things
-        baseCommands = dataIn.data
+
+        self.dataIn.__errorMessageData__ = dataIn[0:1]
+        self.dataIn.setDriveMotorData(dataIn.data[1:14])
+        self.dataIn.setArmMotorData(dataIn.data[14:45])
+        self.dataIn.setEmoEmoData(dataIn.data[45:86])
+
+
+
 
         
 

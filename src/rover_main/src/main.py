@@ -9,7 +9,7 @@ import rover as Presision1
 comPort = "/dev/ttyUSB0"
 
 # Create a rover instance
-p1 = Presision1(comPort)
+p1 = Presision1()
 
 
 

@@ -30,7 +30,8 @@ class UDMRTDataBuffer:
         self.__driveMotorErrorData__ = ""
         self.__armMotorErrorData__ = ""
         self.__emoErrorData__ = ""
-        
+        self.__cameraData__ = ""
+
         self.__messageOut__ = ""
         
     #Getter and setter methods... lots of them...
@@ -136,6 +137,8 @@ class UDMRTDataBuffer:
         self.__ultrasonicSensor3Data__ = str[30:34]
         self.__ultrasonicSensor4Data__ = str[34:38]
         
+    #def setCameraData(self, dataIn):
+    #    self.__cameraData__ = dataIn.data
     
     def composeMessageOut(self):
         
