@@ -10,6 +10,7 @@
 #Pydev Files
 .pydevproject
 .project
+.pyc
 
 # Docker COnfig File
 docker/branch.txt

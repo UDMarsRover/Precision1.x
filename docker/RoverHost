@@ -1,0 +1,7 @@
+#! Dockerfile
+#
+# This file was created by Greg Molskow for the use of UDMRT club members
+# The goal of this image is to create a developemnt enviornment for 
+# UDMRT that already has ROS and all of the required packages installed.
+
+FROM presision1_main_v1.0 AS rover_host
