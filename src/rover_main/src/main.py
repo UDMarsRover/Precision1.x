@@ -2,19 +2,11 @@ import time
 import rospy
 import sys
 from std_msgs.msg import String
-from communications import Communications
 import rover as Presision1
 
-# Define the port fro the USB antenna 
-comPort = "/dev/ttyUSB0"
-
 # Create a rover instance
-p1 = Presision1()
-
-
-
-
-
+rate = 10 #Hz
+p1 = Presision1(rate)
 
 # The main Loop
 if __name__ == '__main__':
@@ -24,10 +16,11 @@ if __name__ == '__main__':
 
         if (p1.hasError()):
             print(" i seem to has an ewwow :( plz hewp me :,(...."+p1.getError())
+        else:
+            p1.publishDataToBase()
 
-        print("Main loop yo")
-
-        rospy.spin()
+        # Sleep for a set amount of time to keep our rate
+        p1.rate.sleep()
 
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
