@@ -38,13 +38,30 @@ class UDMRTDataBuffer:
     
     def setErrorMessageData(self):
         # Do some logic for determining error code 
+        emo     = self.__emoErrorData__
+        drive   = self.__driveMotorErrorData__
+        arm     = self.__armMotorErrorData__
 
-        strOut = "NULL"
-        self.__errorMessageData__ = strOut
+        if (emo != "FF"):
+            self.__errorMessageData__ = emo
+        elif (drive != "FF"):
+            self.__errorMessageData__ = drive
+        elif (arm != "FF"):
+            self.__errorMessageData__ = arm
+        else:
+            self.__errorMessageData__ = "FF"
+        
     
     def getErrorMessageData(self):
         return self.__errorMessageData__
     
+    def getDriveMotorData(self):
+        strOut = self.__driveMotor1Data__
+        strOut += self.__driveMotor2Data__
+        strOut += self.__driveMotor3Data__
+        strOut += self.__driveMotor4Data__
+        return strOut
+
     def getDriveMotor1Data(self):
         return self.__driveMotor1__
     
@@ -56,7 +73,16 @@ class UDMRTDataBuffer:
     
     def getDriveMotor4Data(self):
         return self.__driveMotor4__
-    
+
+    def getArmMotorData(self):
+        strOut = self.__armMotor1Data__
+        strOut += self.__armMotor2Data__
+        strOut += self.__armMotor3Data__
+        strOut += self.__armMotor4Data__
+        strOut += self.__armMotor5Data__
+        strOut += self.__armMotor6Data__
+
+
     def getArmMotor1Data(self):
         return self.__armMotor1__
     
@@ -104,9 +130,22 @@ class UDMRTDataBuffer:
     
     def getUltrasonicSensor4Data(self):
         return self.__ultrasonicSensor4Data__
+
+    def getEmoData(self):
+        strOut = self.getGyroscopeData()
+        strOut += self.getBoxTempData()
+        strOut += self.getBusMonitorData()
+        strOut += self.getBatteryTempData()
+        strOut += self.getVoltageConverterTempData()
+        strOut += self.getCurrentConversionData()
+        strOut += self.getUltrasonicSensor1Data()
+        strOut += self.getUltrasonicSensor2Data()
+        strOut += self.getUltrasonicSensor3Data()
+        strOut += self.getUltrasonicSensor4Data()
     
     def setDriveMotorData(self, dataIn):
         str = dataIn.data
+        str = str.upper()
         self.__driveMotorErrorData__ = str[0:2]
         self.__driveMotor1Data__ = str[2:5]
         self.__driveMotor2Data__ = str[5:8]
@@ -115,6 +154,7 @@ class UDMRTDataBuffer:
         
     def setArmMotorData(self, dataIn):
         str = dataIn.data
+        str = str.upper()
         self.__armMotorErrorData__ = str[0:2]
         self.__armMotor1Data__ = str[2:7]
         self.__armMotor2Data__ = str[7:12]
@@ -125,6 +165,7 @@ class UDMRTDataBuffer:
         
     def setEmoData(self, dataIn):
         str = dataIn.data
+        str = str.upper()
         self.__emoErrorData__ = str[0:2]
         self.__gyroscopeData__ = str[2:5]
         self.__boxTempData__ = str[5:8]
@@ -168,6 +209,6 @@ class UDMRTDataBuffer:
         return self.__messageOut__
     
     #Checking for any errors
-    def checkForError(self, str):
+    def checkForError(self):
         #If true, no error. If false, there is an error.
-        return str[0:1].lower() == "ff"
+        return self.__errorMessageData__ == "FF"
