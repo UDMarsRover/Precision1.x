@@ -24,7 +24,8 @@ class Rover:
 
         # Initialize the Rover ROS Subscribers and tie them to the Data buffer
         rospy.Subscriber('EmoToPi', String, self.dataOutBuf.setEmoData)
-            #Light on/off
+
+        #Light on/off
         rospy.Subscriber('DriveToPi', String, self.dataOutBuf.setDriveMotorData)
             #Speed left drive and speed right drive
         rospy.Subscriber('ArmToPi', String, self.dataOutBuf.setArmMotorData)
