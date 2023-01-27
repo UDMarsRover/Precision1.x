@@ -20,7 +20,7 @@ class Camera:
     def run(self): 
         rate = rospy.Rate(self.fps)
         bridge = CvBridge()
-        publisher = rospy.Publisher('camera_image', Image, queue_size=10)
+        publisher = rospy.Publisher('CameraToBridge', Image, queue_size=10)
         while (self.camera is not None and self.camera.isOpened()):
             ret, frame = self.camera.read()
             if ret is not None:
@@ -32,9 +32,10 @@ class Camera:
 if __name__ == '__main__':
     camera = Camera()
     camera.run()
-        # Set the ros node
+
+    # Set the ros node
     rospy.init_node('camera_node')
-    
+
     def run(self): 
         # Set ros rate to match camera rate
         rate = rospy.Rate(self.fps)
@@ -59,4 +60,4 @@ if __name__ == '__main__':
     # Run the camera
     camera.run()
 
-    
+
