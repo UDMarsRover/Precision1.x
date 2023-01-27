@@ -12,40 +12,33 @@ import UDMRTDataBuffer as DataBuf
 
 class Rover:
 
-    def __init__(self, refreshRate =10):
+    def __init__(self, refreshRate = 10):
 
         # Initialize the Rover data buffer
-        self.dataIn = DataBuf()
-        self.dataOut = DataBuf()
+        self.dataInBuf = DataBuf()
+        self.dataOutBuf = DataBuf()
 
         # Initialize the Rover ROS_MAIN node
         rospy.init_node('rover_main', anonymous = True)
-        rospy.rospy.Rate(refreshRate) #Hz
+        self.rate = rospy.rospy.Rate(refreshRate) #Hz
 
         # Initialize the Rover ROS Subscribers and tie them to the Data buffer
-        rospy.Subscriber('EmoToPi', String, self.dataOut.setEmoData)
+        rospy.Subscriber('EmoToPi', String, self.dataOutBuf.setEmoData)
             #Light on/off
-        rospy.Subscriber('DriveToPi', String, self.dataOut.setDriveMotorData)
+        rospy.Subscriber('DriveToPi', String, self.dataOutBuf.setDriveMotorData)
             #Speed left drive and speed right drive
-        rospy.Subscriber('ArmToPi', String, self.dataOut.setArmMotorData)
+        rospy.Subscriber('ArmToPi', String, self.dataOutBuf.setArmMotorData)
             # 6 angles with ###.# presision
         rospy.Subscriber('BaseToRover', String, self.ingestBaseCommands)
 
         # Will be separate
-        #rospy.Subscriber('CameraToBase', String, self.cameraIngest)
-            
-
-
-
-
+        #rospy.Subscriber('CameraToBase', String, self.cameraIngest) 
 
     def publishDataToBase(self):
         pub = rospy.Publisher('RoverToBase',String, queue_size = 10)
-        rospy.rospy.Rate(10) #Hz
-        command = self.dataOut.composeMessageOut()
+        command = self.dataOutBuf.composeMessageOut()
         rospy.loginfo("Buffer to Base:" + command)
         pub.publish(command)
-        rate.sleep() #Not sure what this does, find out..
 
     def hasError(self):
         return self.dataBuf.checkForError()
@@ -55,11 +48,29 @@ class Rover:
 
     def ingestBaseCommands(self, dataIn):
         # Take in data from base and do things
+        str = dataIn.data
+        str = str.upper()
 
-        self.dataIn.__errorMessageData__ = dataIn[0:1]
-        self.dataIn.setDriveMotorData(dataIn.data[1:14])
-        self.dataIn.setArmMotorData(dataIn.data[14:45])
-        self.dataIn.setEmoEmoData(dataIn.data[45:86])
+        #emoPub = rospy.Publisher('PiToEmo',String, queue_size = 10)
+        drivePub = rospy.Publisher('PiToDrive',String, queue_size = 10)
+        armPub = rospy.Publisher('PiToArm',String, queue_size = 10)
+
+        self.dataInBuf.__errorMessageData__ = str[0:1]
+        self.dataInBuf.setDriveMotorData(str[1:14])
+        self.dataInBuf.setArmMotorData(str[14:45])
+        self.dataInBuf.setEmoEmoData(str[45:86])
+
+        #emoPub.publish(self.dataInBuf.getEmoData())
+        drivePub.publish(self.dataInBuf.getDriveMotorData())
+        armPub.publish(self.dataInBuf.getArmMotorData())
+
+        #rospy.loginfo("Buffer to Emo:" + self.dataInBuf.getEmoData())
+        rospy.loginfo("Buffer to Drive:" + self.dataInBuf.getDriveMotorData())
+        rospy.loginfo("Buffer to Arm:" + self.dataInBuf.getArmMotorData())
+
+        
+
+        
 
 
 

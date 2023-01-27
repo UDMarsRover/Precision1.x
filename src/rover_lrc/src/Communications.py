@@ -5,21 +5,18 @@ from std_msgs.msg import String
 
 class Communications:
 
-    def __init__(self,name,serialPort, baudRate=57600):
-
-        # Initialize the Rover ROS_COMMS node
-        rospy.init_node('rover_main', anonymous = True)
-        
-
-        # Subscribe to the Rover COMS_OUT topic
-        rospy.Subscriber('RoverToBase', String, self.writeData)
+    def __init__(self,serialPort,pushTopic, pullTopic, baudRate=57600):
 
         # initalize out internal variables and set up the publisher node and comm port!!
-        self.__subscriberName = name
         self.__baudRate     = baudRate
+        self.__pushTopic    = pushTopic
+        self.__pullTopic    = pullTopic
         self.port           = serial.Serial(serialPort,self.__baudRate)           # Open the serial com port
         self.DataOutBuffer  = ""
         self.DataInBuffer   = ""
+
+        # Subscribe to the Rover COMS_OUT topic
+        rospy.Subscriber(self.__pushTopic, String, self.writeData)
     # Getter function for getting baud rate
     def getBaud(self):
         return self.__baudRate
@@ -40,7 +37,7 @@ class Communications:
     # Check to see if there is data that was sent to the receiver
     def readData(self):
 
-        pub = rospy.Publisher('BaseToRover', String, queue_size = 10)
+        pub = rospy.Publisher(self.__pullTopic, String, queue_size = 10)
         # Will freeze if no data is passed
 
         try:
@@ -48,13 +45,14 @@ class Communications:
             ser_bytes = ser_bytes[:len(ser_bytes)-1]
             dataInBuffer = ser_bytes.decode()
             
-            # Publish to ROS Comms In topic
+            # Publish to ROS Comms In topic to trigger the command in function
             rospy.loginfo("Base to Rover:" + dataInBuffer)
             pub.publish(dataInBuffer)
-            rate.sleep()
+            return True
         
         except Exception as e:
             rospy.loginfo("ERROR_COMMS_IN: " + e)
+            return False
 
      
 
