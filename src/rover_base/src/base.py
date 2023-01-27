@@ -18,8 +18,16 @@ class Base():
 
     def ingestRoverData(self, dataIn):
         # Take in data from rover and do things
-
+        str = dataIn.data
+        str = str.upper()
+       
+        pub = rospy.Publisher('BaseToGUI', String, queueSize = 10)
+        
         self.dataIn.__errorMessageData__ = dataIn[0:1]
         self.dataIn.setDriveMotorData(dataIn.data[1:14])
         self.dataIn.setArmMotorData(dataIn.data[14:45])
         self.dataIn.setEmoEmoData(dataIn.data[45:86])
+
+        pub.publish(self.dataIn.composeMessageOut())
+
+        rospy.loginfo('Base to GUI: ' + self.dataIn.composeMessageOut())
