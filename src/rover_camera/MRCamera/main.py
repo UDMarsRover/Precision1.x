@@ -32,6 +32,7 @@ class Camera:
 if __name__ == '__main__':
     camera = Camera()
     camera.run()
+
     # Set the ros node
     rospy.init_node('camera_node')
 
@@ -40,7 +41,7 @@ if __name__ == '__main__':
         rate = rospy.Rate(self.fps)
         bridge = CvBridge()
         # Instantiate publisher
-        publisher = rospy.Publisher('CameraToBridge', Image, queue_size=10)
+        publisher = rospy.Publisher('CameraToBase', Image, queue_size=10)
         # Loop to publish images
         while (self.camera is not None and self.camera.isOpened()):
             # Get single frame from camera
