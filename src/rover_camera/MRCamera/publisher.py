@@ -57,10 +57,6 @@ def createImageObject(frame):
     return bridge.cv2_to_imgmsg(np.zeros(w,h,3), encoding="passthrough") 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-    # Configuration
-=======
->>>>>>> 3e6fed363ee962b718c2be4c1aea6baaca7d1e02
 
     rate = 5
     
@@ -77,11 +73,7 @@ if __name__ == '__main__':
     # ROS setting
     rospy.loginfo("Initiate the camera_node.")
     rospy.init_node('camera_node')
-<<<<<<< HEAD
-    rate = rospy.Rate(rate)
-=======
     rate = rospy.Rate(5)
->>>>>>> 3e6fed363ee962b718c2be4c1aea6baaca7d1e02
 
     rospy.loginfo("Create the camera_image publisher.")
     publisher = rospy.Publisher('CameraToBase', Image, queue_size=10)
