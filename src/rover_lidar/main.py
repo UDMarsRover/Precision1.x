@@ -5,7 +5,7 @@ from std_msgs.msg import Float64MultiArray
 
 class Zones():
     def __init__(self):
-        self.pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
+        self.pub = rospy.Publisher('LidarToPi', Float64MultiArray, queue_size=10)
         
 
     def publish(self):
