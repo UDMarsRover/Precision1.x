@@ -33,7 +33,7 @@ from std_msgs.msg import Float32MultiArray
 pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
 def callback(msg):
     arr = Float32MultiArray()
-    arr.data = [msg.ranges[90]]
+    arr.data = [msg.ranges[0]]
     pub.publish(arr)
 
 
