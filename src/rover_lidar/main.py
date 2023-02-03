@@ -7,11 +7,11 @@ class Zones():
     def __init__(self):
         self.pub = rospy.Publisher('LidarToPi', Float64MultiArray, queue_size=10)
         
-    def callback(self):
+    def callback(self, msg):
             print("BRUH")
             rospy.init_node('deez_nuts')
             arr = Float64MultiArray()
-            arr.data = [self.pub.ranges[0], 0, 0, 0, 0, 0, 0, 0]
+            arr.data = [msg.ranges[0], 0, 0, 0, 0, 0, 0, 0]
             self.pub.publish(arr)
 
     def stream(self):
