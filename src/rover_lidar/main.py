@@ -11,7 +11,7 @@ class Zones():
             print("BRUH")
             rospy.init_node('deez_nuts')
             arr = Float32MultiArray()
-            print(LaserScan.ranges[0])
+            print(msg.ranges[0])
             # arr.data = [LaserScan.ranges[0], 0, 0, 0, 0, 0, 0, 0]
             # self.pub.publish(arr)
 
