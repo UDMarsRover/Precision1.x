@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-import sensor_msgs.LaserScan
+from sensor_msgs.msg import LaserScan
 
 class Zones():
     def __init__(self):
