@@ -15,7 +15,7 @@ class Zones():
     def stream(self):
         print("Running ros loop...")
         while not rospy.is_shutdown():
-            rospy.Subscriber("scan", LaserScan, publish)
+            rospy.Subscriber("scan", LaserScan, self.publish())
             rospy.init_node('zone_shitter')
             rospy.sleep(10)
 
