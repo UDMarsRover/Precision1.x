@@ -9,6 +9,7 @@ class Zones():
         
 
     def publish(self):
+        rospy.init_node('deez_nuts')
         self.pub.publish([0, 0, 0, 0, 0, 0, 0, 0])
         print("Data recieved from lidar.")
 
