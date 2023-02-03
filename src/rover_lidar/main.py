@@ -19,7 +19,7 @@ class Zones():
         print("Running ros loop...")
         while not rospy.is_shutdown():
             rospy.Subscriber("scan", LaserScan, self.publish())
-            rospy.sleep(10)
+            rospy.sleep(1)
 
 
     
