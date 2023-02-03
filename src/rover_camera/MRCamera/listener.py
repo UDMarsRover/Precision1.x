@@ -24,7 +24,7 @@ class ServeCamera():
             self.event.set()
 
         Thread(target=lambda: rospy.init_node('cam_listener', disable_signals=True)).start()
-        rospy.Subscriber("CameraToBridge", Image, on_image)
+        rospy.Subscriber("CameraToBase", Image, on_image)
 
         app = Flask(__name__)
 
