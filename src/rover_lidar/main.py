@@ -19,7 +19,7 @@ class Zones():
         print("Running ros loop...")
         while not rospy.is_shutdown():
             print("Data recieved from lidar.")
-            sub = rospy.Subscriber("scan", LaserScan, callback)
+            sub = rospy.Subscriber("scan", LaserScan, this.callback)
             rospy.sleep(1)
 
 
