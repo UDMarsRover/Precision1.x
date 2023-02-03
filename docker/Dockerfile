@@ -6,47 +6,21 @@
 # UDMRT that already has ROS and all of the required packages installed.
 
 
-<<<<<<< HEAD
 ######## Create the main image for the system ########
 FROM ros:noetic AS rover_dev_main_v1.0
-=======
 
-# Define the gitHub branch to pull from.
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-ARG branch="paul"
-=======
-ARG branch="Kaiden"
->>>>>>> master
-=======
-ARG branch="john"
->>>>>>> john
->>>>>>> origin/paul
-=======
-ARG branch="Ryan"
-
->>>>>>> master
+ARG branch="master"
 
 # Install OS tools
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install git -y && \
-<<<<<<< HEAD
-    apt-get install python3-pip -y && \
-    apt-get install ros-noetic-cv-bridge -y 
-
-# Install and Update Development/ROS tools
-RUN pip install pyserial && \
-    pip install opencv-python && \
-=======
     apt-get install ros-noetic-cv-bridge -y && \
     apt-get install python3-pip -y
 
 # Install and Update Development/ROS tools
 RUN pip install pyserial && \
     pip install opencv-python &&\
->>>>>>> master
     rosdep update
 
 
