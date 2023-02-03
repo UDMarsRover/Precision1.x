@@ -4,7 +4,7 @@ from sensor_msgs.msg import LaserScan
 
 class Zones():
     def __init__(self):
-        self.pub = rospy.Publisher('LidarToPi', Int8MultiArray, queue_size=10)
+        self.pub = rospy.Publisher('LidarToPi', Int32MultiArray, queue_size=10)
         
 
     def stream():
