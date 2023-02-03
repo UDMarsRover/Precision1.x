@@ -46,7 +46,7 @@ class Communications:
             dataInBuffer = ser_bytes.decode()
             
             # Publish to ROS Comms In topic to trigger the command in function
-            rospy.loginfo("Base To Rover:" + dataInBuffer)
+            rospy.loginfo("Rover To Base:" + dataInBuffer)
             pub.publish(dataInBuffer)
             return True
         

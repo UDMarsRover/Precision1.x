@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from communications import Communications
+from Communications import Communications
 import rospy
 
 
