@@ -10,7 +10,9 @@ class Zones():
 
     def publish(self):
         rospy.init_node('deez_nuts')
-        self.pub.publish([0, 0, 0, 0, 0, 0, 0, 0])
+        arr = Int32MultiArray()
+        arr.data = [0, 0, 0, 0, 0, 0, 0, 0]
+        self.pub.publish(arr)
         print("Data recieved from lidar.")
 
     def stream(self):
