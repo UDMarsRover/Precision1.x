@@ -13,8 +13,16 @@ class Base():
         self.dataOut = DataBuf()
 
         # Initialize the Base ROS_MAIN node
-        rospy.init_node('rover_main', anonymous = True)
+        rospy.init_node('base_main', anonymous = True)
         rospy.rospy.Rate(refreshRate) #Hz
+
+        rospy.Subscriber('CommsToBase', String, self.ingestRoverData)
+
+    def publishDataToBase(self):
+        pub = rospy.Publisher('BaseToRover',String, queue_size = 10)
+        command = self.dataOutBuf.composeMessageOut()
+        rospy.loginfo("Buffer to Base:" + command)
+        pub.publish(command)
 
     def ingestRoverData(self, dataIn):
         # Take in data from rover and do things
