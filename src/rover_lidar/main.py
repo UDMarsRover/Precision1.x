@@ -32,7 +32,7 @@ from std_msgs.msg import Float32MultiArray
 #     zone.stream()
 
 def callback(msg):
-    print(len(msg.ranges))
+    print(msg.ranges[0])
 
 rospy.init_node('scan_values')
 sub = rospy.Subscriber('scan', LaserScan, callback)
