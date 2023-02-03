@@ -8,7 +8,7 @@ import rospy
 import sys
 from std_msgs.msg import String
 
-import UDMRTDataBuffer as DataBuf
+from UDMRTDataBuffer import UDMRTDataBuffer as DataBuf
 
 class Rover:
 

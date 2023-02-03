@@ -2,7 +2,7 @@ import time
 import rospy
 import sys
 from std_msgs.msg import String
-import rover as Precision1Base
+from base import Base as Precision1Base
 
 # Create a rover instance
 rate = 10 #Hz
