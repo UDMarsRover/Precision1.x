@@ -11,7 +11,7 @@ class Zones():
 
     def stream(self):
 
-        def publish(self):
+        def publish(msg):
             rospy.init_node('deez_nuts')
             arr = Float64MultiArray()
             arr.data = [msg[0], 0, 0, 0, 0, 0, 0, 0]
