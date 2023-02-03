@@ -14,7 +14,7 @@ class Zones():
         def publish(msg):
             rospy.init_node('deez_nuts')
             arr = Float64MultiArray()
-            arr.data = [msg[0], 0, 0, 0, 0, 0, 0, 0]
+            arr.data = [msg.ranges[0], 0, 0, 0, 0, 0, 0, 0]
             self.pub.publish(arr)
 
         print("Data recieved from lidar.")
