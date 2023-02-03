@@ -8,15 +8,15 @@ class Zones():
         self.pub = rospy.Publisher('LidarToPi', Int32MultiArray, queue_size=10)
         
 
-    def stream():
-        print("We running ros loop...")
+    def stream(self):
+        print("Running ros loop...")
         while not rospy.is_shutdown():
             rospy.Subscriber("scan", LaserScan, publish)
             rospy.init_node('zone_shitter')
             rospy.sleep(10)
 
 
-    def publish():
+    def publish(self):
         self.pub.publish([0, 0, 0, 0, 0, 0, 0, 0])
         print("Data recieved from lidar.")
 
