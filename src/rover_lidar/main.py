@@ -9,9 +9,10 @@ class Zones():
         
 
     def stream():
-        rospy.Subscriber("scan", LaserScan, publish)
-        rospy.init_node('zone_shitter')
-        rospy.spin()
+        while not rospy.is_shutdown():
+            rospy.Subscriber("scan", LaserScan, publish)
+            rospy.init_node('zone_shitter')
+            rospy.sleep(10)
 
 
     def publish():
