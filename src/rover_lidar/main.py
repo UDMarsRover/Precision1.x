@@ -12,6 +12,7 @@ class Zones():
     def stream(self):
 
         def callback(msg):
+            print("BRUH")
             rospy.init_node('deez_nuts')
             arr = Float64MultiArray()
             arr.data = [msg.ranges[0], 0, 0, 0, 0, 0, 0, 0]
