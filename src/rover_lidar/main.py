@@ -7,7 +7,10 @@ class Zones():
     def __init__(self):
         self.pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
         
-    def callback(self):
+    
+
+    def stream(self):
+        def callback(msg):
             print("BRUH")
             rospy.init_node('deez_nuts')
             arr = Float32MultiArray()
@@ -15,12 +18,10 @@ class Zones():
             # arr.data = [LaserScan.ranges[0], 0, 0, 0, 0, 0, 0, 0]
             # self.pub.publish(arr)
 
-    def stream(self):
-
         print("Running ros loop...")
         while not rospy.is_shutdown():
             print("Data recieved from lidar.")
-            self.sub = rospy.Subscriber("scan", LaserScan, self.callback())
+            self.sub = rospy.Subscriber("scan", LaserScan, callback)
             rospy.sleep(1)
 
 
