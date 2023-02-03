@@ -8,7 +8,6 @@ project(rover_base)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv2
   roscpp
   rospy
   std_msgs
