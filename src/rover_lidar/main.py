@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Int32MultiArray
 
 class Zones():
     def __init__(self):
