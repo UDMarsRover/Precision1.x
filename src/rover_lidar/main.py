@@ -9,6 +9,7 @@ class Zones():
         
 
     def stream():
+        print("We running ros loop...")
         while not rospy.is_shutdown():
             rospy.Subscriber("scan", LaserScan, publish)
             rospy.init_node('zone_shitter')
@@ -22,4 +23,4 @@ class Zones():
 
 if __name__ == '__main__':
     zone = Zones()
-    zone.stream
+    zone.stream()
