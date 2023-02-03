@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 import rospy
+import sensor_msgs.LaserScan
 
 class Zones():
     def __init__(self):
         None
 
     def stream():
-        None
         rospy.Subscriber("scan", LaserScan, publish)
         self.pub = rospy.Publisher('LidarToPi', Int8MultiArray, queue_size=10)
         rospy.init_node('zone_shitter', anonymous=True)
+        rospy.spin()
+
 
     def publish():
         self.pub.publish([0, 0, 0, 0, 0, 0, 0, 0])
+        print("Data recieved from lidar.")
+
 
 if __name__ == '__main__':
     zone = Zones()
