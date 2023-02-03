@@ -4,12 +4,12 @@ from sensor_msgs.msg import LaserScan
 
 class Zones():
     def __init__(self):
-        None
+        self.pub = rospy.Publisher('LidarToPi', Int8MultiArray, queue_size=10)
+        
 
     def stream():
         rospy.Subscriber("scan", LaserScan, publish)
-        self.pub = rospy.Publisher('LidarToPi', Int8MultiArray, queue_size=10)
-        rospy.init_node('zone_shitter', anonymous=True)
+        rospy.init_node('zone_shitter')
         rospy.spin()
 
 
