@@ -7,7 +7,7 @@ class Zones():
 
     def stream():
         None
-        rospy.Subscriber("LaserScan", LaserScan, publish)
+        rospy.Subscriber("scan", LaserScan, publish)
         self.pub = rospy.Publisher('LidarToPi', Int8MultiArray, queue_size=10)
         rospy.init_node('zone_shitter', anonymous=True)
 
