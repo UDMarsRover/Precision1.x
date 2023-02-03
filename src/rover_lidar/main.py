@@ -30,9 +30,10 @@ from std_msgs.msg import Float32MultiArray
 # if __name__ == '__main__':
 #     zone = Zones()
 #     zone.stream()
-
+pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
 def callback(msg):
-    print(msg.ranges[0])
+    pub.publish([msg.ranges[90]])
+
 
 rospy.init_node('scan_values')
 sub = rospy.Subscriber('scan', LaserScan, callback)
