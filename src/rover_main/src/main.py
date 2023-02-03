@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 import time
 import rospy
 import sys
 from std_msgs.msg import String
-import rover as Presision1
+from rover import Rover as Presision1
 
 # Create a rover instance
 rate = 10 #Hz
