@@ -7,7 +7,7 @@ class Zones():
     def __init__(self):
         self.pub = rospy.Publisher('LidarToPi', Float64MultiArray, queue_size=10)
         
-    def callback(self, msg):
+    def callback(msg, self):
             print("BRUH")
             rospy.init_node('deez_nuts')
             arr = Float64MultiArray()
