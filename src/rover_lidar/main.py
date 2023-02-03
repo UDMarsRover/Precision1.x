@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 import rospy
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float32MultiArray
 
 class Zones():
     def __init__(self):
-        self.pub = rospy.Publisher('LidarToPi', Float64MultiArray, queue_size=10)
+        self.pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
         
     def callback(self):
             print("BRUH")
             rospy.init_node('deez_nuts')
-            arr = Float64MultiArray()
-            arr.data = [self.sub.ranges[0], 0, 0, 0, 0, 0, 0, 0]
+            arr = Float32MultiArray()
+            arr.data = [msg.ranges[0], 0, 0, 0, 0, 0, 0, 0]
             self.pub.publish(arr)
 
     def stream(self):
