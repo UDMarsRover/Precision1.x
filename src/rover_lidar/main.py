@@ -22,7 +22,7 @@ def callback(msg):
         b, a = butter(3, 0.05)
 
 
-        return filtfit(b, a, arr)
+        return filtfilt(b, a, arr)
 
     print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
