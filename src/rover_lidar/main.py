@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import rospy
 import numpy as np
-from scipy.signal import lfilter
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float32MultiArray
 
@@ -9,9 +8,9 @@ pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
 
 def callback(msg):
     # Get an array of lengths in a specific zone
-    # 7  0  1
-    # 6     2
-    # 5  4  3
+    # 1  0  7
+    # 2     6
+    # 3  4  5
     def getZone(i):
         None
         dt = 0.001
@@ -34,7 +33,7 @@ def callback(msg):
             return 2
         elif j < 2:
             return 3
-        else: return 0
+        else: return 4
     
     print("Minimum in zone 7: " + str(getZone(7)))
     arr = Float32MultiArray()
