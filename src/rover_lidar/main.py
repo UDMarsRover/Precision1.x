@@ -26,9 +26,19 @@ def callback(msg):
 
         return min(arr)
 
-    print("Minimum in zone 0: " + str(getZone(0)))
+    def danger(i):
+        j = getZone(i)
+        if j < 0.20:
+            return 1
+        elif j < 0.50:
+            return 2
+        elif j < 2:
+            return 3
+        else: return 0
+    
+    print("Minimum in zone 7: " + str(getZone(7)))
     arr = Float32MultiArray()
-    arr.data = [msg.ranges[360]]
+    arr.data = [danger(0), danger(1), danger(2), danger(3), danger(4), danger(5), danger(6), danger(7)]
     pub.publish(arr)
 
 
