@@ -23,11 +23,11 @@ def callback(msg):
         j = getZone(i)
         j_prior = previous_ranges[i]
         # if j = inf and j_prior = 1, then j = 1
-        if math.isinf(msg.data(i)) and j_prior < 4:
+        if math.isinf(msg.ranges[i]) and j_prior < 4:
             print("SO CLOSE")
             j = 1
         # if j = inf and j_prior = 4 then j = 4
-        if math.isinf(msg.data(i)) and j_prior > 1:
+        if math.isinf(msg.ranges[i]) and j_prior > 1:
             print("SO FAR")
             j = 4
         if j < 0.20:
