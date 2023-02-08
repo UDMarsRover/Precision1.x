@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import numpy as np
-from scipy import signal
+from scipy.signal import filtfilt, butter
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float32MultiArray
 
@@ -19,8 +19,10 @@ def callback(msg):
         start = int(i * increment)
         stop = int((i + 1) * increment)
         arr = msg.ranges[start : stop]
-        
-        return min(arr)
+        b, a = butter(3, 0.05)
+
+
+        return filtfit(b, a, arr)
 
     print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
