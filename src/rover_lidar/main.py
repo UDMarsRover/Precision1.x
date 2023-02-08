@@ -33,7 +33,7 @@ def callback(msg):
         signal_filtered = np.fft.ifft(fhat_clean) #inverse fourier transform
         return min(signal_filtered)
 
-    print("Minimum in zone 0: " + getZone(0))
+    print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
     arr.data = [msg.ranges[360]]
     pub.publish(arr)
