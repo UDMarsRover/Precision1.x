@@ -29,7 +29,8 @@ def callback(msg):
             return 2
         elif j < 2:
             return 3
-        else: return 4
+        elif j > 2 and j < 15:
+            return 0
     
     print("Minimum in zone 7: " + str(getZone(7)))
     arr = Float32MultiArray()
