@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import numpy as np
-from scipy.signal import filtfilt, butter
+from scipy.signal import lfilter
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float32MultiArray
 
@@ -19,10 +19,12 @@ def callback(msg):
         start = int(i * increment)
         stop = int((i + 1) * increment)
         arr = msg.ranges[start : stop]
-        b, a = butter(3, 0.05)
+        n = len(arr)
+        n = 15  # the larger n is, the smoother curve will be
+        b = [1.0 / n] * n
 
 
-        return filtfilt(b, a, arr)
+        return min(lfilter(b, a, arr))
 
     print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
