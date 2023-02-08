@@ -24,7 +24,7 @@ def callback(msg):
         a = 1
 
 
-        return min(lfilter(b, a, arr))
+        return min(lfilter(b, a, arr)) * n
 
     print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
