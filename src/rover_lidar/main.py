@@ -22,9 +22,9 @@ def callback(msg):
         n = 15  # the larger n is, the smoother curve will be
         b = [1.0 / n] * n
         a = 1
+        smooth = lfilter(b, a, arr) * n
 
-
-        return min(lfilter(b, a, arr)) * n
+        return min(arr)
 
     print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
