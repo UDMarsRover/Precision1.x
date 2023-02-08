@@ -31,6 +31,7 @@ def callback(msg):
         fhat_clean = psd_idxs * fhat #used to retrieve the signal
 
         signal_filtered = np.fft.ifft(fhat_clean) #inverse fourier transform
+        print(signal_filtered)
         return min(signal_filtered)
 
     print("Minimum in zone 0: " + str(getZone(0)))
