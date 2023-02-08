@@ -40,7 +40,7 @@ def callback(msg):
 
         return j
         
-    previous_ranges = [0, 0, 0, 0, 0, 0, 0]
+    previous_ranges = [0, 0, 0, 0, 0, 0, 0, 0]
     arr = Float32MultiArray()
     arr.data = [danger(0), danger(1), danger(2), danger(3), danger(4), danger(5), danger(6), danger(7)]
     previous_ranges = arr.data
