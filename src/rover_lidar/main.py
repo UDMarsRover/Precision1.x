@@ -18,10 +18,6 @@ def callback(msg):
         start = int(i * increment)
         stop = int((i + 1) * increment)
         arr = msg.ranges[start : stop]
-        n = 15  # the larger n is, the smoother curve will be
-        b = [1.0 / n] * n
-        a = 1
-        smooth = lfilter(b, a, arr) * n
 
         return min(arr)
 
