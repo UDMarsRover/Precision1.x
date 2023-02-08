@@ -18,21 +18,8 @@ def callback(msg):
         start = int(i * increment)
         stop = int((i + 1) * increment)
         arr = msg.ranges[start : stop]
-        n = len(arr)
-        fhat = np.fft.fft(arr, n)
-        psd = fhat * np.conj(fhat)/n
-        freq = (1/(dt*n)) * np.arange(n)
-        idxs_half = np.arange(1, np.floor(n/2), dtype=np.int32) #first half index
-
-        ## Filter out noise
-        threshold = 100
-        psd_idxs = psd > threshold #array of 0 and 1
-        psd_clean = psd * psd_idxs #zero out all the unnecessary powers
-        fhat_clean = psd_idxs * fhat #used to retrieve the signal
-
-        signal_filtered = np.fft.ifft(fhat_clean) #inverse fourier transform
-        print(signal_filtered)
-        return min(signal_filtered)
+        
+        return min(arr)
 
     print("Minimum in zone 0: " + str(getZone(0)))
     arr = Float32MultiArray()
