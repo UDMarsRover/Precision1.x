@@ -15,8 +15,8 @@ def callback(msg):
         None
         dt = 0.001
         increment = len(msg.ranges) / 8
-        start = i * increment
-        stop = (i + 1) * increment
+        start = int(i * increment)
+        stop = int((i + 1) * increment)
         arr = msg.ranges[start : stop]
         n = len(arr)
         fhat = np.fft.fft(arr, n)
