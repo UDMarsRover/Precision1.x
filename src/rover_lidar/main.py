@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-import numpy as np
+import math
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float32MultiArray
 
@@ -30,12 +30,13 @@ def callback(msg):
         else:
             j = 4
         j_prior = previous_ranges[i]
-        inf = float('inf')
         # if j = inf and j_prior = 1, then j = 1
-        if j == inf and j_prior == 1:
+        if math.isinf(j) and j_prior < 4:
+            print("SO CLOSE")
             j = 1
         # if j = inf and j_prior = 4 then j = 4
-        if j == inf and j_prior == 4:
+        if math.isinf(j) and j_prior > 1:
+            print("SO FAR")
             j = 4
 
         return j
