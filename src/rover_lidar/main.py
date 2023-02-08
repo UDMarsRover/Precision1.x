@@ -5,7 +5,6 @@ from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float32MultiArray
 
 pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
-previous_ranges = [0, 0, 0, 0, 0, 0, 0]
 
 def callback(msg):
     # Get an array of lengths in a specific zone
@@ -13,7 +12,6 @@ def callback(msg):
     # 2     6
     # 3  4  5
     def getZone(i):
-        None
         increment = len(msg.ranges) / 8
         start = int(i * increment)
         stop = int((i + 1) * increment)
@@ -42,7 +40,7 @@ def callback(msg):
 
         return j
         
-    
+    previous_ranges = [0, 0, 0, 0, 0, 0, 0]
     arr = Float32MultiArray()
     arr.data = [danger(0), danger(1), danger(2), danger(3), danger(4), danger(5), danger(6), danger(7)]
     previous_ranges = arr.data
