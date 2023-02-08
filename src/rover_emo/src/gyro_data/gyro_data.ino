@@ -5,7 +5,6 @@
 //readAccelerometer() method provides positional information for X, Y, and Z on a scale of -1 to 1. Therefore, we do not need to use readGyroscope(), even though these are the values
 //we are looking for.
 float acelX, acelY, acelZ; 
-int plusThreshold = 30, minusThreshold = -30;
 String errorCodes;
 String gyroError;
 /*
@@ -15,7 +14,7 @@ so that
 
 
 void setup() {
-  // put your setup code here, to run once:
+  // put your setup code here, to run once: 
   Serial.begin(9600);
   while (!Serial);
   Serial.println("Begun");
