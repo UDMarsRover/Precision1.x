@@ -7,8 +7,9 @@ pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
 def callback(msg):
     arr = Float32MultiArray()
     arr.data = [msg.ranges[0]]
-    print("Minimum angle: " + str(msg.range_min))
-    print("Maximum angle: " + str(msg.range_max))
+    print("Minimum angle: " + str(msg.angle_min))
+    print("Maximum angle: " + str(msg.angle_max))
+    print("Angle increment" + str(msg.angle_increment))
     pub.publish(arr)
 
 
