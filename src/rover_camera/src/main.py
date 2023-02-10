@@ -24,7 +24,7 @@ class Camera:
         while (self.camera is not None and self.camera.isOpened()):
             ret, frame = self.camera.read()
             if ret is not None:
-                publisher.publish(bridge.cv2_to_imgmsg(frame, encoding="bgr8"))
+                publisher.publish(bridge.cv2_to_compressed_imgmsg(frame, dst_format='jpg'))
                 rate.sleep()
 
         self.camera.release()
