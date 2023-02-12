@@ -12,6 +12,8 @@
 .pydevproject
 .project
 .pyc
+__pycache__/
+
 
 # Docker COnfig File
 docker/branch.txt
