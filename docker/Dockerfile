@@ -9,8 +9,6 @@
 ######## Create the main image for the system ########
 FROM ros:noetic AS rover_dev_main_v1.0
 
-ARG branch="master"
-
 # Install OS tools
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install git -y && \
