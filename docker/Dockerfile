@@ -9,12 +9,9 @@
 ######## Create the main image for the system ########
 FROM ros:noetic AS rover_dev_main_v1.0
 
-ARG branch="master"
-
 # Install OS tools
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install git -y && \
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install git -y && \
     apt-get install ros-noetic-cv-bridge -y && \
     apt-get install python3-pip -y
 
@@ -25,10 +22,23 @@ RUN pip install pyserial && \
 
 
 # Install code from git and update local repo to correct branch
+
+RUN useradd udmrt -m -p udmrt -G sudo
+
 WORKDIR /home/udmrt
 
+SHELL ["/bin/bash", "-c"]
+
+USER udmrt
 RUN mkdir /home/udmrt/precision1
 RUN mkdir /home/udmrt/precision1/src
+
+WORKDIR /home/udmrt/precision1
+
+RUN source /opt/ros/noetic/setup.bash
+
+
+
 
 ######## Create the image for the auxillary devices ######## 
 FROM rover_dev_main_v1.0 AS rover_aux
