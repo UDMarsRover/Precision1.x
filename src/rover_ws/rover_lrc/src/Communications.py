@@ -26,12 +26,12 @@ class Communications:
         dataOut = dataIn.data
         try:
             for i in range(0,len(dataOut)):
-                self.port.write(str(dataOut[i],'utf-8'))
+                self.port.write(bytes(str(dataOut[i]),'utf-8'))
                 # self.port.write(bytes(dataOut[i],'utf-8'))         # Write the data to the comms device
             
             self.port.write(bytes('\n','utf-8'))            # Write our termination value to indicate the message is over
         except Exception as e:
-            rospy.loginfo("ERROR_COMMS_OUT: " + e)
+            rospy.loginfo("ERROR_COMMS_OUT: " + str(e))
         
         
 
