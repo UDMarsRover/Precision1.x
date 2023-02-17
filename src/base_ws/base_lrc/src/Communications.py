@@ -44,6 +44,7 @@ class Communications:
         try:
             ser_bytes = self.port.read_until()
             ser_bytes = ser_bytes[:len(ser_bytes)-1]
+            print(ser_bytes)
             dataInBuffer = ser_bytes.decode()
             
             # Publish to ROS Comms In topic to trigger the command in function
@@ -52,7 +53,7 @@ class Communications:
             return True
         
         except Exception as e:
-            rospy.loginfo("ERROR_COMMS_IN: " + e)
+            rospy.loginfo("ERROR_COMMS_IN: " + str(e))
             return False
 
      

@@ -1,7 +1,7 @@
 import time
 import serial
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Image
 
 class Communications:
 
@@ -14,9 +14,10 @@ class Communications:
         self.port           = serial.Serial(serialPort,self.__baudRate)           # Open the serial com port
         self.DataOutBuffer  = ""
         self.DataInBuffer   = ""
+        self.__pushTopicType = pushTopicType
 
         # Subscribe to the Rover COMS_OUT topic
-        rospy.Subscriber(self.__pushTopic, pushTopicType, self.writeData)
+        rospy.Subscriber(self.__pushTopic, self.__pushTopicType, self.writeData)
     # Getter function for getting baud rate
     def getBaud(self):
         return self.__baudRate
@@ -26,7 +27,10 @@ class Communications:
         dataOut = dataIn.data
         try:
             for i in range(0,len(dataOut)):
-                self.port.write(bytes(str(dataOut[i]),'utf-8'))
+                if self.__pushTopicType == Image :
+                    self.port.write(dataOut[i])
+                else:
+                    self.port.write(bytes(dataOut[i],'utf-8'))
                 # self.port.write(bytes(dataOut[i],'utf-8'))         # Write the data to the comms device
             
             self.port.write(bytes('\n','utf-8'))            # Write our termination value to indicate the message is over
