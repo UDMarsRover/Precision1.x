@@ -32,8 +32,9 @@ services:
         target: /home/udmrt/precision1
 
     #entrypoint: /bin/bash
-    #devices:
+    devices:
       #TBD -  For USB Inputs and 
+      - /dev/ttyUSB0:/dev/ttyUSB0
 
 
   #rover_aux:
