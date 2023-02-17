@@ -5,7 +5,7 @@ from std_msgs.msg import String
 
 class Communications:
 
-    def __init__(self,serialPort,pushTopic, pullTopic, baudRate=57600):
+    def __init__(self,serialPort,pushTopic, pullTopic, pushTopicType = String, baudRate=57600):
 
         # initalize out internal variables and set up the publisher node and comm port!!
         self.__baudRate     = baudRate
@@ -16,7 +16,7 @@ class Communications:
         self.DataInBuffer   = ""
 
         # Subscribe to the Rover COMS_OUT topic
-        rospy.Subscriber(self.__pushTopic, String, self.writeData)
+        rospy.Subscriber(self.__pushTopic, pushTopicType, self.writeData)
     # Getter function for getting baud rate
     def getBaud(self):
         return self.__baudRate
