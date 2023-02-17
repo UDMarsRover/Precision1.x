@@ -3,9 +3,9 @@ from Communications import Communications
 import rospy
 
 
-comPort1 = "/dev/ttyUSB0"
-comPort2 = ""
-commsOut = Communications(comPort1,pushTopic = 'RoverToBase', pullTopic = 'BaseToRover')
+#comPort1 = "/dev/ttyUSB0"
+comPort2 = "/dev/ttyUSB1"
+#commsOut = Communications(comPort1,pushTopic = 'RoverToBase', pullTopic = 'BaseToRover')
 camOut = Communications(comPort2,pushTopic = 'CameraToBase', pullTopic = 'BaseToCamera')
 
 # Initialize the Rover ROS_COMMS node
@@ -19,7 +19,7 @@ if (__name__ == '__main__'):
     while not rospy.is_shutdown():
 
         # Send Data Out
-        commsOut.readData()
+        #commsOut.readData()
         camOut.readData()
         rate.sleep()
 
