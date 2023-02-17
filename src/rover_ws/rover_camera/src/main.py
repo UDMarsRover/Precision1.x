@@ -10,7 +10,7 @@ class Camera:
     def __init__(self, camFile = -1, fps=20, width=320, height=240):
         # Setup camera
         self.fps = fps
-        self.camera = cv2.VideoCapture(camFile, cv2.CAP_V4L)
+        self.camera = cv2.VideoCapture(camFile)
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.camera.set(cv2.CAP_PROP_FPS, fps)

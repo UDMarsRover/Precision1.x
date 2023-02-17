@@ -1,0 +1,4 @@
+<launch>
+    <node name="rover_main" pkg="rover_main" type="main.py" />
+    <node name="rover_lrc" pkg="rover_lrc" type="main.py" />
+</launch>

@@ -10,6 +10,7 @@ from std_msgs.msg import String
 
 from UDMRTDataBuffer import UDMRTDataBuffer as DataBuf
 
+
 class Rover:
 
     def __init__(self, refreshRate = 10):
@@ -20,7 +21,7 @@ class Rover:
 
         # Initialize the Rover ROS_MAIN node
         rospy.init_node('rover_main', anonymous = True)
-        self.rate = rospy.rospy.Rate(refreshRate) #Hz
+        self.rate = rospy.Rate(refreshRate) #Hz
 
         # Initialize the Rover ROS Subscribers and tie them to the Data buffer
         rospy.Subscriber('EmoToPi', String, self.dataOutBuf.setEmoData)
@@ -42,10 +43,10 @@ class Rover:
         pub.publish(command)
 
     def hasError(self):
-        return self.dataBuf.checkForError()
+        return self.dataInBuf.checkForError()
 
     def getError(self):
-        return self.dataBuf.getErrorMessageData()
+        return self.dataInBuf.getErrorMessageData()
 
     def ingestBaseCommands(self, dataIn):
         # Take in data from base and do things

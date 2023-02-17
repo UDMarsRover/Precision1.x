@@ -5,8 +5,8 @@ import rospy
 
 comPort1 = "/dev/ttyUSB0"
 comPort2 = ""
-commsOut = Communications(comPort1,pushTopic = 'RoverToBase', pullTopic = 'BaseToRover', serialPort = comPort1)
-camOut = Communications(comPort2,pushTopic = 'CameraToBase', pullTopic = 'BaseToCamera', serialPort = comPort2)
+commsOut = Communications(comPort1,pushTopic = 'RoverToBase', pullTopic = 'BaseToRover')
+camOut = Communications(comPort2,pushTopic = 'CameraToBase', pullTopic = 'BaseToCamera')
 
 # Initialize the Rover ROS_COMMS node
 rospy.init_node('rover_lrc', anonymous = True)
