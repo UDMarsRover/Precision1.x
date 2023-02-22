@@ -1,7 +1,8 @@
 import time
 import serial
 import rospy
-from std_msgs.msg import String, Image
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
 
 class Communications:
 
