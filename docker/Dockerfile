@@ -9,15 +9,18 @@
 ######## Create the main image for the system ########
 FROM ros:noetic AS rover_dev_main_v1.0
 
+SHELL ["/bin/bash", "-c"]
+
 # Install OS tools
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install git -y && \
+RUN apt-get upgrade -y && apt-get update && \
+    apt-get install git -y && \
     apt-get install ros-noetic-cv-bridge -y && \
     apt-get install python3-pip -y
 
 # Install and Update Development/ROS tools
 RUN pip install pyserial && \
-    pip install opencv-python &&\
+    pip install opencv-python && \
+    pip install flask &&\
     rosdep update
 
 
