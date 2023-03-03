@@ -13,18 +13,17 @@ def callback(msg):
     # 2     6
     # 3  4  5
     def getZone(i):
-        min = 0
+        minval = 0
         increment = int(len(msg.ranges) / 16)
         start = int(i * increment)
         stop = int((i + 2) * increment)
         if i > 0:
             arr = msg.ranges[start : stop]
-            min = min(arr)
+            minval = min(arr)
         else:
             left = msg.ranges[0 : increment]
             right = msg.ranges[len(msg.ranges) - increment : len(msg.ranges) - 1]
-            print(msg.ranges[0:5])
-            min = min(msg.ranges[0 : 5])
+            minval = min(left)
 
         # increment = int(len(msg.ranges) / 16)
         # start = int(i * increment)
@@ -40,7 +39,7 @@ def callback(msg):
 
         
 
-        return min
+        return minval
 
     def danger(i):
         j = getZone(i)
