@@ -15,6 +15,7 @@ def callback(msg):
     def getZone(i):
         minval = 0
         increment = int(len(msg.ranges) / 16)
+        print("increment: ", increment)
         start = int(i * increment)
         stop = int((i + 2) * increment)
         if i > 0:
@@ -36,12 +37,10 @@ def callback(msg):
         j_prior = previous_ranges[i]
         # if j = inf and j_prior = 1, then j = 1
         if math.isinf(j) and j_prior < 4:
-            print("SO CLOSE")
-            return 1
+            return 0
         # if j = inf and j_prior = 4 then j = 4
         if math.isinf(msg.ranges[i]) and j_prior > 1:
-            print("SO FAR")
-            return 4
+            return 5
         if j < 0.20:
             return 1
         elif j < 0.50:
