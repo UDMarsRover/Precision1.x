@@ -14,9 +14,7 @@ def callback(msg):
     # 3  4  5
     def getZone(i):
         lenr = len(msg.ranges)
-        startidx = int(lenr / 16)
-        print(startidx)
-        space = lenr / 8
+        startidx = int(lenr / 16)        space = lenr / 8
         starts = [0, startidx, startidx + space * 1, startidx + space * 2, startidx + space * 3,
              startidx + space * 4, startidx + space * 5, startidx + space * 6, startidx + space * 7]
         if i == 7:
@@ -56,6 +54,7 @@ def callback(msg):
             right = msg.ranges[start : end]
             minLeft = min(left)
             minRight = min(right)
+            print(start1, ", ", end1)
             return min(minLeft, minRight)
         else:
             return 0
