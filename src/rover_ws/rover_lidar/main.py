@@ -35,7 +35,7 @@ def callback(msg):
         j = getZone(i)
         j_prior = previous_ranges[i]
         # if j = inf and j_prior = 1, then j = 1
-        if math.isinf(msg.ranges[i]) and j_prior < 4:
+        if math.isinf(j) and j_prior < 4:
             print("SO CLOSE")
             return 1
         # if j = inf and j_prior = 4 then j = 4
@@ -43,15 +43,14 @@ def callback(msg):
             print("SO FAR")
             return 4
         if j < 0.20:
-            j = 1
+            return 1
         elif j < 0.50:
-            j = 2
+            return 2
         elif j < 2:
-            j = 3
+            return 3
         else:
-            j = 4
+            return 4
 
-        return j
         
     previous_ranges = [0, 0, 0, 0, 0, 0, 0, 0]
     arr = Float32MultiArray()
