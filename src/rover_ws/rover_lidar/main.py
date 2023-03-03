@@ -39,7 +39,7 @@ def callback(msg):
 
         
 
-        return min(arr)
+        return min
 
     def danger(i):
         j = getZone(i)
