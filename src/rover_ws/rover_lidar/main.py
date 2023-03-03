@@ -17,7 +17,7 @@ def callback(msg):
         increment = int(len(msg.ranges) / 16)
         start = int(i * increment)
         stop = int((i + 2) * increment)
-        if zone > 0:
+        if i > 0:
             arr = msg.ranges[start : stop]
             min = min(arr)
         else:
