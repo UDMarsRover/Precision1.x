@@ -7,6 +7,7 @@ import numpy as np
 
 pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
 
+
 def callback(msg):
     # Get an array of lengths in a specific zone
     # 1  0  7
@@ -18,35 +19,7 @@ def callback(msg):
         space = int(lenr / 8)
         starts = [0, startidx, startidx + space * 1, startidx + space * 2, startidx + space * 3,
              startidx + space * 4, startidx + space * 5, startidx + space * 6, startidx + space * 7]
-        if i == 7:
-            start = starts[7]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 6:
-            start = starts[6]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 5:
-            start = starts[5]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 4:
-            start = starts[4]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 3:
-            start = starts[3]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 2:
-            start = starts[2]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 1:
-            start = starts[1]
-            end = start + space
-            return min(msg.ranges[start : end])
-        elif i == 0:
+        if i == 0:
             start1 = starts[8]
             end1 = lenr - 1
             print(start1, ", ", end1)
@@ -58,7 +31,9 @@ def callback(msg):
             minRight = min(right)
             return min(minLeft, minRight)
         else:
-            return 0
+            start = starts[i]
+            end = start + space
+            return min(msg.ranges[start : end])
 
 
     def danger(i):
