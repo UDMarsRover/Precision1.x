@@ -15,6 +15,7 @@ def callback(msg):
     def getZone(i):
         minval = 0
         increment = int(len(msg.ranges) / 16)
+        print ("Length: ", len(msg.ranges))
         print("increment: ", increment)
         start = int(i * increment)
         stop = int((i + 2) * increment)
