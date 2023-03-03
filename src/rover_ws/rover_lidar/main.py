@@ -3,7 +3,7 @@ import rospy
 import math
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Float32MultiArray
-import numpy
+import numpy as np
 
 pub = rospy.Publisher('LidarToPi', Float32MultiArray, queue_size=10)
 
