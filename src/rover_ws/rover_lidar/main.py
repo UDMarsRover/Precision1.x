@@ -22,7 +22,8 @@ def callback(msg):
             end1 = int(len(msg.ranges) - 1)
             start2 = int(0)
             end2 = increment
-            arr = numpy.concatenate(msg.ranges[start1 : end1], msg.ranges[start2 : end2])
+            # arr = numpy.concatenate(msg.ranges[start1 : end1], msg.ranges[start2 : end2])
+            arr = msg.ranges[start1 : end1]
         
 
         return min(arr)
