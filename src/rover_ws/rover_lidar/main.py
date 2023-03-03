@@ -49,7 +49,7 @@ def callback(msg):
             return min(msg.ranges[start : end])
         elif i == 0:
             start1 = starts[8]
-            end1 = lenr
+            end1 = lenr - 1
             start = starts[0]
             end = startidx
             left = msg.ranges[start1 : end1]
