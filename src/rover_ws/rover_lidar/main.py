@@ -19,7 +19,7 @@ def callback(msg):
         arr = msg.ranges[start : stop]
         if (i == 0): 
             start1 = len(msg.ranges) - increment
-            end1 = len(msg.ranges - 1)
+            end1 = len(msg.ranges) - 1
             start2 = 0
             end2 = increment
             arr = numpy.concatenate(msg.ranges[start1 : end1], msg.ranges[start2 : end2])
