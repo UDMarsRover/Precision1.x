@@ -18,6 +18,7 @@ class ServeCamera():
     def serve(self):
 
         def on_image(msg):
+            print("bitch")
             self.frame
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
             self.frame = cv2.imencode(".jpg", cv_image)[1].tobytes()

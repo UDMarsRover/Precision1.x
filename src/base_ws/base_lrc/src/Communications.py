@@ -3,10 +3,12 @@ import time
 import serial
 import rospy
 from std_msgs.msg import String
+from sensor_msgs.msg import Image
+
 
 class Communications:
 
-    def __init__(self,serialPort,pushTopic, pullTopic, baudRate=57600):
+    def __init__(self,serialPort,pushTopic, pullTopic, pushTopicType = String, baudRate=57600):
 
         # initalize out internal variables and set up the publisher node and comm port!!
         self.__baudRate     = baudRate
@@ -15,9 +17,11 @@ class Communications:
         self.port           = serial.Serial(serialPort,self.__baudRate)           # Open the serial com port
         self.DataOutBuffer  = ""
         self.DataInBuffer   = ""
+        self.__pushTopicType = pushTopicType
 
         # Subscribe to the Rover COMS_OUT topic
-        rospy.Subscriber(self.__pushTopic, String, self.writeData)
+        rospy.Subscriber(self.__pushTopic, self.__pushTopicType, self.writeData)
+    
     # Getter function for getting baud rate
     def getBaud(self):
         return self.__baudRate
@@ -27,9 +31,11 @@ class Communications:
         dataOut = dataIn.data
         try:
             for i in range(0,len(dataOut)):
-                self.port.write(bytes(dataOut[i],'utf-8'))         # Write the data to the comms device
-            
-            self.port.write(bytes('\n','utf-8'))            # Write our termination value to indicate the message is over
+                if self.__pushTopicType == Image :
+                    self.port.write(dataOut[i])
+                else:
+                    self.port.write(bytes(dataOut[i],'utf-8'))
+                # self.port.write(bytes(dataOut[i],'utf-8'))            # Write our termination value to indicate the message is over
         except Exception as e:
             rospy.loginfo("ERROR_COMMS_OUT: " + e)
         
@@ -55,7 +61,6 @@ class Communications:
         except Exception as e:
             rospy.loginfo("ERROR_COMMS_IN: " + str(e))
             return False
-
      
 
 

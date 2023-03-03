@@ -32,7 +32,7 @@ WORKDIR /home/udmrt
 
 SHELL ["/bin/bash", "-c"]
 
-USER udmrt
+
 RUN mkdir /home/udmrt/precision1
 RUN mkdir /home/udmrt/precision1/src
 
