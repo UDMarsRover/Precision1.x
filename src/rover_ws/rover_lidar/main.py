@@ -15,9 +15,9 @@ def callback(msg):
     def getZone(i):
         lenr = len(msg.ranges)
         startidx = int(lenr / 16)        
-        space = lenr / 8
-        starts = int([0, startidx, startidx + space * 1, startidx + space * 2, startidx + space * 3,
-             startidx + space * 4, startidx + space * 5, startidx + space * 6, startidx + space * 7])
+        space = int(lenr / 8)
+        starts = [0, startidx, startidx + space * 1, startidx + space * 2, startidx + space * 3,
+             startidx + space * 4, startidx + space * 5, startidx + space * 6, startidx + space * 7]
         if i == 7:
             start = starts[7]
             end = start + space
