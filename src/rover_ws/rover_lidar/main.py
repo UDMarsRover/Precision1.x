@@ -49,13 +49,13 @@ def callback(msg):
         elif i == 0:
             start1 = starts[8]
             end1 = lenr - 1
+            print(start1, ", ", end1)
             start = starts[0]
             end = startidx
             left = msg.ranges[start1 : end1]
             right = msg.ranges[start : end]
             minLeft = min(left)
             minRight = min(right)
-            print(start1, ", ", end1)
             return min(minLeft, minRight)
         else:
             return 0
