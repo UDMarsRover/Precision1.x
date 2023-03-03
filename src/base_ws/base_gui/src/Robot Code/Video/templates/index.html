@@ -1,0 +1,22 @@
+    
+  <!DOCTYPE html>
+<html>
+<body>
+
+
+
+
+
+
+    <img class="stream" src="{{ url_for('video_feed') }}" style="width: 100%; ">
+
+
+
+
+
+  {% include "loadavg.html" %}
+  {% block content %}{% endblock %}
+
+
+</body>
+</html>
