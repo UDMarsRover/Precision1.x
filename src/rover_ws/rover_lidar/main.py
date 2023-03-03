@@ -21,10 +21,9 @@ def callback(msg):
             arr = msg.ranges[start : stop]
             min = min(arr)
         else:
-            None
             left = np.array(msg.ranges[0 : increment])
             right = np.array(msg.ranges[len(msg.ranges) - increment : len(msg.ranges) - 1])
-            min = min(np.minimum(left, right))
+            min = min(left)
 
         # increment = int(len(msg.ranges) / 16)
         # start = int(i * increment)
