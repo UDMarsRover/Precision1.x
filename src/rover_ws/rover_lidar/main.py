@@ -13,28 +13,53 @@ def callback(msg):
     # 2     6
     # 3  4  5
     def getZone(i):
-        startidx = int(len(msg.ranges) / 16)
+        lenr = len(msg.ranges)
+        startidx = int(lenr / 16)
         print(startidx)
-        starts = [0, 48, 143, 238, 333, 428, 523, 618]
-        minval = 0
-        increment = int(len(msg.ranges) / 16)
-        print ("Length: ", len(msg.ranges))
-        print("increment: ", increment)
-        start = int(i * increment)
-        stop = int((i + 2) * increment)
-        if i > 0:
-            arr = msg.ranges[start : stop]
-            minval = min(arr)
+        space = lenr / 8
+        starts = [0, startidx, startidx + space * 1, startidx + space * 2, startidx + space * 3,
+             startidx + space * 4, startidx + space * 5, startidx + space * 6, startidx + space * 7]
+        if i == 7:
+            start = starts[7]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 6:
+            start = starts[6]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 5:
+            start = starts[5]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 4:
+            start = starts[4]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 3:
+            start = starts[3]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 2:
+            start = starts[2]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 1:
+            start = starts[1]
+            end = start + space
+            return min(msg.ranges[start : end])
+        elif i == 0:
+            start1 = starts[8]
+            end1 = lenr
+            start = starts[0]
+            end = startidx
+            left = msg.ranges[start1 : end1]
+            right = msg.ranges[start : end]
+            minLeft = min(left)
+            minRight = min(right)
+            return min(minLeft, minRight)
         else:
-            left = msg.ranges[0 : increment]
-            right = msg.ranges[len(msg.ranges) - increment : len(msg.ranges) - 1]
-            minleft = min(left)
-            minright = min(right)
-            minval = min(minleft, minright)
+            return 0
 
-        
-
-        return minval
 
     def danger(i):
         j = getZone(i)
