@@ -13,17 +13,31 @@ def callback(msg):
     # 2     6
     # 3  4  5
     def getZone(i):
+        min = 0
         increment = int(len(msg.ranges) / 16)
         start = int(i * increment)
         stop = int((i + 2) * increment)
-        arr = msg.ranges[start : stop]
-        if (i == 0): 
-            start1 = int(len(msg.ranges) - increment)
-            end1 = int(len(msg.ranges) - 1)
-            start2 = int(0)
-            end2 = increment
-            # arr = numpy.concatenate(msg.ranges[start1 : end1], msg.ranges[start2 : end2])
-            arr = msg.ranges[start1 : end1]
+        if zone > 0:
+            arr = msg.ranges[start : stop]
+            min = min(arr)
+        else:
+            None
+            left = msg.ranges[0 : increment]
+            right = msg.ranges[len(msg.ranges) - increment : len(msg.ranges) - 1]
+            min = min(x for x in (left + right))
+
+        # increment = int(len(msg.ranges) / 16)
+        # start = int(i * increment)
+        # stop = int((i + 2) * increment)
+        # arr = msg.ranges[start : stop]
+        # if (i == 0): 
+        #     start1 = int(len(msg.ranges) - increment)
+        #     end1 = int(len(msg.ranges) - 1)
+        #     start2 = int(0)
+        #     end2 = increment
+        #     arr = numpy.concatenate(msg.ranges[start1 : end1], msg.ranges[start2 : end2])
+        #     arr = msg.ranges[start1 : end1]
+
         
 
         return min(arr)
