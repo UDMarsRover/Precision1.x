@@ -23,7 +23,7 @@ def callback(msg):
         else:
             left = msg.ranges[0 : increment]
             right = msg.ranges[len(msg.ranges) - increment : len(msg.ranges) - 1]
-            min = min(left)
+            min = min(msg.ranges[0 : 5])
 
         # increment = int(len(msg.ranges) / 16)
         # start = int(i * increment)
