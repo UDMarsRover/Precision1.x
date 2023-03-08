@@ -27,7 +27,14 @@ class LidarProcessor(object):
         # spin until interrupted
         rospy.spin()
 
-
-if __name__ == "__main__":
+# define a main function that creates and runs an instance of LidarProcessor class        
+def main():
+    # create an instance of LidarProcessor class with default parameters
     processor = LidarProcessor()
+    # run the processor 
     processor.run()
+
+# check if this file is executed as a script    
+if __name__ == "__main__":
+    # call the main function 
+    main()
