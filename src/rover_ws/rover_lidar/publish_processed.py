@@ -26,3 +26,8 @@ class LidarProcessor(object):
         rospy.init_node("lidar_processor")
         # spin until interrupted
         rospy.spin()
+
+
+if __name__ == "__main__":
+    processor = LidarProcessor()
+    processor.run()
