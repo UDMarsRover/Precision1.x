@@ -72,12 +72,15 @@ void setup() {
 }
 
 void loop() {
+  String sensorData = gyroscopeData() + "," + boxTemperatureData();
   for (int i = 0; i < 7; i++) {
     errorString += errorHexBits[i];
   }
   //String sensorData = gyroscopeData() + boxTemperatureData() + ultrasonicData() + busMonitorData() + batteryTempData() + voltageConverterTempData() + GPSData();
-  String sensorData = errorString + ", " + gyroscopeData() + "," + boxTemperatureData() + "," + ultrasonicData();
+  sensorData = sensorData + "," + errorString;
   Serial.println(sensorData);
+  errorString = "";
+  
   for (int i = 0; i < 7; i++) {
     errorHexBits[i] = 'F';
   } //FIX THIS, THIS SUCKS
@@ -118,11 +121,11 @@ String gyroscopeData() {
 
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
-    errorHexBits[4] = '1';
+    errorHexBits[4] = '0';
   }
   else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
   {
-    errorHexBits[4] = '0';
+    errorHexBits[4] = '1';
   }
   
   delay(50);
