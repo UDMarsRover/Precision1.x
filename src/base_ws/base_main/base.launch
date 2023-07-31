@@ -1,4 +1,0 @@
-<launch>
-    <node name="base_main" pkg="base_main" type="main.py" />
-    <node name="base_lrc" pkg="base_lrc" type="main.py" />
-</launch>
