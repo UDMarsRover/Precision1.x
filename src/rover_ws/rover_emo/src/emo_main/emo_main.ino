@@ -30,10 +30,20 @@ float plusThreshold = 60, minusThreshold = -60;
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
-
+/*
 int errorCode = 0xFF; //This variable will be used in every method when an error occurs. When there is an error, that error will attempt to overwrite this variable. 
 //If the error passed has higher priority than the current error in this variable, it replaces it. 
 //This way, this variable can be concatenated to the string at the end of the loop to return the highest priority error on every loop.
+*/
+char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F', 'F'};
+//index 0 = 48V Monitor
+//index 1 = Battery Temp
+//index 2 = Voltage Converter Temp
+//index 3 = Box Temp
+//index 4 = Gyroscope
+//index 5 = GPS
+//index 6 = Ultrasonics
+String errorString;
 
 ros::NodeHandle nh;
 std_msgs::String str_data;
@@ -62,10 +72,18 @@ void setup() {
 }
 
 void loop() {
+  String sensorData = gyroscopeData() + "," + boxTemperatureData();
+  for (int i = 0; i < 7; i++) {
+    errorString += errorHexBits[i];
+  }
   //String sensorData = gyroscopeData() + boxTemperatureData() + ultrasonicData() + busMonitorData() + batteryTempData() + voltageConverterTempData() + GPSData();
-  String sensorData = gyroscopeData() + "," + boxTemperatureData() + "," + ultrasonicData();
-  Serial.println(sensorData + "," + (String)errorCode);
-  errorCode = 0xFF;
+  sensorData = sensorData + "," + errorString;
+  Serial.println(sensorData);
+  errorString = "";
+  
+  for (int i = 0; i < 7; i++) {
+    errorHexBits[i] = 'F';
+  } //FIX THIS, THIS SUCKS
   /*
    if (temp != "3B") {
     digitalWrite(RED, HIGH);
@@ -85,9 +103,7 @@ void loop() {
 
 String gyroscopeData() {
   if (!IMU.begin()) {
-    if (0xD5 < errorCode) {
-      errorCode = 0xD5;
-    };//Could not initialize
+    errorHexBits[4] = 'E';
   }
   if (IMU.gyroscopeAvailable()) {
     IMU.readAcceleration(curAcelX, curAcelY, curAcelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
@@ -105,15 +121,11 @@ String gyroscopeData() {
 
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
-    if (0x31 < errorCode) {
-      errorCode = 0x31;
-    }
+    errorHexBits[4] = '0';
   }
   else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
   {
-    if (0x30 < errorCode) {
-      errorCode = 0x30;
-    }
+    errorHexBits[4] = '1';
   }
   
   delay(50);
@@ -128,23 +140,22 @@ String boxTemperatureData() {
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
     String temp_reading = (String)(currTemp * 10);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
-    
+    if (currTemp < 0) {
+      errorHexBits[3] = '2';
+    }
+    else if (currTemp < 10) {
+      errorHexBits[3] = '3';
+    }
     if (currTemp > 60) {
-      if (0x37 < errorCode) {
-        errorCode = 0x37;
-      }
+      errorHexBits[3] = '1';
     }
     else if (currTemp > 70) {
-      if (0x2F < errorCode) {
-        errorCode = 0x2F;
-      }
+      errorHexBits[3] = '0';
     }
     // Returns the temperature
     return temp_reading.substring(0, 3);
   }
-  if (0x3B < errorCode) {
-      errorCode = 0x3B;
-    }
+  errorHexBits[3] = 'E';
 }
 
 String ultrasonicData() {
@@ -162,14 +173,10 @@ String ultrasonicData() {
   curDuration = expFilter(alphaUltra, duration, curDuration);
   
   if (curDuration < 31) {
-    if (0x32 < errorCode) {
-      errorCode = 0x32;
-    }
+    errorHexBits[6] = '0';
   }
   else if ((curDuration > 31) && (curDuration < 62)) {
-    if (0x33 < errorCode) {
-      errorCode = 0x33;
-    }
+    errorHexBits[6] = '1';
   }
   distance = (String)curDuration;
   longD += stringPadding(4, distance);
@@ -184,14 +191,11 @@ String ultrasonicData() {
   curDuration = pulseIn(echoPinE, HIGH);
   curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
   curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration > 600) {
-    curDuration = duration;
-  }
   if (curDuration < 31) {
-    return "B3";
+    errorHexBits[6] = '0';
   }
-  else if (curDuration < 62) {
-    return "B2";
+  else if ((curDuration > 31) && (curDuration < 62)) {
+    errorHexBits[6] = '1';
   }
   distance = (String)curDuration;
   longD += stringPadding(4, distance);
@@ -206,14 +210,11 @@ String ultrasonicData() {
   curDuration = pulseIn(echoPinS, HIGH);
   curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
   curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration > 600) {
-    curDuration = duration;
-  }
   if (curDuration < 31) {
-    return "B3";
+    errorHexBits[6] = '0';
   }
-  else if (curDuration < 62) {
-    return "B2";
+  else if ((curDuration > 31) && (curDuration < 62)) {
+    errorHexBits[6] = '1';
   }
   distance = (String)curDuration;
   longD += stringPadding(4, distance);
@@ -228,14 +229,11 @@ String ultrasonicData() {
   curDuration = pulseIn(echoPinW, HIGH);
   curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
   curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration > 600) {
-    curDuration = duration;
-  }
   if (curDuration < 31) {
-    return "B3";
+    errorHexBits[6] = '0';
   }
-  else if (curDuration < 62) {
-    return "B2";
+  else if ((curDuration > 31) && (curDuration < 62)) {
+    errorHexBits[6] = '1';
   }
   distance = (String)curDuration;
   longD += stringPadding(4, distance);
