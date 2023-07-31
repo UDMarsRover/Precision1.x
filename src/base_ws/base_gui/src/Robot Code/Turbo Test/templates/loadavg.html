@@ -1,0 +1,29 @@
+<div id="load" class="load">
+<div id="load" class="load">
+<div id="color" class="color">
+
+  <table>
+    <tr><th></th><th>1 min</th><th>5 min</th><th>15 min</th></tr>
+    <tr><th>Load averages:</th><td>{{ load1 }}</td><td>{{ load5 }}</td><td>{{ load15 }}</td></tr>
+  </table>
+   <form method="post" action="/input">
+        <input type="submit" value="VALUE1" name="action1" style="background-color:{{ load1 }}"/>
+    </form>
+ 
+  
+
+div {
+  animation: colorchange 10s infinite; 
+}
+
+@keyframes colorchange {
+  0%   {background-color: red;}
+  25%  {background-color: yellow;}
+  50%  {background-color: blue;}
+  75%  {background-color: green;}
+  100% {background-color: red;}
+}
+  
+</div>
+</div>
+</div>
