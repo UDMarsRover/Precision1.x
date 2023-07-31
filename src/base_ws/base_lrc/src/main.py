@@ -3,6 +3,9 @@ from Communications import Communications
 import rospy
 from sensor_msgs.msg import Image
 
+import sys
+sys.path.append('../../../src/communications_lib')
+
 
 print("Hi From Base Main Coms")
 comPort1 = "/dev/ttyUSB0"

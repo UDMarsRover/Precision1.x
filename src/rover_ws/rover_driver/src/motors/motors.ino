@@ -1,13 +1,13 @@
 #include "HardwareSerial.h"
 #include "MoogMotor.h"
-#include <ros.h>
-#include <ros/time.h>
-#include <std_msgs/String.h>
+//#include <ros.h>
+//#include <ros/time.h>
+//#include <std_msgs/String.h>
 
 
 int input;
 float velocity = 1;
-float acceleration = 1;
+float acceleration = 0.75;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
@@ -16,21 +16,22 @@ float motor1, motor2, motor3, motor4 = 0;
 MoogMotor leftDrive = MoogMotor(&Serial2); //Comms for left drive
 MoogMotor rightDrive = MoogMotor(&Serial1); //Comms for right drive
 
-ros::NodeHandle driverNode;
-std_msgs::String str_msg;
-ros::Publisher errors("DriverToPi", &str_msg);
-ros::Subscriber<std_msgs::String> sub("PiToDriver", &messageCb );
+//ros::NodeHandle driverNode;
+//std_msgs::String str_msg;
+//ros::Publisher errors("DriverToPi", &str_msg);
+//ros::Subscriber<std_msgs::String> sub("PiToDriver", &messageCb );
 
 void setup() {
 
-  //Serial.begin(9600); //Start a serial to take in keyboard commands
-  driverNode.initNode();
-  driverNode.advertise(chatter);
+  Serial.begin(9600); //Start a serial to take in keyboard commands
+  //driverNode.initNode();
+  //driverNode.advertise(chatter);
   leftDrive.setUp();
   rightDrive.setUp();
 
 }
 
+/*
 void messageCb(const std_msgs::String& dataIn){
     digitalWrite(13, HIGH-digitalRead(13));   // blink the led
     commands = dataIn.data;
@@ -40,25 +41,26 @@ void messageCb(const std_msgs::String& dataIn){
     motor3 = int(commands[6:8])/100;
     motor4 = int(commands[9:11])/100;
 }
-
+*/
 
 
 
 void loop() {
+  rightDrive.statusCheck();
+  
+  if (rightDrive.connected){
+    Serial.println(rightDrive.statusCode);
+    keyboard_teleop();
+  }
+  else Serial.println("Motor Not Connected");
 
-    goodl = leftDrive.setVelocity(motor1, acceleration);
-    goodr = rightDrive.setVelocity(motor3, acceleration);
 
-    str_msg.data = "FF";
-    errors.publish( &str_msg );
-    driverNode.spinOnce();
-    delay(1000);
+}
 
-    /*
+void keyboard_teleop(){
   if(Serial.available()){
     
-    input = Serial.read(); //Check for an input
-    
+    input = Serial.read(); //Get Command
     if(input == 'w'){
       goodl = leftDrive.setVelocity(velocity, acceleration);
       goodr = rightDrive.setVelocity(velocity, acceleration);
@@ -91,7 +93,7 @@ void loop() {
     else if(input == 'e'){
       leftDrive.stop();
       rightDrive.stop();
-      Serial.println("Stopped");
+      Serial.println("Stopping...");
     }
 
     else if (input == 'q'){
@@ -101,12 +103,22 @@ void loop() {
     }
 
     else if (input == 'p'){
-      leftDrive.off();
-      rightDrive.off();
-      Serial.println("Shutdown..");
+      leftDrive.park();
+      rightDrive.park();
+      Serial.println("Break Engaged..");
+    }
+
+    else if (input == 'x'){
+      leftDrive.ESHUTDOWN();
+      rightDrive.ESHUTDOWN();
+      Serial.println("ESHUTDOWN..");
+    }
+
+    else if (input == 'n'){
+      leftDrive.neutral();
+      rightDrive.neutral();
+      Serial.println("In Nutural...");
     }
     
   }
-
-  */
 }

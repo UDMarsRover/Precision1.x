@@ -35,6 +35,7 @@ services:
     devices:
       #TBD -  For USB Inputs and 
       - /dev/ttyUSB0:/dev/ttyUSB0
+      #- /dev/ttyUSB1:/dev/ttyUSB1
 
 
   #rover_aux:

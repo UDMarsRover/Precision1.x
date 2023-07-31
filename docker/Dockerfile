@@ -44,8 +44,8 @@ RUN source /opt/ros/noetic/setup.bash
 
 
 ######## Create the image for the auxillary devices ######## 
-FROM rover_dev_main_v1.0 AS rover_aux
+#FROM rover_dev_main_v1.0 AS rover_aux
 
 
 ######## Create the image for the host devices ########
-FROM rover_dev_main_v1.0 AS rover_host
+#FROM rover_dev_main_v1.0 AS rover_host
