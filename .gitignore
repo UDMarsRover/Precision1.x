@@ -7,6 +7,14 @@
 # Visual Studio Files
 .vscode
 
+#Pydev Files
+.pydevproject
+.project
+.pyc
+
+# Docker COnfig File
+docker/branch.txt
+
 # Ros Build Files (Must be rebuilt on every computer)
 devel/
 build/
