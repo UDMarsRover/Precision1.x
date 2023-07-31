@@ -3,6 +3,8 @@ services:
 
   # Define our service (container) for ROS Master Node
   rover_host:
+    container_name: rover_host
+    hostname: rover_host
     # Define where Docker Composde should get the image from
     build:
       dockerfile: ./Dockerfile
@@ -13,8 +15,8 @@ services:
 
     # Set enviornment variables
     environment:
-      - "ROS_IP=192.0.1.3"        # The IP address of the ROS Host Node
-      - "ROS_MASTER_URI=http://192.0.1.2:11311"  # The IP address of the ROS Master Node
+      #- "ROS_IP=192.0.1.3"        # The IP address of the ROS Host Node
+      - "ROS_MASTER_URI=http://192.0.1.3:11311"  # The IP address of the ROS Master Node
 
     # Attach the network card to the container
     networks:
@@ -28,69 +30,73 @@ services:
       - type: bind
         source: ./..
         target: /home/udmrt/precision1
-    #devices:
+
+    #entrypoint: /bin/bash
+    devices:
       #TBD -  For USB Inputs and 
+      - /dev/ttyUSB0:/dev/ttyUSB0
+      #- /dev/ttyUSB1:/dev/ttyUSB1
 
 
-  rover_aux:
+  #rover_aux:
     # Define where Docker Composde should get the image from
-    build:
-      dockerfile: ./Dockerfile
-      target: rover_aux
+  #  build:
+  #    dockerfile: ./Dockerfile
+  #    target: rover_aux
     
-    stdin_open: true        # docker run -i
-    tty: true               # docker run -t
+  #  stdin_open: true        # docker run -i
+  #  tty: true               # docker run -t
 
     # Set enviornment variables
-    environment:
-      - "ROS_IP=192.0.1.4"        # The IP address of the ROS Aux Node
-      - "ROS_MASTER_URI=http://192.0.1.2:11311"  # The IP address of the ROS Master Node
+  #  environment:
+  #    - "ROS_IP=192.0.1.4"        # The IP address of the ROS Aux Node
+  #    - "ROS_MASTER_URI=http://192.0.1.2:11311"  # The IP address of the ROS Master Node
 
     # Attach the network card to the container
-    networks:
-      rosnet:
-        ipv4_address: 192.0.1.4
+  #  networks:
+  #    rosnet:
+  #      ipv4_address: 192.0.1.4
 
     #The startup command for this service, run the entrypoint script then run roscore command
     #command: roslaunch ...
 
 
-    volumes:
-      - type: bind
-        source: ./..
-        target: /home/udmrt/precision1
+  #  volumes:
+  #    - type: bind
+  #      source: ./..
+  #      target: /home/udmrt/precision1
     #devices:
       #TBD -  For USB Inputs and 
 
 
-  ros_master:
+  #ros_master:
     # Define where Docker Composde should get the image from
-    build:
-      dockerfile: ./Dockerfile
-      target: rover_dev_main_v1.0
+  #  build:
+  #    dockerfile: ./Dockerfile
+  #    target: rover_dev_main_v1.0
     
-    stdin_open: true        # docker run -i
-    tty: true               # docker run -t
+  #  stdin_open: true        # docker run -i
+  #  tty: true               # docker run -t
 
     # Set enviornment variables
-    environment:
-      - "ROS_IP=192.0.1.2"  # The IP address of out ROS Master Node
+  #  environment:
+  #    - "ROS_IP=192.0.1.2"  # The IP address of out ROS Master Node
 
     # Attach the network card to the container
-    networks:
-      rosnet:
-        ipv4_address: 192.0.1.2
+  #  networks:
+  #    rosnet:
+  #      ipv4_address: 192.0.1.2
 
     #The startup command for this service, run the entrypoint script then run roscore command
-    command: /bin/bash -c   "source /opt/ros/noetic/setup.bash && \
-                            cd /home/udmrt/precision1 && \
-                            catkin_make && \
-                            source ./devel/setup.bash &&\
-                            roscore"
-    volumes:
-      - type: bind
-        source: ./..
-        target: /home/udmrt/precision1
+  #  command: /bin/bash -c   "source /opt/ros/noetic/setup.bash && \
+  #                          cd /home/udmrt/precision1 && \
+  #                          catkin_make && \
+  #                          source ./devel/setup.bash &&\
+  #                          roscore"
+  #  volumes:
+  #    - type: bind
+  #      source: ./..
+  #      target: /home/udmrt/precision1
     #devices:
       #TBD -  For USB Inputs and 
 
