@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Video Test/static/Video&apos; to &apos;haarcascade_frontalface_alt.xml&apos;" description="Rename resource &apos;Video&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="static/Video" name="haarcascade_frontalface_alt.xml" stamp="1666914709752" updateReferences="true"/>
+</session>

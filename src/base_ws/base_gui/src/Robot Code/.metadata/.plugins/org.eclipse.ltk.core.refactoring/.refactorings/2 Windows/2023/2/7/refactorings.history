@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;2 Windows/video_popup&apos; to &apos;video_popup.py&apos;" description="Rename resource &apos;video_popup&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="video_popup" name="video_popup.py" stamp="1676597347769" updateReferences="true"/>
+</session>

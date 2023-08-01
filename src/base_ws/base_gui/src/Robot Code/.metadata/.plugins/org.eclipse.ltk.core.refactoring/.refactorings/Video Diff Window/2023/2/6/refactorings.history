@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;Video Diff Window/Boxes_Only&apos; to &apos;Boxes_Only.py&apos;" description="Rename resource &apos;Boxes_Only&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Boxes_Only" name="Boxes_Only.py" stamp="1675993202025" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;Video Diff Window/Video_Only&apos; to &apos;Video_Only.py&apos;" description="Rename resource &apos;Video_Only&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Video_Only" name="Video_Only.py" stamp="1675993254633" updateReferences="true"/>
+</session>
