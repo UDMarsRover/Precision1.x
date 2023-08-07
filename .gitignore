@@ -6,9 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Ros Build Files (Must be rebuilt on every computer)
+.catkin_workspace
+
 # Distribution / packaging
 .Python
 **/build/
+!**/docs/build
 **/devel/
 develop-eggs/
 dist/
@@ -180,7 +184,4 @@ __pycache__/
 # Docker COnfig File
 docker/branch.txt
 
-# Ros Build Files (Must be rebuilt on every computer)
-devel/
-build/
-.catkin_workspace
+

@@ -1,5 +1,6 @@
-# Precision1.x
-## Code for UDMRT's first rover
+Precision1.x Overview 
+=====================
+Code for UDMRT's first rover
 This software was first developed using ROS Melodic and python 2.7.16. This was designed to operate on a RaspberryPi 4 running a version of Raspbian OS.
 
 After cloning this repo (and installing the base ROS Melodic software), you must run the command:
