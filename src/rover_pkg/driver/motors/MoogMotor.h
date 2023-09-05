@@ -31,7 +31,9 @@
 #define ABDCHECKSUM   0b0000000000000010  //0x0002
 #define FEEDBACK      0b0000000000000001  //0x0001
   
-  
+
+//1010010
+//1000010
 
 
 
@@ -74,12 +76,24 @@ class MoogMotor
      };
     statusBufferStruct statusBuffer;
     void statusCheck();
-    unsigned int statusCode:16;
-    bool connected;
+    bool isConnected();
+    unsigned int getStatusCode();
+    bool resetStatusCodes();
+    void drive();
+    int getData(char[]);
+    
     
   private:
+    unsigned int statusCode:17;
+    unsigned int statusCode1:17;
+    unsigned int statusCode2:17;
+    unsigned int statusCode3:17;
+    unsigned int statusCode4:17;
+    unsigned int statusCode5:17;
+    unsigned int statusCode6:17;
+    unsigned int statusCode7:17;
+    bool connected;
     HardwareSerial *serial = NULL;
-    int getData(char[]);
     void updateStatusCode(unsigned int , bool);
     bool sendCommand(String);
  };

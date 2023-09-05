@@ -12,6 +12,7 @@ MoogMotor::MoogMotor(HardwareSerial* associatedSerial)
 {
   serial = associatedSerial;
   serial->setTimeout(50); // In Milliseconds
+  
   //initSerial();
 }
 
@@ -20,15 +21,15 @@ boolean MoogMotor::setVelocity(float rpm, float acceleration){
     
     //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
         
+
+        //vel = rpm * (32768 / 8000) * 65536;
         rpm = rpm * 4423680;   // Motor ranged from +- 2,147,483,647
+        //rpm = rpm * 32768;
         
         acceleration = int(acceleration * 1000); //Range 0 -> 2147483647
         serial->print("MV ");     //Set to motor velocity mode
         serial->print("VT="+String(rpm)+" ");       //Set the rpm
         serial->print("ADT=" + String(acceleration) + " ");      //Set the acceration/deceleration
-        
-        
-        
         serial->print("G ");      //Go Command
         
         //return true;                //Retrun a true to confirm operation complete
@@ -61,18 +62,18 @@ boolean MoogMotor::setPosition(float value, float velocity, float acceleration){
         acceleration = int(acceleration * 2147483647.0); //Range 0 -> 2147483647
         
         
-        serial->print("MP\r");     //Set to motor position mode
+        serial->print("MP ");     //Set to motor position mode
         serial->print("VT=");       //Set the rpm
         serial->print(velocity);
-        serial->print("\r");
+        serial->print(" ");
         serial->print("ADT=");      //Set the acceration/deceleration
         serial->print(acceleration);
-        serial->print("\r");
+        serial->print(" ");
         serial->print("PT=");
         serial->print(value);       //Set the position
-        serial->print("\r");
+        serial->print(" ");
         
-        serial->print("G\r");      //Go Command
+        serial->print("G ");      //Go Command
         delay(1);
         return true;                //Retrun a true to confirm operation complete
     }
@@ -97,17 +98,26 @@ void MoogMotor::stop()
 
 void MoogMotor::setUp()
 {
-      serial->begin(9600);
-      
-      serial->print("EIGN(2) ");
-      serial->print("EIGN(3) ");
-      serial->print("ZS ");
-      serial->print("MDT ");
-      serial->print("BRKSRV ");   // Engage Break When not Moving
-      serial->print("G ");        // Go Command to turn on coils
-      serial->print("X ");        // Send Stop Request
+
+  serial->begin(9600);
+  //serial->write("AMPS=1000 ");
+  serial->print("EIGN(2) ");  // Clear Limits
+  serial->print("EIGN(3) ");  // Clear Limits
+  serial->print("ZS ");       // Clear All Warning Tags
+  serial->print("SLD ");
+
+  drive();
+
+  statusCheck();
 }
 
+void MoogMotor::drive(){
+  serial->print("MDT ");
+  serial->print("MDB ");
+  serial->print("BRKSRV ");   // Engage Break When not Moving
+  serial->print("G ");        // Go Command to turn on coils
+  serial->print("X ");        // Send Stop Request'
+}
 
 void MoogMotor::neutral(){
   serial->print("BRKRLS ");   // Disengage breaking system
@@ -139,4 +149,26 @@ void MoogMotor::updateStatusCode(unsigned int code, bool statusIn){
 
 void MoogMotor::statusCheck(){
   statusCode = getData("RW(0) ");
+  statusCode1 = getData("RW(1) ");
+  statusCode2 = getData("RW(2) ");
+  statusCode3 = getData("RW(3) ");
+  statusCode4 = getData("RW(4) ");
+  statusCode5 = getData("RW(5) ");
+  statusCode6 = getData("RW(6) ");
+  statusCode7 = getData("RW(7) ");
 }
+
+bool MoogMotor::isConnected(){
+  return MoogMotor::connected;
+}
+
+unsigned int MoogMotor::getStatusCode(){
+  return MoogMotor::statusCode;
+}
+
+bool MoogMotor::resetStatusCodes(){
+  serial->print("ZS ");       // Clear All Warning Tags
+  park();
+  return statusCode == ACTIVE;
+}
+

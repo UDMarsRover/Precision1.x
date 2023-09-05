@@ -3,11 +3,11 @@
 //#include <ros.h>
 //#include <ros/time.h>
 //#include <std_msgs/String.h>
-
+ 
 
 int input;
 float velocity = 1;
-float acceleration = 0.75;
+float acceleration = 0.005;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
@@ -26,8 +26,10 @@ void setup() {
   Serial.begin(9600); //Start a serial to take in keyboard commands
   //driverNode.initNode();
   //driverNode.advertise(chatter);
-  leftDrive.setUp();
+  //leftDrive.setUp();
   rightDrive.setUp();
+
+  
 
 }
 
@@ -44,16 +46,40 @@ void messageCb(const std_msgs::String& dataIn){
 */
 
 
+/******************************************/
+/*                  Notes
+/ - If you want to switch between forward 
+/   and backward, call stop in between
+/   velocity calls!!!! otherwise an error
+/   will be thrown and the motor will stop.
+/   This is by design of the manufacturer.
+/******************************************/
+
+
+
 
 void loop() {
-  rightDrive.statusCheck();
   
-  if (rightDrive.connected){
-    Serial.println(rightDrive.statusCode);
-    keyboard_teleop();
-  }
-  else Serial.println("Motor Not Connected");
+  rightDrive.statusCheck();
 
+  int error = rightDrive.getStatusCode();
+
+  if (error == 21) rightDrive.getData("ZS ");
+  
+  //if (rightDrive.isConnected()){
+    Serial.println(rightDrive.getStatusCode());
+    Serial.println(rightDrive.getData("EL=262143 "));
+    keyboard_teleop();
+    //Serial.println(rightDrive.getStatusCode());
+    //Serial.println(rightDrive.getData("TRQ "));
+    delay(100);
+  //}
+  //else {
+    
+  //  rightDrive.setUp();
+  //  Serial.println("Motor Not Connected!");
+  //  delay(100);
+  //}
 
 }
 
@@ -64,11 +90,7 @@ void keyboard_teleop(){
     if(input == 'w'){
       goodl = leftDrive.setVelocity(velocity, acceleration);
       goodr = rightDrive.setVelocity(velocity, acceleration);
-
-      if(goodl && goodr){
-        Serial.println("Running Forward");
-        positionM = positionM + 0.1;
-        }
+      if(goodl && goodr){Serial.println("Running Forward");}
       
     }
 
@@ -118,6 +140,12 @@ void keyboard_teleop(){
       leftDrive.neutral();
       rightDrive.neutral();
       Serial.println("In Nutural...");
+    }
+
+    else if (input == 'r'){
+      leftDrive.resetStatusCodes();
+      rightDrive.resetStatusCodes();
+      Serial.println("Reseting Tags");
     }
     
   }
