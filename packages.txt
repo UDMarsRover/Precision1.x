@@ -1,0 +1,4 @@
+opencv-python
+numpy
+rospy
+cv_bridge
