@@ -30,11 +30,7 @@ float plusThreshold = 60, minusThreshold = -60;
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
-/*
-int errorCode = 0xFF; //This variable will be used in every method when an error occurs. When there is an error, that error will attempt to overwrite this variable. 
-//If the error passed has higher priority than the current error in this variable, it replaces it. 
-//This way, this variable can be concatenated to the string at the end of the loop to return the highest priority error on every loop.
-*/
+
 char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F', 'F'};
 //index 0 = 48V Monitor
 //index 1 = Battery Temp
