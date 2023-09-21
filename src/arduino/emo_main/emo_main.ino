@@ -30,7 +30,13 @@ float plusThreshold = 60, minusThreshold = -60;
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
-
+/*
+This new error code system is replacing the previous FIFO queue solution which incorporated an error code priority list. The issue with this design is that we can only pass
+one error from EMO to ROS in each pass, which is unfavorable if we have multiple problems at once. Also, if a high priority issue isn't resolved quickly, all errors of lesser
+importance will be undetectable. This new system will allow us to track each part of the EMO all at once, detecting any problems and reporting them in their respective index.
+The highest priority errors will be sent as 0, and then 1, 2, etc. Documentation on what each of these error codes mean is in the google drive and will have to be implemented
+on the Pi side based on what is held in the array. 
+*/
 char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F', 'F'};
 //index 0 = 48V Monitor
 //index 1 = Battery Temp
