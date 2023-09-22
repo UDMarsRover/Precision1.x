@@ -1,5 +1,4 @@
 import cv2 as cv
-import numpy as np
 print(cv.__version__)
 
 capture = cv.VideoCapture(0)
@@ -10,7 +9,7 @@ while True:
     # capture frame-by-frame
     ret, frame = capture.read()
 
-    # if fame is read correctly retis True
+    # if frame is read correctly ret is True
     if not ret:
         print("Cant recieve frame(stream end?). Exiting...")
         break
@@ -19,5 +18,5 @@ while True:
     if cv.waitKey(1) == ord('q'):
         break
 # release capture and destroy windows
-cap.release()
+capture.release()
 cv.destroyAllWindows()
