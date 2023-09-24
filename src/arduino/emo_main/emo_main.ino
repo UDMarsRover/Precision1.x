@@ -24,12 +24,17 @@ String longD;
 // Declare 
 float acelX, acelY, acelZ; 
 float curAcelX, curAcelY, curAcelZ;
+
+float acelOutX, acelOutY, acelOutZ;
+float curAcelOutX, curAcelOutY, curAcelOutZ;
+
 float curAcelXmap, curAcelYmap;
 float plusThreshold = 60, minusThreshold = -60;
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
+double alphaAcel = 0.6;
 /*
 This new error code system is replacing the previous FIFO queue solution which incorporated an error code priority list. The issue with this design is that we can only pass
 one error from EMO to ROS in each pass, which is unfavorable if we have multiple problems at once. Also, if a high priority issue isn't resolved quickly, all errors of lesser
@@ -74,7 +79,7 @@ void setup() {
 }
 
 void loop() {
-  String sensorData = gyroscopeData() + "," + boxTemperatureData();
+  String sensorData = gyroscopeData() + "," + accelerometerData() + "," + boxTemperatureData();
   for (int i = 0; i < 7; i++) {
     errorString += errorHexBits[i];
   }
@@ -100,7 +105,25 @@ void loop() {
   */
 }
 
+String accelerometerData() {
+  if (!IMU.begin()) {
+    errorHexBits[4] = 'E';
+  }
+  if (IMU.gyroscopeAvailable()) {
+    IMU.readAcceleration(curAcelOutX, curAcelOutY, curAcelOutZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
+  }
+  curAcelOutX = expFilter(alphaAcel, acelOutX, curAcelOutX);
+  curAcelOutY = expFilter(alphaAcel, acelOutY, curAcelOutY);
+  curAcelOutZ = expFilter(alphaAcel, acelOutZ, curAcelOutZ);
 
+  acelOutX = curAcelOutX;
+  acelOutY = curAcelOutY;
+  acelOutZ = curAcelOutZ;
+
+  delay(50);
+
+  return  "(" + String(curAcelOutX) + "," + String(curAcelOutY) + "," + String(curAcelOutZ) + ")";
+}
 
 
 String gyroscopeData() {
@@ -286,5 +309,6 @@ double expFilter(double alpha, double prevReading, double curReading){
     return -( (alpha * curReading) + ((1 - alpha) * prevReading) );
   }
   */
+  
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
