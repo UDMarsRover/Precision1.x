@@ -1,4 +1,7 @@
 Flask
 Turbo
 cv2
-ROS
+ROSopencv-python
+numpy
+rospy
+cv_bridge
