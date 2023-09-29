@@ -26,6 +26,8 @@ class UDMRTDataBuffer:
         self.__ultrasonicSensor2Data__ = ""
         self.__ultrasonicSensor3Data__ = ""
         self.__ultrasonicSensor4Data__ = ""
+        self.__accelerometerData__ = ""
+        self._gpsData__ = ""
         
         self.__driveMotorErrorData__ = ""
         self.__armMotorErrorData__ = ""
@@ -125,17 +127,28 @@ class UDMRTDataBuffer:
         
     def setEmoData(self, dataIn):
         str = dataIn.data
-        self.__emoErrorData__ = str[0:2]
-        self.__gyroscopeData__ = str[2:5]
-        self.__boxTempData__ = str[5:8]
-        self.__busMonitorData__ = str[8:12]
-        self.__batteryTempData__ = str[12:15]
-        self.__voltageConverterTempData__ = str[15:18]
-        self.__currentConversionData__ = str[18:22]
+        
+        self.__gyroscopeData__ = str[0:5]
+        self.__accelerometerData__ = str[6:20]
+        self.__boxTempData__ = str[21:23]
+        self.__emoErrorData__ = str[24:29]
+#rest of stuff not in emo yet
+        self.__busMonitorData__ = str[30:33]
+        self.__batteryTempData__ = str[34:37]
+        self.__voltageConverterTempData__ = str[38:41]
+        self.__currentConversionData__ = str[42:45]
+        
+    exampleEmoString = "1801800.1220.1220.988732FFFFFF"
+    exampleEmoStringWithAll = "1801800.1220.1220.988732FFFFFF48.0273483273"
+                        
+    def setDriveMegaSensorData(self,dataIn):
+        str = dataIn.data
         self.__ultrasonicSensor1Data__ = str[22:26]
         self.__ultrasonicSensor2Data__ = str[26:30]
         self.__ultrasonicSensor3Data__ = str[30:34]
         self.__ultrasonicSensor4Data__ = str[34:38]
+        #self._gpsData__ = str[]
+
         
     #def setCameraData(self, dataIn):
     #    self.__cameraData__ = dataIn.data
@@ -171,3 +184,4 @@ class UDMRTDataBuffer:
     def checkForError(self):
         #If true, no error. If false, there is an error.
         return self.__emoErrorData__.lower() == "ff"
+

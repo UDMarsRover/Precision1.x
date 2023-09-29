@@ -78,30 +78,18 @@ void setup() {
 }
 
 void loop() {
-  String sensorData = gyroscopeData() + "," + accelerometerData() + "," + boxTemperatureData();
+  String sensorData = gyroscopeData() + accelerometerData() + boxTemperatureData();
   for (int i = 0; i < 7; i++) {
     errorString += errorHexBits[i];
   }
-  //String sensorData = gyroscopeData() + boxTemperatureData() + ultrasonicData() + busMonitorData() + batteryTempData() + voltageConverterTempData() + GPSData();
+  //String sensorData = gyroscopeData() + boxTemperatureData() + busMonitorData() + batteryTempData() + voltageConverterTempData();
   sensorData = sensorData + "," + errorString;
   Serial.println(sensorData);
   errorString = "";
   
   for (int i = 0; i < 7; i++) {
     errorHexBits[i] = 'F';
-  } //FIX THIS, THIS SUCKS
-  /*
-   if (temp != "3B") {
-    digitalWrite(RED, HIGH);
-    digitalWrite(BLUE, HIGH);
-    digitalWrite(GREEN, LOW);
-  }
-  else {
-    digitalWrite(RED, LOW);
-    digitalWrite(BLUE, HIGH);
-    digitalWrite(GREEN, HIGH);
-  }
-  */
+  } 
 }
 
 String accelerometerData() {
@@ -121,7 +109,7 @@ String accelerometerData() {
 
   delay(50);
 
-  return  "(" + String(curAcelOutX) + "," + String(curAcelOutY) + "," + String(curAcelOutZ) + ")";
+  return  String(curAcelOutX) + String(curAcelOutY) + String(curAcelOutZ);
 }
 
 
@@ -154,7 +142,7 @@ String gyroscopeData() {
   
   delay(50);
 
-  return xString + "," + yString;
+  return xString + yString;
 }
 
 
