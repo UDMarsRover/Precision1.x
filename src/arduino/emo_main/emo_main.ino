@@ -42,14 +42,13 @@ importance will be undetectable. This new system will allow us to track each par
 The highest priority errors will be sent as 0, and then 1, 2, etc. Documentation on what each of these error codes mean is in the google drive and will have to be implemented
 on the Pi side based on what is held in the array. 
 */
-char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F', 'F'};
-//index 0 = 48V Monitor
-//index 1 = Battery Temp
-//index 2 = Voltage Converter Temp
-//index 3 = Box Temp
-//index 4 = Gyroscope
-//index 5 = GPS
-//index 6 = Ultrasonics
+char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F'};
+//index 0 = 48V Monitor 4 indicies
+//index 1 = Battery Temp, 4 indicies
+//index 2 = Voltage Converter Temp, 4 indicies
+//index 3 = Box Temp, 4 indicies
+//index 4 = Gyroscope, 8 indicies
+//index 5 = Accelerometer, 8 indices
 String errorString;
 
 ros::NodeHandle nh;
