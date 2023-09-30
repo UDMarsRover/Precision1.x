@@ -6,7 +6,7 @@
  
 
 int input;
-float velocity = 1;
+float velocity = 0.6;
 float acceleration = 0.005;
 float positionM = 0;
 boolean goodl = false;
@@ -16,10 +16,15 @@ float motor1, motor2, motor3, motor4 = 0;
 MoogMotor leftDrive = MoogMotor(&Serial2); //Comms for left drive
 MoogMotor rightDrive = MoogMotor(&Serial1); //Comms for right drive
 
+//void ros_read(std_msgs::String msg){
+//  Serial.println(msg.data);
+//}
+
+
 //ros::NodeHandle driverNode;
 //std_msgs::String str_msg;
 //ros::Publisher errors("DriverToPi", &str_msg);
-//ros::Subscriber<std_msgs::String> sub("PiToDriver", &messageCb );
+//ros::Subscriber<std_msgs::String> sub("PiToDriver", &ros_read);
 
 void setup() {
 
@@ -27,7 +32,7 @@ void setup() {
   //driverNode.initNode();
   //driverNode.advertise(chatter);
   //leftDrive.setUp();
-  rightDrive.setUp();
+  //rightDrive.setUp();
 
   
 
