@@ -11,16 +11,16 @@ from sensor_msgs.msg import Image
 #     new_height = int(len(image) / f)
 #     pixel_map = np.zeros((int(new_height),int(new_width),3), dtype = int)
         
-#     for i in range(new_height):
-#         newI = i*f
-#         for j in range(new_width):
-#             newJ = j*f
-#             subimage = image[newI:newI+f, newJ:newJ+f, :]
-#             outtemp = np.sum(subimage, axis=(0,1))
-#             p = np.asarray(outtemp/(f*f), dtype= 'int')
-#             pixel_map[i][j] = p
+    # for i in range(new_height):
+    #     newI = i*f
+    #     for j in range(new_width):
+    #         newJ = j*f
+    #         subimage = image[newI:newI+f, newJ:newJ+f, :]
+    #         outtemp = np.sum(subimage, axis=(0,1))
+    #         p = np.asarray(outtemp/(f*f), dtype= 'int64')
+    #         pixel_map[i][j] = p
 
-#     return pixel_map
+    # return pixel_map
 
 def start_node():
     # create node
@@ -36,12 +36,14 @@ def start_node():
         exit()
 
     # create publisher with image data type
-    pub = rospy.Publisher('image', Image, queue_size=10)
+    pub = rospy.Publisher("camera", Image, queue_size=10)
 
     # main control loop
     while not rospy.is_shutdown():
         #capture frame by frame
         ret, frame = capture.read()
+        # capture.set(cv.CAP_PROP_FRAME_WIDTH, 320)
+        # capture.set(cv.CAP_PROP_FRAME_HEIGHT, 240)
 
         if not ret:
             print("Can't recieve frame")
@@ -51,12 +53,12 @@ def start_node():
         #compressed_frame = compress_image(frame)
 
         #display frame
-        cv.imshow('video', compressed_frame)
-        if cv.waitKey(1) == ord('q'):
-            break
+        # cv.imshow('video', frame)
+        # if cv.waitKey(1) == ord('q'):
+        #     break
 
         # convert from opencv image to ros image
-        img_msg = bridge.cv2_to_imgmsg(compressed_frame, "bgr8")
+        img_msg = bridge.cv2_to_imgmsg(frame, "bgr8")
 
         # publish to topic
         pub.publish(img_msg)
