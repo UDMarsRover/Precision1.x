@@ -7,9 +7,7 @@
 #include <std_msgs/String.h>
 #include <Arduino_HTS221.h>
 #include <Arduino_LSM9DS1.h>
-#define GREEN 23
-#define RED 22
-#define BLUE 24
+
 //Ultrasonic sensor
 #define trigPin 2 //attach pin D3 Arduino to pin Trig of HC-SR04
 #define echoPinN 3 // attach pin D2 Arduino to pin Echo of HC-SR04_North
@@ -30,21 +28,7 @@ float plusThreshold = 60, minusThreshold = -60;
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
-/*
-This new error code system is replacing the previous FIFO queue solution which incorporated an error code priority list. The issue with this design is that we can only pass
-one error from EMO to ROS in each pass, which is unfavorable if we have multiple problems at once. Also, if a high priority issue isn't resolved quickly, all errors of lesser
-importance will be undetectable. This new system will allow us to track each part of the EMO all at once, detecting any problems and reporting them in their respective index.
-The highest priority errors will be sent as 0, and then 1, 2, etc. Documentation on what each of these error codes mean is in the google drive and will have to be implemented
-on the Pi side based on what is held in the array. 
-*/
-char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F', 'F'};
-//index 0 = 48V Monitor
-//index 1 = Battery Temp
-//index 2 = Voltage Converter Temp
-//index 3 = Box Temp
-//index 4 = Gyroscope
-//index 5 = GPS
-//index 6 = Ultrasonics
+
 String errorString;
 
 ros::NodeHandle nh;
@@ -62,9 +46,6 @@ void setup() {
   // setup
   Serial.begin(9600);
   delay(10);
-  digitalWrite(RED, HIGH);
-  digitalWrite(BLUE, LOW);
-  digitalWrite(GREEN, HIGH);
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(echoPinN, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinE, INPUT); // Sets the echoPin as an INPUT
@@ -75,32 +56,27 @@ void setup() {
 
 void loop() {
   String sensorData = gyroscopeData() + "," + boxTemperatureData();
-  for (int i = 0; i < 7; i++) {
-    errorString += errorHexBits[i];
-  }
-  //String sensorData = gyroscopeData() + boxTemperatureData() + ultrasonicData() + busMonitorData() + batteryTempData() + voltageConverterTempData() + GPSData();
-  sensorData = sensorData + "," + errorString;
-  Serial.println(sensorData);
-  errorString = "";
-  
-  for (int i = 0; i < 7; i++) {
-    errorHexBits[i] = 'F';
-  } //FIX THIS, THIS SUCKS
-  /*
-   if (temp != "3B") {
-    digitalWrite(RED, HIGH);
-    digitalWrite(BLUE, HIGH);
-    digitalWrite(GREEN, LOW);
-  }
-  else {
-    digitalWrite(RED, LOW);
-    digitalWrite(BLUE, HIGH);
-    digitalWrite(GREEN, HIGH);
-  }
-  */
+
 }
 
 
+float thermistorData(int pin){
+  int ThermistorPin = 0;
+  int Vo;
+  float R1 = 10000;
+  float logR2, R2, T;
+  float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+  Vo = analogRead(pin);
+  R2 = R1 * (1023.0 / (float)Vo - 1.0);
+  logR2 = log(R2);
+  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
+  T = T - 273.15;
+  T = (T * 9.0)/ 5.0 + 32.0; 
+
+  //Serial.print("Temperature: "); 
+  //Serial.print(T);
+  //Serial.println(" C");
+}
 
 
 String gyroscopeData() {
@@ -160,131 +136,10 @@ String boxTemperatureData() {
   errorHexBits[3] = 'E';
 }
 
-String ultrasonicData() {
-  // Clears the trigPin condition
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  longD = "";
-
-  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinN, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(alphaUltra, duration, curDuration);
-  
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);// everthing below does not work unless all sensors are connected
-/*
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinE, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);
-
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinS, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);
-
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinW, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);
-*/
-
-  return longD; //note to self: check whether it is necessary or not to have a 50 ms delay after each of the 4 readings. Also, this will not run without all 4 sensors connected.
-}
-/*
-String busMonitorData() {
-
-}
-
-String batteryTempData() {
-
-}
-
-String voltageConverterTempData() {
-
-}
-
-String GPSData() {
-
-}
-
-String getErrorCode() {
-
-}
-*/
-
-String stringPadding(int requiredDigits, String value) { //Fix to move negative sign to front of value
-  int diff = requiredDigits - value.length();
-  while (diff > 0) {
-    value = "0" + value;
-    diff = diff - 1;
-  }
-  return value;
-}
 
 // test for different sensors
 // use this within each method for the sensors
 double expFilter(double alpha, double prevReading, double curReading){
   // Serial.println(alpha);
-  /*
-  if (curReading < 0) {
-    return -( (alpha * curReading) + ((1 - alpha) * prevReading) );
-  }
-  */
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
