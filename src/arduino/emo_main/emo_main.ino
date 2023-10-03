@@ -116,7 +116,7 @@ String boxTemperatureData() {
   if (HTS.begin()){
     float currTemp = HTS.readTemperature();
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
-    String temp_reading = (String)(currTemp * 10);
+    String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
     if (currTemp < 0) {
       errorHexBits[3] = '2';
