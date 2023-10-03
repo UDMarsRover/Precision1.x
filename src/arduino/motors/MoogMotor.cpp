@@ -1,12 +1,13 @@
 /*
  * MoogMotor.cpp - Library for controlling Moog Smart Motors via HardwareSerial.
  * Created by Joe Ditz on Jan 27, 2021
- * Edited by Greg Moldkoe Mar 27, 2021
+ * Edited by Greg Moldkow Mar 27, 2021
  */
 
 #include "Arduino.h"
 #include "HardwareSerial.h"
 #include "MoogMotor.h"
+
 
 MoogMotor::MoogMotor(HardwareSerial* associatedSerial)
 {
@@ -106,7 +107,7 @@ void MoogMotor::setUp()
   serial->print("ZS ");       // Clear All Warning Tags
   serial->print("SLD ");
 
-  drive();
+  park();
 
   statusCheck();
 }
@@ -139,13 +140,7 @@ int MoogMotor::getData(char command[]){
   return int(serial->parseInt());
 }
 
-void MoogMotor::updateStatusCode(unsigned int code, bool statusIn){
-  if (connected) {
-    statusCode = statusCode & ~code;              // Reset the bit
-    statusCode = statusCode | (code * statusIn);  // Update to proper status
-  }
-  else statusCode = 0xffff;  // Set everythong to a fault if disconected
-}
+
 
 void MoogMotor::statusCheck(){
   statusCode = getData("RW(0) ");
@@ -169,6 +164,6 @@ unsigned int MoogMotor::getStatusCode(){
 bool MoogMotor::resetStatusCodes(){
   serial->print("ZS ");       // Clear All Warning Tags
   park();
-  return statusCode == ACTIVE;
+  return statusCode == DRIVEREADY;
 }
 

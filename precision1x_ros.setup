@@ -37,6 +37,7 @@ echo "source ~/p1x/bin/activate" >> ~/.bashrc
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 echo "cd /mnt/hgfs/UDMRT/Precision1.x" >> ~/.bashrc
 
+# Install xbox controller drivers
 
 
 

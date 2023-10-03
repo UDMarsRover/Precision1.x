@@ -1,40 +1,149 @@
 #include "HardwareSerial.h"
 #include "MoogMotor.h"
-//#include <ros.h>
-//#include <ros/time.h>
-//#include <std_msgs/String.h>
+#include <ros.h>
+#include <ros/time.h>
+#include <std_msgs/String.h>
+#include <geometry_msgs/Accel.h>
  
 
 int input;
-float velocity = 0.6;
-float acceleration = 0.005;
+float velocity = 0.9;
+float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
-float motor1, motor2, motor3, motor4 = 0;
+char rightDriveError[4];
+char leftDriveError[4];
+char driveError[8];
+
+int led = 7;
+
+float roverWidth  = 1;   //meters
+float wheelRad    = 0.032;  //meters
+float gearRatio   = 40;
+float revsperrotate = 4000;
 
 MoogMotor leftDrive = MoogMotor(&Serial2); //Comms for left drive
 MoogMotor rightDrive = MoogMotor(&Serial1); //Comms for right drive
 
-//void ros_read(std_msgs::String msg){
-//  Serial.println(msg.data);
-//}
+std_msgs::String currentDriveGear;
+std_msgs::String currentDriveError;
+ros::NodeHandle driverNode;
+ros::Publisher DriveGear("DriveGear", &currentDriveGear);
+ros::Publisher DriveError("DriveError", &currentDriveError);
+
+void runTankDrive(geometry_msgs::Accel command){
+  float kmh = command.linear.x;     // km/h
+  float ds = command.angular.x;     // deg/sec
+
+  float mpm = (kmh*1000)/60;
+  float dm = ds * 60;
+  
+  float rdw = ((mpm + (roverWidth/2) * dm) / wheelRad);   // deg/min
+  float ldw = ((mpm - (roverWidth/2) * dm) / wheelRad);   // deg/min
+
+  float rdc = ((rdw/360) / revsperrotate) * gearRatio;    //counts/min
+  float ldc = ((ldw/360) / revsperrotate) * gearRatio;    //counts/min
+
+  goodr = rightDrive.setVelocity(rdc, acceleration);
+  goodl = leftDrive.setVelocity(-ldc, acceleration);
+  if(goodl && goodr){currentDriveGear.data = "D";}
+
+}
+
+void keyboard_teleop_ros(std_msgs::String msg){
+  String input = msg.data;
+  digitalWrite(led,HIGH);
+  if(input == "w"){
+    goodl = leftDrive.setVelocity(velocity, acceleration);
+    goodr = rightDrive.setVelocity(velocity, acceleration);
+    if(goodl && goodr){driverNode.loginfo("Running Forward");}
+    
+  }
+
+  else if (input == "s"){
+    goodl = leftDrive.setVelocity(-velocity,acceleration);
+    goodr = rightDrive.setVelocity(-velocity,acceleration);
+    if(goodl && goodr){driverNode.loginfo("Running Backwards");}
+    currentDriveGear.data = "N";
+  }
+
+  else if (input == "d"){
+    goodl = leftDrive.setVelocity(-velocity,acceleration);
+    goodr = rightDrive.setVelocity(velocity,acceleration);
+    if(goodl && goodr){driverNode.loginfo("Running Left");}
+    currentDriveGear.data = "D";
+  }
+
+  else if (input == "a"){
+    goodl = leftDrive.setVelocity(velocity,acceleration);
+    goodr = rightDrive.setVelocity(-velocity,acceleration);
+    if(goodl && goodr){driverNode.loginfo("Running Right");}
+    currentDriveGear.data = "D";
+  }
+
+  else if(input == "e"){
+    leftDrive.stop();
+    rightDrive.stop();
+    driverNode.loginfo("Stopping...");
+  }
+
+  else if (input == "q"){
+    leftDrive.setUp();
+    rightDrive.setUp();
+    driverNode.loginfo("Startup...");
+  }
+
+  else if (input == "p"){
+    leftDrive.park();
+    rightDrive.park();
+    driverNode.loginfo("Break Engaged..");
+    currentDriveGear.data = "P";
+  }
+
+  else if (input == "x"){
+    leftDrive.ESHUTDOWN();
+    rightDrive.ESHUTDOWN();
+    driverNode.loginfo("ESHUTDOWN..");
+  }
+
+  else if (input == "n"){
+    leftDrive.neutral();
+    rightDrive.neutral();
+    driverNode.loginfo("In Nutural...");
+    currentDriveGear.data = "N";
+    
+  }
+
+  else if (input == "r"){
+    leftDrive.resetStatusCodes();
+    rightDrive.resetStatusCodes();
+    driverNode.loginfo("Reseting Tags");
+  }
+  
+  DriveGear.publish(&currentDriveGear);
+  
+  digitalWrite(led,LOW);
+}
 
 
-//ros::NodeHandle driverNode;
-//std_msgs::String str_msg;
-//ros::Publisher errors("DriverToPi", &str_msg);
-//ros::Subscriber<std_msgs::String> sub("PiToDriver", &ros_read);
+
+ros::Subscriber<std_msgs::String> commandsIn("DriveCommand", &keyboard_teleop_ros);
+ros::Subscriber<geometry_msgs::Accel> velocityIn("DriveVelocity", &runTankDrive);
+
 
 void setup() {
 
-  Serial.begin(9600); //Start a serial to take in keyboard commands
-  //driverNode.initNode();
-  //driverNode.advertise(chatter);
-  //leftDrive.setUp();
-  //rightDrive.setUp();
+  //Serial.begin(9600); //Start a serial to take in keyboard commands
 
-  
+  driverNode.initNode();
+  driverNode.advertise(DriveGear);
+  driverNode.advertise(DriveError);
+  driverNode.subscribe(commandsIn);
+  driverNode.subscribe(velocityIn);
+  leftDrive.setUp();
+  rightDrive.setUp();
+  pinMode(led,OUTPUT);
 
 }
 
@@ -64,31 +173,25 @@ void messageCb(const std_msgs::String& dataIn){
 
 
 void loop() {
-  
+  driverNode.spinOnce();
   rightDrive.statusCheck();
+  leftDrive.statusCheck();
+  sprintf(rightDriveError,"%x",rightDrive.getStatusCode());
+  sprintf(leftDriveError,"%x",leftDrive.getStatusCode());
+  sprintf(driveError,"0%-4s0%-4s",leftDriveError,rightDriveError);
+  currentDriveError.data = driveError;
+  DriveError.publish(&currentDriveError);
 
-  int error = rightDrive.getStatusCode();
-
-  if (error == 21) rightDrive.getData("ZS ");
-  
-  //if (rightDrive.isConnected()){
-    Serial.println(rightDrive.getStatusCode());
-    Serial.println(rightDrive.getData("EL=262143 "));
-    keyboard_teleop();
-    //Serial.println(rightDrive.getStatusCode());
-    //Serial.println(rightDrive.getData("TRQ "));
-    delay(100);
-  //}
-  //else {
-    
-  //  rightDrive.setUp();
-  //  Serial.println("Motor Not Connected!");
-  //  delay(100);
-  //}
+  delay(100);
 
 }
 
-void keyboard_teleop(){
+
+
+
+
+
+void keyboard_teleop_dev(){
   if(Serial.available()){
     
     input = Serial.read(); //Get Command
