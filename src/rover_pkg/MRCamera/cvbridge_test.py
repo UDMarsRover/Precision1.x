@@ -13,6 +13,9 @@ while True:
     if not ret:
         print("Cant recieve frame(stream end?). Exiting...")
         break
+    
+    # _, frame = cv.imencode('.jpg', frame)
+    frame = cv.resize(frame, (320, 240))
     #display frame
     cv.imshow('video', frame)
     if cv.waitKey(1) == ord('q'):
