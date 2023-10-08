@@ -20,7 +20,7 @@ def callback(msg):
 def start_node():
     # create node and subscriber
     rospy.init_node('camera_sensor_subscriber', anonymous=True)
-    rospy.Subscriber('CameraToBase', Image, callback)
+    rospy.Subscriber('RoverToBase', Image, callback)
 
     # keep node running until shut down
     rospy.spin()
