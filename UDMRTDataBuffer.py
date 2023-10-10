@@ -136,8 +136,8 @@ class UDMRTDataBuffer:
 #rest of stuff not in emo yet
         self.__busMonitorData__ = str[30:34]
         self.__batteryTempData__ = str[34:38]
-        self.__voltageConverterTempData__ = str[38:42]
-        self.__currentConversionData__ = str[42:46]
+        self.__voltageConverterTempData__ = str[37:40]
+        self.__currentConversionData__ = str[40:43]
         
     
                         
@@ -184,8 +184,13 @@ class UDMRTDataBuffer:
     def checkForError(self):
         #If true, no error. If false, there is an error.
         return self.__emoErrorData__.lower() == "ff"
+    
+
+
 exampleEmoString = "1801800.1220.1220.988732FFFFFF"
 exampleEmoStringWithAll = "1801800.1220.1220.988273FFFFFF48.0273483273"
 dB = UDMRTDataBuffer()
 dB.setEmoData(exampleEmoStringWithAll)
-print(dB.__boxTempData__)
+print(dB.__currentConversionData__)
+
+#Lrc is doing the same thing so this has no purpose. All this stuff is pointless cuz ros can do it without this.
