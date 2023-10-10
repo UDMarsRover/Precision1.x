@@ -8,12 +8,16 @@
 <body>
 
     
-    <div>{{roll}}</div>
+    <div class = "container">
+     <div class = "text"> {{roll}} </div>
+    </div>
 
 </body>
 
     
 <style>
+
+  /*
   div {
     width: 9%;
     height: 16%;
@@ -22,9 +26,29 @@
     margin: 10px;
     position: absolute;
     text-align: center;
-    ;
     background-color: tomato;
+    display: table-column;
   }
+  */
+
+  .container {
+    width: 9%;
+    height: 16%;
+    border: 4px solid rgb(0, 0, 0);
+    padding: 10%;
+    margin: 10%;
+    position: absolute;
+    text-align: center;
+    background-color: tomato;
+}
+
+/* If you want text inside of the container */
+.text {
+ position: relative;
+ text-align: center;
+ top: 40%
+  
+}
 </style>
 
 
