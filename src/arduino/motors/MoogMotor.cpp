@@ -29,7 +29,7 @@ boolean MoogMotor::setVelocity(float rpm, float acceleration){
         
         acceleration = int(acceleration * 1000); //Range 0 -> 2147483647
         serial->print("MV ");     //Set to motor velocity mode
-        serial->print("VT="+String(rpm)+" ");       //Set the rpm
+        serial->print("1VT="+String(rpm)+" ");       //Set the rpm
         serial->print("ADT=" + String(acceleration) + " ");      //Set the acceration/deceleration
         serial->print("G ");      //Go Command
         
@@ -102,6 +102,21 @@ void MoogMotor::setUp()
 
   serial->begin(9600);
   //serial->write("AMPS=1000 ");
+
+  serial->print("SADDR1 ");
+  serial->print("ECHO ");
+  delay(200);
+  serial->print("SADDR2 ");
+  serial->print("1ECHO ");
+  delay(200);
+  serial->print("SADDR3 ");
+  serial->print("2ECHO ");
+  //delay(200);
+  //serial->print("SADDR4 ");
+  //serial->print("4ECHO ");
+
+
+
   serial->print("EIGN(2) ");  // Clear Limits
   serial->print("EIGN(3) ");  // Clear Limits
   serial->print("ZS ");       // Clear All Warning Tags
@@ -166,4 +181,3 @@ bool MoogMotor::resetStatusCodes(){
   park();
   return statusCode == DRIVEREADY;
 }
-
