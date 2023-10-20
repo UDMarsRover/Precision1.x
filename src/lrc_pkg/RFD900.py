@@ -1,9 +1,11 @@
+import cv2
 import time
 import serial
 import rospy
 import numpy as np
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 
 class RFD900:
 
@@ -27,6 +29,7 @@ class RFD900:
         self.dataInBuffer   = ""
         self.__imageStreamOK__  = False
         self.__imageResolution__ = [0,0]
+        self.bridge = CvBridge()
 
         # Update operation registers and store final values
         if deploy:
@@ -51,14 +54,19 @@ class RFD900:
         :return: Returns a boolean value that indicates if the data was written or not
         :rtype: boolean
         """
-        imageMat = dataIn.data
+        imageMat = self.bridge.imgmsg_to_cv2(dataIn)
+
+        print(len(imageMat))
         if(self.__imageStreamOK__):
             # Write a row of image data at a time
+            
             for i in range(self.__imageResolution__[0]):
                 line = ""
                 for j in range(self.__imageResolution__[1]):
-                    line = line + "," + hex(imageMat[i][j])
-                self.__writeOutgoingData__(line)
+                    print(type(imageMat))
+                    line = line + "," + str(imageMat[i, j])
+            
+            self.__writeOutgoingData__(line) # TODO test if writing line works better
             return True
         else:
             self.__errorHandler__(RuntimeError("No Image Stream Initialization!! Please call RFD900.openImageStream()"))

@@ -16,19 +16,21 @@ def start_node():
     video_capture = cv2.VideoCapture(0)
     bridge = CvBridge()
 
+    imout = Image()
+
     # main control loop
     while not rospy.is_shutdown():
         #capture frame by frame
         ret, frame = video_capture.read()
-
         if ret == True:
             rospy.loginfo('Frame captured and published')
 
             # compress image
-            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 75]
-            _, frame = cv2.imencode('.jpg', frame, encode_param)
+            # encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 75]
+            # _, frame = cv2.imencode('.jpg', frame, encode_param)
 
             # convert to imgmsg and publish to topic
+            # imout.data = frame
             image_to_topic = bridge.cv2_to_imgmsg(frame)
             publisher.publish(image_to_topic)
 

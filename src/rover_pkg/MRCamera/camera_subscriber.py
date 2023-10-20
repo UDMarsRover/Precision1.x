@@ -12,7 +12,7 @@ def callback(msg):
 
     # convert back to cv and display image
     cv_image = bridge.imgmsg_to_cv2(msg)
-    cv_image = cv2.imdecode(cv_image, cv2.IMREAD_COLOR)
+    # cv_image = cv2.imdecode(cv_image, cv2.IMREAD_COLOR)
     cv2.imshow("camera", cv_image)
 
     cv2.waitKey(1)

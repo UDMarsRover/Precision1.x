@@ -19,7 +19,7 @@ camSub = rospy.Subscriber('CameraToBase', Image,  camCom.writeImage)
 camPub = rospy.Publisher('BaseToCamera', Image, queue_size = 10)
 rate = rospy.Rate(10)               # Set the refresh rate
 
-#camCom.openImageStream(resolution)
+camCom.openImageStream(resolution)
 
 if (__name__ == '__main__'):
     # While roscore is up, running and connencted
