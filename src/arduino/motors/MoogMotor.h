@@ -17,7 +17,7 @@ class MoogMotor
   
      MoogMotor(HardwareSerial* associatedSerial);
     //boolean driveMotor(MotorMode operationMode, float value);
-     boolean setVelocity(float rpm, float acceleration);
+     boolean setVelocity(int motorAddr, float rpm, float acceleration);
      boolean setTorque(float torque);
      boolean setPosition(float value,float velocity, float acceleration);
      
@@ -27,7 +27,7 @@ class MoogMotor
      void setUp();
      void off();
      void neutral();
-     void park();
+     void park(int);
      
 
     void statusCheck();
@@ -47,9 +47,10 @@ class MoogMotor
     unsigned int statusCode5:17;
     unsigned int statusCode6:17;
     unsigned int statusCode7:17;
+    bool sendCommand(String, int = 0);
     bool connected;
     HardwareSerial *serial = NULL;
-    bool sendCommand(String);
+    //bool sendCommand(String);
  };
 
 #endif

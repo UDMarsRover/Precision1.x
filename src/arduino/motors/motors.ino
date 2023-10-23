@@ -17,6 +17,8 @@ char rightDriveError[4];
 char leftDriveError[4];
 char driveError[8];
 
+int mid = 2;
+
 int led = 7;
 int motorRX[] = {2,4,6,8};
 int motorTX[] = {3,5,7,9};
@@ -58,7 +60,7 @@ void runTankDrive(geometry_msgs::Accel command){
   float ldc = ((ldw/360) / revsperrotate) * gearRatio;    //counts/min
 
   //goodr = R1Drive.setVelocity(rdc, acceleration);
-  goodl = L1Drive.setVelocity(-ldc, acceleration);
+  goodl = L1Drive.setVelocity(mid,-ldc, acceleration);
   //goodr = goodr & R2Drive.setVelocity(rdc, acceleration);
   //goodl = goodl & L2Drive.setVelocity(-ldc, acceleration);
   if(goodl && goodr){currentDriveGear.data = "D";}
@@ -69,7 +71,7 @@ void keyboard_teleop_ros(std_msgs::String msg){
   String input = msg.data;
   digitalWrite(led,HIGH);
   if(input == "w"){
-    goodl = L1Drive.setVelocity(-velocity, acceleration);
+    goodl = L1Drive.setVelocity(mid,-velocity, acceleration);
     //goodr = R1Drive.setVelocity(velocity, acceleration);
     //goodl = goodl & L1Drive.setVelocity(-velocity, acceleration);
     //goodr = goodr & R1Drive.setVelocity(velocity, acceleration);
@@ -78,7 +80,7 @@ void keyboard_teleop_ros(std_msgs::String msg){
   }
 
   else if (input == "s"){
-    goodl = L1Drive.setVelocity(velocity, acceleration);
+    goodl = L1Drive.setVelocity(mid,velocity, acceleration);
     //goodr = R1Drive.setVelocity(-velocity, acceleration);
     //goodl = goodl & L1Drive.setVelocity(velocity, acceleration);
     //goodr = goodr & R1Drive.setVelocity(-velocity, acceleration);
@@ -87,7 +89,7 @@ void keyboard_teleop_ros(std_msgs::String msg){
   }
 
   else if (input == "d"){
-    goodl = L1Drive.setVelocity(velocity, acceleration);
+    goodl = L1Drive.setVelocity(mid,velocity, acceleration);
    // goodr = R1Drive.setVelocity(velocity, acceleration);
     //goodl = goodl & L1Drive.setVelocity(velocity, acceleration);
     //goodr = goodr & R1Drive.setVelocity(velocity, acceleration);
@@ -96,7 +98,7 @@ void keyboard_teleop_ros(std_msgs::String msg){
   }
 
   else if (input == "a"){
-    goodl = L1Drive.setVelocity(velocity, acceleration);
+    goodl = L1Drive.setVelocity(mid,velocity, acceleration);
     //goodr = R1Drive.setVelocity(-velocity, acceleration);
     //goodl = goodl & L1Drive.setVelocity(velocity, acceleration);
     //goodr = goodr & R1Drive.setVelocity(-velocity, acceleration);
@@ -121,7 +123,7 @@ void keyboard_teleop_ros(std_msgs::String msg){
   }
 
   else if (input == "p"){
-    L1Drive.park();
+    //L1Drive.park();
     //R1Drive.park();
     //L2Drive.park();
     //R2Drive.park();

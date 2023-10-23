@@ -17,25 +17,22 @@ MoogMotor::MoogMotor(HardwareSerial* associatedSerial)
   //initSerial();
 }
 
-boolean MoogMotor::setVelocity(float rpm, float acceleration){
+boolean MoogMotor::setVelocity(int motorAdd, float rpm, float acceleration){
     // RPM Can only be from -1 to 1
     
     //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
         
 
-        //vel = rpm * (32768 / 8000) * 65536;
-        rpm = rpm * 4423680;   // Motor ranged from +- 2,147,483,647
-        //rpm = rpm * 32768;
-        
-        acceleration = int(acceleration * 1000); //Range 0 -> 2147483647
-        serial->print("MV ");     //Set to motor velocity mode
-        serial->print("1VT="+String(rpm)+" ");       //Set the rpm
-        serial->print("ADT=" + String(acceleration) + " ");      //Set the acceration/deceleration
-        serial->print("G ");      //Go Command
-        
-        //return true;                //Retrun a true to confirm operation complete
-    //}
-    //return false;                   //Reteun a false if there is an error
+    //vel = rpm * (32768 / 8000) * 65536;
+    rpm = rpm * 4423680;   // Motor ranged from +- 2,147,483,647
+    //rpm = rpm * 32768;
+    
+    acceleration = int(acceleration * 1000); //Range 0 -> 2147483647
+    sendCommand("MV",motorAdd);     //Set to motor velocity mode
+    sendCommand("VT="+String(rpm),motorAdd);       //Set the rpm
+    sendCommand("ADT=" + String(acceleration),motorAdd);      //Set the acceration/deceleration
+    sendCommand("G",motorAdd);      //Go Command
+    
 }
 
 boolean MoogMotor::setTorque(float torque){
@@ -102,29 +99,42 @@ void MoogMotor::setUp()
 
   serial->begin(9600);
   //serial->write("AMPS=1000 ");
+  sendCommand("SADDR0");
+  delay(500);
+  sendCommand("SADDR1");
+  delay(500);
+  sendCommand("ECHO",1);
+  delay(500);
+  sendCommand("SLEEP",1);
+  delay(500);
+  sendCommand("SADDR2");
+  delay(500);
+  sendCommand("ECHO",2);
+  delay(500);
+  sendCommand("SLEEP",2);
+  delay(500);
+  sendCommand("SADDR3");
+  delay(500);
+  sendCommand("ECHO",3);
+  delay(500);
+  sendCommand("SLEEP",3);
+  delay(500);
+  sendCommand("SADDR4");
+  delay(500);
+  sendCommand("WAKE");
 
-  serial->print("SADDR1 ");
-  serial->print("ECHO ");
-  delay(200);
-  serial->print("SADDR2 ");
-  serial->print("1ECHO ");
-  delay(200);
-  serial->print("SADDR3 ");
-  serial->print("2ECHO ");
-  //delay(200);
-  //serial->print("SADDR4 ");
-  //serial->print("4ECHO ");
 
+  sendCommand("EIGN(2)");
+  sendCommand("EIGN(3)");
+  sendCommand("ZS");
+  sendCommand("SLD");
 
+  park(1);
+  park(2);
+  park(3);
+  park(4);
 
-  serial->print("EIGN(2) ");  // Clear Limits
-  serial->print("EIGN(3) ");  // Clear Limits
-  serial->print("ZS ");       // Clear All Warning Tags
-  serial->print("SLD ");
-
-  park();
-
-  statusCheck();
+  //statusCheck();
 }
 
 void MoogMotor::drive(){
@@ -141,15 +151,29 @@ void MoogMotor::neutral(){
   
 }
 
-void MoogMotor::park(){
-  serial->print("BRKSRV ");   // Engage Break When not Moving
-  serial->print("G ");        // Go Command to turn on coils
-  serial->print("X ");        // Send Stop Request
+void MoogMotor::park(int motorAdd){
+  sendCommand("BRKSRV", motorAdd);   // Engage Break When not Moving
+  sendCommand("G",motorAdd);        // Go Command to turn on coils
+  sendCommand("X", motorAdd);        // Send Stop Request
   
 }
 
-int MoogMotor::getData(char command[]){
+bool MoogMotor::sendCommand( String command, int motorAdd){
+  //char output[sizeof(command) + 2];
+  char sendAddr = ((uint8_t) motorAdd | 0b10000000);
+  //strcpy(output, sendAddr);
+  //strcat(output, command);
+  //strcat(output, " ");
+
+  //serial->print(output);
+
+  serial->print(sendAddr);
   serial->print(command);
+  serial->print(" ");
+}
+
+int MoogMotor::getData(char command[]){
+  sendCommand(command);
   if (serial->available()) connected = true;
   else connected = false;
   return int(serial->parseInt());
@@ -178,6 +202,6 @@ unsigned int MoogMotor::getStatusCode(){
 
 bool MoogMotor::resetStatusCodes(){
   serial->print("ZS ");       // Clear All Warning Tags
-  park();
+  //park();
   return statusCode == DRIVEREADY;
 }
