@@ -26,7 +26,7 @@ void setup() {
   gpsNode.initNode();
   gpsNode.advertise(pub);
   //Serial.begin(9600);
-  ss.begin(9600);
+  ss.begin(57600);
 }
 
 void loop() 
