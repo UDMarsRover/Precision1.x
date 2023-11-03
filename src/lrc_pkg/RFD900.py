@@ -56,16 +56,15 @@ class RFD900:
         """
         imageMat = self.bridge.imgmsg_to_cv2(dataIn)
 
-        print(len(imageMat))
         if(self.__imageStreamOK__):
             # Write a row of image data at a time
-            
+            start_time = time.time()
             for i in range(self.__imageResolution__[0]):
                 line = ""
                 for j in range(self.__imageResolution__[1]):
-                    print(type(imageMat))
                     line = line + "," + str(imageMat[i, j])
-            
+            print(time.time() - start_time)
+
             self.__writeOutgoingData__(line) # TODO test if writing line works better
             return True
         else:
