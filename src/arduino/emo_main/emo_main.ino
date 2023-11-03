@@ -1,10 +1,8 @@
-/*
- * John Ludeke
- * rosserial publisher for sensor data
- */
 
 #include <ros.h>
+#include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
+#include <sensor_msgs/Imu.h>
 #include <Arduino_HTS221.h>
 #include <Arduino_LSM9DS1.h>
 
@@ -29,13 +27,18 @@ double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
 
-String errorString;
 
 ros::NodeHandle nh;
-std_msgs::String str_data;
-ros::Publisher sensordata("sensordata", &str_data);
+//std_msgs::Float64 imu_data;
+std_msgs::Float64 boxTemp_data;
 
+//ros::Publisher imuPub("imu_pub", &imu_data);
+ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
 
+geometry_msgs::Quaternion orientation;
+ros::Publisher imu_qua("imu_qua",&orientation);
+
+char errorCode;
 
 // method that updates the errorCodes array
 //void updateErrorCode(std::string newError);
@@ -52,11 +55,27 @@ void setup() {
   pinMode(echoPinS, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinW, INPUT); // Sets the echoPin as an INPUT
   
+  nh.initNode();
+  //nh.advertise(imuPub);
+  //nh.advertise(boxTempPub);
+  nh.advertise(imu_qua);
 }
 
 void loop() {
-  String sensorData = gyroscopeData() + "," + boxTemperatureData();
+  delay(50);
+  
 
+  //String sensorData = String(gyroscopeData()) + "," + String(boxTemperatureData());
+  //float gyro = gyroscopeData();
+  //imu_data.data = gyro; 
+  //boxTemp_data.data = boxTemperatureData();
+  //imuPub.publish(&imu_data);
+  //boxTempPub.publish(&boxTemp_data);  
+  gyroscopeData();
+  imu_qua.publish(&orientation);
+  nh.spinOnce(); 
+  
+  //Serial.println(sensorData);
 }
 
 
@@ -79,10 +98,12 @@ float thermistorData(int pin){
 }
 
 
-String gyroscopeData() {
+void gyroscopeData() {
+  
   if (!IMU.begin()) {
-    errorHexBits[4] = 'E';
+    errorCode = 'E';
   }
+  
   if (IMU.gyroscopeAvailable()) {
     IMU.readAcceleration(curAcelX, curAcelY, curAcelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
   }
@@ -93,32 +114,39 @@ String gyroscopeData() {
 
   acelX = curAcelX;
   acelY = curAcelY;
-
-  String xString = stringPadding(3, String(map(curAcelX*100, -100, 100, 0, 360)));
-  String yString = stringPadding(3, String(map(curAcelY*100, -100, 100, 0, 360)));
+  orientation.x = curAcelXmap;
+  orientation.y = curAcelYmap;
+  
+  /*
 
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
-    errorHexBits[4] = '0';
+    error = '0';
   }
   else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
   {
-    errorHexBits[4] = '1';
+    error = '1';
   }
   
   delay(50);
 
   return xString + "," + yString;
+  
+  */
+
+  
+
+
 }
 
 
-String boxTemperatureData() {
+float boxTemperatureData() {
   if (HTS.begin()){
     float currTemp = HTS.readTemperature();
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
-    String temp_reading = (String)(currTemp);
+    //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
-    if (currTemp < 0) {
+    /*if (currTemp < 0) {
       errorHexBits[3] = '2';
     }
     else if (currTemp < 10) {
@@ -134,12 +162,16 @@ String boxTemperatureData() {
     return temp_reading.substring(0, 3);
   }
   errorHexBits[3] = 'E';
+  */
+  return(currTemp);
+  }
 }
 
 
 // test for different sensors
 // use this within each method for the sensors
-double expFilter(double alpha, double prevReading, double curReading){
+double expFilter(double alpha, double prevReading, double curReading){ 
   // Serial.println(alpha);
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
+
