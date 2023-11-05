@@ -29,14 +29,13 @@ double alphaGyro = 0.3;
 
 
 ros::NodeHandle nh;
-//std_msgs::Float64 imu_data;
+
 std_msgs::Float64 boxTemp_data;
-
-//ros::Publisher imuPub("imu_pub", &imu_data);
 ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
-
 geometry_msgs::Quaternion orientation;
-ros::Publisher imu_qua("imu_qua",&orientation);
+ros::Publisher imuPub("imu_pub",&orientation);
+
+
 
 char errorCode;
 
@@ -47,7 +46,7 @@ char errorCode;
 
 void setup() {
   // setup
-  Serial.begin(9600);
+  //Serial.begin(9600);
   delay(10);
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(echoPinN, INPUT); // Sets the echoPin as an INPUT
@@ -56,23 +55,17 @@ void setup() {
   pinMode(echoPinW, INPUT); // Sets the echoPin as an INPUT
   
   nh.initNode();
-  //nh.advertise(imuPub);
-  //nh.advertise(boxTempPub);
-  nh.advertise(imu_qua);
+  nh.advertise(boxTempPub);
+  nh.advertise(imuPub);
 }
 
 void loop() {
   delay(50);
-  
-
   //String sensorData = String(gyroscopeData()) + "," + String(boxTemperatureData());
-  //float gyro = gyroscopeData();
-  //imu_data.data = gyro; 
-  //boxTemp_data.data = boxTemperatureData();
-  //imuPub.publish(&imu_data);
-  //boxTempPub.publish(&boxTemp_data);  
+  boxTemp_data.data = boxTemperatureData();
+  boxTempPub.publish(&boxTemp_data);  
   gyroscopeData();
-  imu_qua.publish(&orientation);
+  imuPub.publish(&orientation);
   nh.spinOnce(); 
   
   //Serial.println(sensorData);
