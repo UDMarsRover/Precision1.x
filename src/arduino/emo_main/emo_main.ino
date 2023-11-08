@@ -3,8 +3,13 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/BatteryState.h>
 #include <Arduino_HTS221.h>
 #include <Arduino_LSM9DS1.h>
+#include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/DiagnosticArray.h>
+#include <std_msgs/Byte.h>
+#include <diagnostic_msgs/KeyValue.h>
 
 //Ultrasonic sensor
 #define trigPin 2 //attach pin D3 Arduino to pin Trig of HC-SR04
@@ -22,20 +27,35 @@ float acelX, acelY, acelZ;
 float curAcelX, curAcelY, curAcelZ;
 float curAcelXmap, curAcelYmap;
 float plusThreshold = 60, minusThreshold = -60;
+int voltagePin = A0;
+int sensorValue;
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
 
+#define OK 0
+#define WARN 1
+#define ERROR 2
+#define STALE 3
 
 ros::NodeHandle nh;
 
 std_msgs::Float64 boxTemp_data;
 ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
-geometry_msgs::Quaternion orientation;
-ros::Publisher imuPub("imu_pub",&orientation);
 
+geometry_msgs::Vector3 angular_velocity;
+ros::Publisher imuPub("imu_pub",&angular_velocity);
 
+sensor_msgs::BatteryState voltage_msg;
+ros::Publisher voltagePub("voltage_pub", &voltage_msg);
+
+diagnostic_msgs::DiagnosticStatus diagnostic_msg;
+ros::Publisher diagnosticPub("diagnostic_pub", &diagnostic_msg);
+
+diagnostic_msgs::KeyValue keys;
+
+ diagnosticArray[4];
 
 char errorCode;
 
@@ -53,10 +73,15 @@ void setup() {
   pinMode(echoPinE, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinS, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinW, INPUT); // Sets the echoPin as an INPUT
+  pinMode(voltagePin, INPUT); 
   
   nh.initNode();
   nh.advertise(boxTempPub);
   nh.advertise(imuPub);
+  nh.advertise(voltagePub);
+  nh.advertise(diagnosticPub);
+
+  diagnostic_msg.values_length = 4;
 }
 
 void loop() {
@@ -65,7 +90,11 @@ void loop() {
   boxTemp_data.data = boxTemperatureData();
   boxTempPub.publish(&boxTemp_data);  
   gyroscopeData();
-  imuPub.publish(&orientation);
+  imuPub.publish(&angular_velocity);
+  voltageSensorData();
+  voltagePub.publish(&voltage_msg);
+  diagnostic_msg.st_values = diagnosticArray;
+  diagnosticPub.publish(&diagnostic_msg);
   nh.spinOnce(); 
   
   //Serial.println(sensorData);
@@ -107,8 +136,8 @@ void gyroscopeData() {
 
   acelX = curAcelX;
   acelY = curAcelY;
-  orientation.x = curAcelXmap;
-  orientation.y = curAcelYmap;
+  angular_velocity.x = curAcelXmap;
+  angular_velocity.y = curAcelYmap;
   
   /*
 
@@ -158,6 +187,16 @@ float boxTemperatureData() {
   */
   return(currTemp);
   }
+}
+
+void voltageSensorData() {
+  int sensorValue = analogRead(A0);
+  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  float voltage = map(sensorValue, 0, 1023, 0, 3.3);
+  float batteryVoltage = map(voltage, 0, 3.3, 0, 53);
+  
+  voltage_msg.voltage = batteryVoltage;
+
 }
 
 
