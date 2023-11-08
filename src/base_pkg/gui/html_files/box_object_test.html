@@ -2,91 +2,69 @@
 <html>
 <head>
 <style>
-.city {
+.boxesDesign {
     border: 4px solid rgb(0, 0, 0);
     padding: 10%;
     margin: 10%;
-    position: absolute;
-    text-align: center;
     background-color: tomato;
     position: relative;
     text-align: center;
     top: 0%;
     left: 0%;
+    width: 100%;
+    height: 100%;
+}
+
+.boxesLocation{
+    position: fixed;
     width: 10%;
     height: 10%;
-  
 }
-    .box{
-        position: fixed;
+
+    .roll{
         top: 0%;
         left: 0%;
-        width: 10%;
-        height: 10%;
-    }
+    }       
 
-    .box1{
-        position: fixed;
+    .pitch{
         top: 20%;
         left: 0%;
-        width: 10%;
-        height: 10%;
     }
 
-    .box2{
-        position: fixed;
+    .temp{
         top: 40%;
         left: 0%;
-        width:10%;
-        height: 10%;
     }
 
-    .box3{
-        position: fixed;
+    .radio{
         top: 60%;
         left: 0%;
-        width: 10%;
-        height: 10%;
     }
 
-    .box4{
-        position: fixed;
+    .piError{
         top: 80%;
         left: 0%;
-        width: 10%;
-        height: 10%;
     }
 
-    .box5{
-        position: fixed;
+    .emoError{
         top: 80%;
-        left: 10%;
-        width: 10%;
-        height: 10%;
+        left: 13%;
     }
 
-    .box6{
-        position: fixed;
+    .driveError{
         top: 80%;
-        left: 20%;
-        width: 10%;
-        height: 10%;
+        left: 26%;
     }
 
-    .box7{
-        position: fixed;
+    .armError{
         top: 80%;
-        left: 30%;
-        width: 10%;
-        height: 10%;
+        left: 39%;
     }
 
-    .box8{
-        position: fixed;
+    .cameraError{
         top: 80%;
-        left: 40%;
-         width: 10%;
-        height: 10%;
+        left: 52%;
+
     }
 
 
@@ -95,66 +73,66 @@
 <body>
     
 
-<div class = "box">
-<div class="city" width="100%" height="100%">
-    <p>Roll</p>
-    <p>{{Roll}}</p>
-</div> 
+<div class = "roll boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Roll</h2>
+        <p>{{Roll}}</p>
+    </div> 
 </div> 
 
-<div class = "box1">
-    <div class="city" width="100%" height="100%">
-        <h2>London</h2>
+<div class = "pitch boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Pitch</h2>
         <p>London is the capital of England.</p>
     </div> 
 </div> 
 
-<div class = "box2">
-    <div class="city" width="100%" height="100%">
-        <h2>London</h2>
+<div class = "temp boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Temperature</h2>
         <p>London is the capital of England.</p>
     </div> 
 </div> 
 
-<div class = "box3">
-    <div class="city" width="100%" height="100%">
-    <h2>London</h2>
-    <p>London is the capital of England.</p>
+<div class = "radio boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Radio Strength</h2>
+        <p>London is the capital of England.</p>
     </div> 
 </div> 
 
-<div class = "box4">
-    <div class="city" width="100%" height="100%">
-    <h2>London</h2>
-    <p>London is the capital of England.</p>
+<div class = "piError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Pi Error</h2>
+        <p>London is the capital of England.</p>
     </div> 
 </div>
 
-<div class = "box5">
-    <div class="city" width="100%" height="100%">
-    <h2>London</h2>
-    <p>London is the capital of England.</p>
+<div class = "emoError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Emo Error</h2>
+        <p>London is the capital of England.</p>
     </div> 
 </div> 
 
-<div class = "box6">
-    <div class="city" width="100%" height="100%">
-    <h2>London</h2>
-    <p>London is the capital of England.</p>
+<div class = "driveError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Drive Error</h2>
+        <p>London is the capital of England.</p>
     </div> 
 </div> 
 
-<div class = "box7">
-    <div class="city" width="100%" height="100%">
-    <h2>London</h2>
-    <p>London is the capital of England.</p>
+<div class = "armError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Arm Error</h2>
+        <p>London is the capital of England.</p>
     </div> 
 </div>
 
-<div class = "box8">
-    <div class="city" width="100%" height="100%">
-    <h2>London</h2>
-    <p>London is the capital of England.</p>
+<div class = "cameraError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h2>Camera Error</h2>
+        <p>London is the capital of England.</p>
     </div> 
 </div> 
 
