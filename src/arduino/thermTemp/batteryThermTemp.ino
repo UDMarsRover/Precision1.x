@@ -1,6 +1,8 @@
 #include <ros.h>
 #include <sensor_msgs/Temperature.h>
 #include <std_msgs/Header.h>
+#include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/DiagnosticArray.h>
 
 int ThermistorPin = 0;
 int Vo, E;
@@ -12,10 +14,19 @@ ros::NodeHandle tempNode;
 sensor_msgs::Temperature temperature_msg;
 ros::Publisher temperature_pub("temperature", &temperature_msg);
 
+#define OK diagnostic_msgs::DiagnosticStatus::OK;
+#define WARN diagnostic_msgs::DiagnosticStatus::WARN;
+#define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
+#define STALE diagnostic_msgs::DiagnosticStatus::STALE;
+
+diagnostic_msgs::DiagnosticStatus diagnostic_msg;
+diagnostic_msgs::DiagnosticArray dia_array;
+ros::Publisher diagnosticPub("diagnostic_pub", &dia_array);
+
 void setup() {
   tempNode.initNode();
   tempNode.advertise(temperature_pub);
- Serial.begin(9600);
+ dia_array status_length = 4;
 }
 
 void loop() {
@@ -42,8 +53,12 @@ void loop() {
     E = 0;
   }
   
+  diagnostic_msg.level = OK;
+  dia_array.status[0] = diagnostic_msg
+  diagnosticPub.publish(&dia_array);
+
   temperature_msg.temperature = T; 
-  temperature_msg.variance = E;  
+  //temperature_msg.variance = E;  
 
   temperature_pub.publish(&temperature_msg);
   tempNode.spinOnce();
