@@ -17,7 +17,6 @@ while not done:
                 done = True  # Flag that we are done so we exit this loop.
 
             if event.type == pygame.JOYBUTTONDOWN:
-                print("Joystick button pressed.")
                 if event.button == 0:
                     joystick = joysticks[event.instance_id]
                     
