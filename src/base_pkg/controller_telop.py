@@ -1,7 +1,13 @@
+import rospy
 import pygame
+from std_msgs.msg import String
+from geometry_msgs.msg import Accel, Vector3
+
+rospy.init_node('RoverController', anonymous=True)
+pub = rospy.Publisher('Drive', Accel, queue_size=10)
+
 
 pygame.init()
-
 
 # This is a simple class that will help us print to the screen.
 # It has nothing to do with the joysticks, just outputting the
@@ -149,3 +155,16 @@ if __name__ == "__main__":
     # If you forget this line, the program will 'hang'
     # on exit if running from IDLE.
     pygame.quit()
+
+    while(True):
+        v = float(input("Input Linear Vel(m/s)"))
+        w = float(input("Input Angular Vel(m/s)"))
+        lv = Vector3()
+        lv.x = v
+        
+        wv = Vector3()
+        wv.x = w
+
+        pub.publisher(lv,w)
+        print([v,w])
+
