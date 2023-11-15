@@ -8,7 +8,6 @@
 #include <Arduino_LSM9DS1.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/DiagnosticArray.h>
-#include <std_msgs/Byte.h>
 #include <diagnostic_msgs/KeyValue.h>
 
 //Ultrasonic sensor
@@ -34,11 +33,12 @@ double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
 
-#define OK 0
-#define WARN 1
-#define ERROR 2
-#define STALE 3
+#define OK diagnostic_msgs::DiagnosticStatus::OK;
+#define WARN diagnostic_msgs::DiagnosticStatus::WARN;
+#define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
+#define STALE diagnostic_msgs::DiagnosticStatus::STALE;
 
+int queue_size = 4;
 ros::NodeHandle nh;
 
 std_msgs::Float64 boxTemp_data;
@@ -51,11 +51,16 @@ sensor_msgs::BatteryState voltage_msg;
 ros::Publisher voltagePub("voltage_pub", &voltage_msg);
 
 diagnostic_msgs::DiagnosticStatus diagnostic_msg;
-ros::Publisher diagnosticPub("diagnostic_pub", &diagnostic_msg);
+//ros::Publisher diagnosticPub("diagnostic_pub", &diagnostic_msg);
 
-diagnostic_msgs::KeyValue keys;
+diagnostic_msgs::DiagnosticArray dia_array;
+ros::Publisher diagnosticPub("diagnostic_pub", &dia_array);
 
- diagnosticArray[4];
+
+
+
+//diagnostic_msgs::KeyValue keys;
+
 
 char errorCode;
 
@@ -81,7 +86,8 @@ void setup() {
   nh.advertise(voltagePub);
   nh.advertise(diagnosticPub);
 
-  diagnostic_msg.values_length = 4;
+  dia_array.status_length = 1;
+
 }
 
 void loop() {
@@ -93,8 +99,14 @@ void loop() {
   imuPub.publish(&angular_velocity);
   voltageSensorData();
   voltagePub.publish(&voltage_msg);
-  diagnostic_msg.st_values = diagnosticArray;
-  diagnosticPub.publish(&diagnostic_msg);
+
+  
+  diagnostic_msg.level = OK;
+  dia_array.status[0] = diagnostic_msg;
+  //diagnostic_msg.level = WARN;
+  //dia_array[1].st_status = diagnostic_msg;
+  diagnosticPub.publish(&dia_array);
+
   nh.spinOnce(); 
   
   //Serial.println(sensorData);
