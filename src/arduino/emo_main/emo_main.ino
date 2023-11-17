@@ -89,7 +89,8 @@ void setup() {
   nh.advertise(diaImuPub);
 
   dia_imu.name = "Gyroscope";
-  //dia_imu.values_length = 2;
+  dia_imu.values_length = 2;
+ // dia_array.status_length = 10;
 
 }
 
@@ -103,11 +104,13 @@ void loop() {
   voltagePub.publish(&voltage_msg);
 
   // diagnostic update
-  dia_imu.message = imu_key.key;
-  dia_imu.values = imu_key;
-
+  dia_imu.values[0] = imu_key;
+  //dia_array.st_status = dia_imu;
+  
   // diagnostic publish
   diaImuPub.publish(&dia_imu);
+  diagnosticPub.publish(&dia_array);
+
 
   /*
   dia_array.status[0] = diagnostic_msg;
@@ -162,13 +165,10 @@ void gyroscopeData() {
   angular_velocity.x = curAcelXmap;
   angular_velocity.y = curAcelYmap;
   
-  
-
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
     //error = '0';
-    imu_key.key = "Roll over emergency";
-    imu_key.value = "0";
+    dia_imu.message = "Roll over emergency";
     dia_imu.level = ERROR;
     //roll over emergency
     
@@ -176,18 +176,17 @@ void gyroscopeData() {
   else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
   {
     //error = '1';
-    imu_key.key = "Roll over warning";
-    imu_key.value = "1"; 
+    dia_imu.message = "Roll over warning";
     dia_imu.level = WARN;
     //roll over warning
   }
   else{
-    imu_key.key = "All Good";
-    imu_key.value = "F";
+    dia_imu.message = "All Good";
     dia_imu.level = OK;
     //All good
   }
-  
+  imu_key.key = ("angular velocity x: ");
+  imu_key.value = "temp";
   delay(50);
 }
 
