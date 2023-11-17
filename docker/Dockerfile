@@ -15,6 +15,7 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get upgrade -y && apt-get update && \
     apt-get install -y git ros-noetic-cv-bridge & \
     ros-noetic-rosserial ros-noetic-rosserial-arduino && \
+    ros-noetic-joy &&\
     apt-get install python3-pip -y
 
 # Install and Update Development/ROS tools
