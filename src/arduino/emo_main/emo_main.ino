@@ -1,4 +1,3 @@
-
 #include <ros.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
@@ -25,7 +24,7 @@ String longD;
 float acelX, acelY, acelZ; 
 float curAcelX, curAcelY, curAcelZ;
 float curAcelXmap, curAcelYmap;
-float plusThreshold = 60, minusThreshold = -60;
+float plusThreshold = 30, minusThreshold = -30;
 int voltagePin = A0;
 int sensorValue;
 // Declare alpha for each sensor as necessary
@@ -38,7 +37,7 @@ double alphaGyro = 0.3;
 #define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
 #define STALE diagnostic_msgs::DiagnosticStatus::STALE;
 
-int queue_size = 4;
+
 ros::NodeHandle nh;
 
 std_msgs::Float64 boxTemp_data;
@@ -50,16 +49,18 @@ ros::Publisher imuPub("imu_pub",&angular_velocity);
 sensor_msgs::BatteryState voltage_msg;
 ros::Publisher voltagePub("voltage_pub", &voltage_msg);
 
-diagnostic_msgs::DiagnosticStatus diagnostic_msg;
-//ros::Publisher diagnosticPub("diagnostic_pub", &diagnostic_msg);
+diagnostic_msgs::DiagnosticStatus dia_imu;
+ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
 
-diagnostic_msgs::DiagnosticArray dia_array;
-ros::Publisher diagnosticPub("diagnostic_pub", &dia_array);
+//diagnostic_msgs::DiagnosticArray dia_array;
+//ros::Publisher diagnosticPub("diagnostic_pub", &dia_array);
+
+diagnostic_msgs::KeyValue box_key;
+diagnostic_msgs::KeyValue imu_key;
 
 
-
-
-//diagnostic_msgs::KeyValue keys;
+//diagnostic_msgs::KeyValue battery_key;
+//ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
 
 
 char errorCode;
@@ -84,15 +85,16 @@ void setup() {
   nh.advertise(boxTempPub);
   nh.advertise(imuPub);
   nh.advertise(voltagePub);
-  nh.advertise(diagnosticPub);
 
-  dia_array.status_length = 1;
+  nh.advertise(diaImuPub);
+
+  dia_imu.name = "Gyroscope";
+  //dia_imu.values_length = 2;
 
 }
 
 void loop() {
   delay(50);
-  //String sensorData = String(gyroscopeData()) + "," + String(boxTemperatureData());
   boxTemp_data.data = boxTemperatureData();
   boxTempPub.publish(&boxTemp_data);  
   gyroscopeData();
@@ -100,13 +102,19 @@ void loop() {
   voltageSensorData();
   voltagePub.publish(&voltage_msg);
 
-  
-  diagnostic_msg.level = OK;
-  dia_array.status[0] = diagnostic_msg;
-  //diagnostic_msg.level = WARN;
-  //dia_array[1].st_status = diagnostic_msg;
-  diagnosticPub.publish(&dia_array);
+  // diagnostic update
+  dia_imu.message = imu_key.key;
+  dia_imu.values = imu_key;
 
+  // diagnostic publish
+  diaImuPub.publish(&dia_imu);
+
+  /*
+  dia_array.status[0] = diagnostic_msg;
+  diagnostic_msg.level = WARN;
+  dia_array[1].st_status = diagnostic_msg;
+  diagnosticPub.publish(&dia_array);
+  */
   nh.spinOnce(); 
   
   //Serial.println(sensorData);
@@ -135,7 +143,10 @@ float thermistorData(int pin){
 void gyroscopeData() {
   
   if (!IMU.begin()) {
-    errorCode = 'E';
+    //errorCode = 'E';
+    imu_key.key = "Disconnect";
+    imu_key.value = "E";
+    dia_imu.level = STALE;
   }
   
   if (IMU.gyroscopeAvailable()) {
@@ -151,26 +162,33 @@ void gyroscopeData() {
   angular_velocity.x = curAcelXmap;
   angular_velocity.y = curAcelYmap;
   
-  /*
+  
 
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
-    error = '0';
+    //error = '0';
+    imu_key.key = "Roll over emergency";
+    imu_key.value = "0";
+    dia_imu.level = ERROR;
+    //roll over emergency
+    
   }
   else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
   {
-    error = '1';
+    //error = '1';
+    imu_key.key = "Roll over warning";
+    imu_key.value = "1"; 
+    dia_imu.level = WARN;
+    //roll over warning
+  }
+  else{
+    imu_key.key = "All Good";
+    imu_key.value = "F";
+    dia_imu.level = OK;
+    //All good
   }
   
   delay(50);
-
-  return xString + "," + yString;
-  
-  */
-
-  
-
-
 }
 
 
@@ -180,26 +198,40 @@ float boxTemperatureData() {
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
     //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
-    /*if (currTemp < 0) {
-      errorHexBits[3] = '2';
+    box_key.key = "All Good";
+    box_key.value = "F";
+    if (currTemp < 0) {
+      //errorHexBits[3] = '2';
+      box_key.key = "Underheat emergency";
+      box_key.value = "2";
     }
     else if (currTemp < 10) {
-      errorHexBits[3] = '3';
+      //errorHexBits[3] = '3';
+      box_key.key = "Underheat warning";
+      box_key.key = "3";
     }
     if (currTemp > 60) {
-      errorHexBits[3] = '1';
+      //errorHexBits[3] = '1';
+      box_key.key = "Overheat warning";
+      box_key.value = "1";
     }
     else if (currTemp > 70) {
-      errorHexBits[3] = '0';
+      //errorHexBits[3] = '0';
+      box_key.key = "Overheat emergency";
+      box_key.value = "0";
     }
     // Returns the temperature
-    return temp_reading.substring(0, 3);
+    //return temp_reading.substring(0, 3);
+    return(currTemp);
+
   }
-  errorHexBits[3] = 'E';
-  */
-  return(currTemp);
-  }
+  //errorHexBits[3] = 'E';
+  box_key.key = "Disconnect";
+  box_key.value = "E";
+
+  
 }
+
 
 void voltageSensorData() {
   int sensorValue = analogRead(A0);

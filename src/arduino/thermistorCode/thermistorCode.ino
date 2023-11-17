@@ -65,13 +65,13 @@ void loop() {
     dia_temp.message = "Overheat Emergency";
     dia_temp.level = ERROR;
   }
-  
-  temp_key.key = "temperature (°C)"
+
+  temp_key.key = "temperature (°C)";
   temp_key.value = T.toString();
 
   diagnosticPub.publish(&dia_temp);
 
-  //temperature_msg.temperature = T; 
+  //batteryTemperature_msg.temperature = T; 
 
   //batteryTemperature_pub.publish(&temperature_msg);
   //tempNode.spinOnce();
@@ -108,7 +108,7 @@ void voltageConverterTempData() {
     dia_temp.level = ERROR;
   }
   
-  temp_key.key = "temperature (°C)"
+  temp_key.key = "temperature (°C)";
   temp_key.value = T.toString();
 
   diagnosticPub.publish(&dia_temp);
