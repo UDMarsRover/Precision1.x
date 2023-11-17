@@ -66,7 +66,7 @@ void loop() {
     dia_temp.level = ERROR;
   }
   
-  temp_key.key = "temperature (°C)"
+  temp_key.key = "temperature (°C)";
   temp_key.value = T.toString();
 
   diagnosticPub.publish(&dia_temp);
@@ -108,7 +108,7 @@ void voltageConverterTempData() {
     dia_temp.level = ERROR;
   }
   
-  temp_key.key = "temperature (°C)"
+  temp_key.key = "temperature (°C)";
   temp_key.value = T.toString();
 
   diagnosticPub.publish(&dia_temp);
