@@ -46,8 +46,8 @@ bool UDMRTDrivetrain::drive(float kmPerHour, float degPerSecond, float accelerat
   float mpm = (kmPerHour*1000)/60;  //Meters per minute
   float dm = degPerSecond * 60;         //Dergees per minute
   
-  float rdw = ((mpm + (ROVERWIDTH/2) * dm) / WHEELRADIUS);   // right wheel rotations /min
-  float ldw = ((mpm - (ROVERWIDTH/2) * dm) / WHEELRADIUS);   // left wheel rotations /min
+  float rdw = ((mpm + (ROVERWIDTH/2) * dm) / (2 * 3.14159 * WHEELRADIUS));   // right wheel rotations /min
+  float ldw = ((mpm - (ROVERWIDTH/2) * dm) / (2 * 3.14159 * WHEELRADIUS));   // left wheel rotations /min
 
   float rdc = ((rdw/360) / REVSPERROTATION) * GEARRATIO;    // encode counts/min
   float ldc = ((ldw/360) / REVSPERROTATION) * GEARRATIO;    // encoder counts/min
