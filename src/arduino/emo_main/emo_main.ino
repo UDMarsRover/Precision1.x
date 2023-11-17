@@ -1,15 +1,14 @@
-/*
- * John Ludeke
- * rosserial publisher for sensor data
- */
-
 #include <ros.h>
+#include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/BatteryState.h>
 #include <Arduino_HTS221.h>
 #include <Arduino_LSM9DS1.h>
-#define GREEN 23
-#define RED 22
-#define BLUE 24
+#include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/DiagnosticArray.h>
+#include <diagnostic_msgs/KeyValue.h>
+
 //Ultrasonic sensor
 #define trigPin 2 //attach pin D3 Arduino to pin Trig of HC-SR04
 #define echoPinN 3 // attach pin D2 Arduino to pin Echo of HC-SR04_North
@@ -29,33 +28,46 @@ float acelOutX, acelOutY, acelOutZ;
 float curAcelOutX, curAcelOutY, curAcelOutZ;
 
 float curAcelXmap, curAcelYmap;
-float plusThreshold = 60, minusThreshold = -60;
+float plusThreshold = 30, minusThreshold = -30;
+int voltagePin = A0;
+int sensorValue;
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
 double alphaAcel = 0.6;
-/*
-This new error code system is replacing the previous FIFO queue solution which incorporated an error code priority list. The issue with this design is that we can only pass
-one error from EMO to ROS in each pass, which is unfavorable if we have multiple problems at once. Also, if a high priority issue isn't resolved quickly, all errors of lesser
-importance will be undetectable. This new system will allow us to track each part of the EMO all at once, detecting any problems and reporting them in their respective index.
-The highest priority errors will be sent as 0, and then 1, 2, etc. Documentation on what each of these error codes mean is in the google drive and will have to be implemented
-on the Pi side based on what is held in the array. 
-*/
-char errorHexBits[] = {'F', 'F', 'F', 'F', 'F', 'F'};
-//index 0 = 48V Monitor 4 indicies
-//index 1 = Battery Temp, 4 indicies
-//index 2 = Voltage Converter Temp, 4 indicies
-//index 3 = Box Temp, 4 indicies
-//index 4 = Gyroscope, 8 indicies
-//index 5 = Accelerometer, 8 indices
-String errorString;
+
+#define OK diagnostic_msgs::DiagnosticStatus::OK;
+#define WARN diagnostic_msgs::DiagnosticStatus::WARN;
+#define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
+#define STALE diagnostic_msgs::DiagnosticStatus::STALE;
 
 ros::NodeHandle nh;
-std_msgs::String str_data;
-ros::Publisher sensordata("sensordata", &str_data);
+
+std_msgs::Float64 boxTemp_data;
+ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
+
+geometry_msgs::Vector3 angular_velocity;
+ros::Publisher imuPub("imu_pub",&angular_velocity);
+
+sensor_msgs::BatteryState voltage_msg;
+ros::Publisher voltagePub("voltage_pub", &voltage_msg);
+
+diagnostic_msgs::DiagnosticStatus dia_imu;
+ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
+
+//diagnostic_msgs::DiagnosticArray dia_array;
+//ros::Publisher diagnosticPub("diagnostic_pub", &dia_array);
+
+diagnostic_msgs::KeyValue box_key;
+diagnostic_msgs::KeyValue imu_key;
 
 
+//diagnostic_msgs::KeyValue battery_key;
+//ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
+
+
+char errorCode;
 
 // method that updates the errorCodes array
 //void updateErrorCode(std::string newError);
@@ -64,20 +76,31 @@ ros::Publisher sensordata("sensordata", &str_data);
 
 void setup() {
   // setup
-  Serial.begin(9600);
+  //Serial.begin(9600);
   delay(10);
-  digitalWrite(RED, HIGH);
-  digitalWrite(BLUE, LOW);
-  digitalWrite(GREEN, HIGH);
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(echoPinN, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinE, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinS, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinW, INPUT); // Sets the echoPin as an INPUT
+  pinMode(voltagePin, INPUT); 
   
+  nh.initNode();
+  nh.advertise(boxTempPub);
+  nh.advertise(imuPub);
+  nh.advertise(voltagePub);
+
+  nh.advertise(diaImuPub);
+
+  dia_imu.name = "Gyroscope";
+  //dia_imu.values_length = 2;
+
+
+
 }
 
 void loop() {
+
   String sensorData = gyroscopeData() + accelerometerData() + boxTemperatureData();
   for (int i = 0; i < 7; i++) {
     errorString += errorHexBits[i];
@@ -103,20 +126,73 @@ String accelerometerData() {
   curAcelOutY = expFilter(alphaAcel, acelOutY, curAcelOutY);
   curAcelOutZ = expFilter(alphaAcel, acelOutZ, curAcelOutZ);
 
+  delay(50);
+  boxTemp_data.data = boxTemperatureData();
+  boxTempPub.publish(&boxTemp_data);  
+  gyroscopeData();
+  imuPub.publish(&angular_velocity);
+  voltageSensorData();
+  voltagePub.publish(&voltage_msg);
+
+  // diagnostic update
+
+  dia_imu.values[0] = imu_key;
+  //dia_array.st_status = dia_imu;
+  
+  // diagnostic publish
+  diaImuPub.publish(&dia_imu);
+  diagnosticPub.publish(&dia_array);
+
+  /*
+  dia_array.status[0] = diagnostic_msg;
+  diagnostic_msg.level = WARN;
+  dia_array[1].st_status = diagnostic_msg;
+  diagnosticPub.publish(&dia_array);
+  */
+  nh.spinOnce(); 
+  
+  //Serial.println(sensorData);
+}
+
+
   acelOutX = curAcelOutX;
   acelOutY = curAcelOutY;
   acelOutZ = curAcelOutZ;
 
+
   delay(50);
 
   return  String(curAcelOutX) + String(curAcelOutY) + String(curAcelOutZ);
+
+float thermistorData(int pin){
+  int ThermistorPin = 0;
+  int Vo;
+  float R1 = 10000;
+  float logR2, R2, T;
+  float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+  Vo = analogRead(pin);
+  R2 = R1 * (1023.0 / (float)Vo - 1.0);
+  logR2 = log(R2);
+  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
+  T = T - 273.15;
+  T = (T * 9.0)/ 5.0 + 32.0; 
+
+  //Serial.print("Temperature: "); 
+  //Serial.print(T);
+  //Serial.println(" C");
+
 }
 
 
-String gyroscopeData() {
+void gyroscopeData() {
+  
   if (!IMU.begin()) {
-    errorHexBits[4] = 'E';
+    //errorCode = 'E';
+    imu_key.key = "Disconnect";
+    imu_key.value = "E";
+    dia_imu.level = STALE;
   }
+  
   if (IMU.gyroscopeAvailable()) {
     IMU.readAcceleration(curAcelX, curAcelY, curAcelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
   }
@@ -127,175 +203,98 @@ String gyroscopeData() {
 
   acelX = curAcelX;
   acelY = curAcelY;
-
-  String xString = stringPadding(3, String(map(curAcelX*100, -100, 100, 0, 360)));
-  String yString = stringPadding(3, String(map(curAcelY*100, -100, 100, 0, 360)));
-
+  angular_velocity.x = curAcelXmap;
+  angular_velocity.y = curAcelYmap;
+  
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
-    errorHexBits[4] = '0';
+    //error = '0';
+    dia_imu.message = "Roll over emergency";
+    dia_imu.level = ERROR;
+    //roll over emergency
+    
   }
   else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
   {
-    errorHexBits[4] = '1';
+    //error = '1';
+
+    dia_imu.message = "Roll over warning";
+
+    dia_imu.level = WARN;
+    //roll over warning
   }
-  
-  delay(50);
+  else{
+
+    dia_imu.message = "All Good";
+    dia_imu.level = OK;
+    //All good
+  }
+  imu_key.key = ("angular velocity x: ");
+  imu_key.value = "temp";
 
   return xString + yString;
+
+  delay(50);
+
 }
 
 
-String boxTemperatureData() {
+float boxTemperatureData() {
   if (HTS.begin()){
     float currTemp = HTS.readTemperature();
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
-    String temp_reading = (String)(currTemp * 10);
+    //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
+    box_key.key = "All Good";
+    box_key.value = "F";
     if (currTemp < 0) {
-      errorHexBits[3] = '2';
+      //errorHexBits[3] = '2';
+      box_key.key = "Underheat emergency";
+      box_key.value = "2";
     }
     else if (currTemp < 10) {
-      errorHexBits[3] = '3';
+      //errorHexBits[3] = '3';
+      box_key.key = "Underheat warning";
+      box_key.key = "3";
     }
     if (currTemp > 60) {
-      errorHexBits[3] = '1';
+      //errorHexBits[3] = '1';
+      box_key.key = "Overheat warning";
+      box_key.value = "1";
     }
     else if (currTemp > 70) {
-      errorHexBits[3] = '0';
+      //errorHexBits[3] = '0';
+      box_key.key = "Overheat emergency";
+      box_key.value = "0";
     }
     // Returns the temperature
-    return temp_reading.substring(0, 3);
+    //return temp_reading.substring(0, 3);
+    return(currTemp);
+
   }
-  errorHexBits[3] = 'E';
-}
+  //errorHexBits[3] = 'E';
+  box_key.key = "Disconnect";
+  box_key.value = "E";
 
-String ultrasonicData() {
-  // Clears the trigPin condition
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  longD = "";
-
-  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinN, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(alphaUltra, duration, curDuration);
   
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
+}
+
+
+void voltageSensorData() {
+  int sensorValue = analogRead(A0);
+  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  float voltage = map(sensorValue, 0, 1023, 0, 3.3);
+  float batteryVoltage = map(voltage, 0, 3.3, 0, 53);
   
-  delay(50);// everthing below does not work unless all sensors are connected
-/*
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinE, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);
-
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinS, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);
-
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  curDuration = pulseIn(echoPinW, HIGH);
-  curDuration = ( curDuration * 0.034 ) / 2; // Speed of sound wave divided by 2 (go and back)
-  curDuration = expFilter(0.3, duration, curDuration);
-  if (curDuration < 31) {
-    errorHexBits[6] = '0';
-  }
-  else if ((curDuration > 31) && (curDuration < 62)) {
-    errorHexBits[6] = '1';
-  }
-  distance = (String)curDuration;
-  longD += stringPadding(4, distance);
-  duration = curDuration;
-  
-  delay(50);
-*/
-
-  return longD; //note to self: check whether it is necessary or not to have a 50 ms delay after each of the 4 readings. Also, this will not run without all 4 sensors connected.
-}
-/*
-String busMonitorData() {
+  voltage_msg.voltage = batteryVoltage;
 
 }
 
-String batteryTempData() {
-
-}
-
-String voltageConverterTempData() {
-
-}
-
-String GPSData() {
-
-}
-
-String getErrorCode() {
-
-}
-*/
-
-String stringPadding(int requiredDigits, String value) { //Fix to move negative sign to front of value
-  int diff = requiredDigits - value.length();
-  while (diff > 0) {
-    value = "0" + value;
-    diff = diff - 1;
-  }
-  return value;
-}
 
 // test for different sensors
 // use this within each method for the sensors
-double expFilter(double alpha, double prevReading, double curReading){
+double expFilter(double alpha, double prevReading, double curReading){ 
   // Serial.println(alpha);
-  /*
-  if (curReading < 0) {
-    return -( (alpha * curReading) + ((1 - alpha) * prevReading) );
-  }
-  */
-  
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
+
