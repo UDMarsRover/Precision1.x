@@ -73,7 +73,6 @@ char errorCode;
 void setup() {
   // setup
   //Serial.begin(9600);
-  delay(10);
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
   pinMode(echoPinN, INPUT); // Sets the echoPin as an INPUT
   pinMode(echoPinE, INPUT); // Sets the echoPin as an INPUT
@@ -90,13 +89,12 @@ void setup() {
 
   dia_imu.name = "Gyroscope";
   //dia_imu.values_length = 2;
-
+  
 
 
 }
 
 void loop() {
-  delay(50);
   boxTemp_data.data = boxTemperatureData();
   boxTempPub.publish(&boxTemp_data);  
   gyroscopeData();
@@ -106,12 +104,9 @@ void loop() {
 
   // diagnostic update
 
-  dia_imu.values[0] = imu_key;
-  //dia_array.st_status = dia_imu;
   
   // diagnostic publish
   diaImuPub.publish(&dia_imu);
-  diagnosticPub.publish(&dia_array);
 
   /*
   dia_array.status[0] = diagnostic_msg;
@@ -191,8 +186,8 @@ void gyroscopeData() {
   }
   imu_key.key = ("angular velocity x: ");
   imu_key.value = "temp";
+  #define diagnostic_updater._diagnostic_status_wrapper.DiagnosticStatusWrapper.add(dia_imu,imu_key.key,imu_key.value);	
 
-  delay(50);
 }
 
 
