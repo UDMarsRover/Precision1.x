@@ -66,14 +66,14 @@ void loop() {
     dia_temp.level = ERROR;
   }
   
-  temp_key.value = "T";
+  temp_key.value[0] = T;
 
   diagnosticPub.publish(&dia_temp);
 
- //temperature_msg.temperature = T; 
+  //temperature_msg.temperature = T; 
 
- //temperature_pub.publish(&temperature_msg);
- //tempNode.spinOnce();
+  //batteryTemperature_pub.publish(&temperature_msg);
+  //tempNode.spinOnce();
   
   delay(500);
 }
@@ -107,7 +107,7 @@ void voltageConverterTempData() {
     dia_temp.level = ERROR;
   }
   
-  temp_key.value = "T";
+  temp_key.value[0] = T;
 
   diagnosticPub.publish(&dia_temp);
 
