@@ -1,4 +1,9 @@
 
+
+#ifndef MoogMotorStatusWords_h
+#define MoogMotorStatusWords_h
+
+
 #define okSTAT    0b0 // Need To Set
 #define warnSTAT  0b0 // Need To Set
 #define errorSTAT 0b0 // Need To Set
@@ -8,6 +13,7 @@ struct errorCode {
   int code;
 };
 
+/*
 //=================================================//
 //          Define Status Word 0 Values            //
 //=================================================//
@@ -49,14 +55,18 @@ errorCode adbBad        = {"ADB Bad Checksum",        0b0000001000000000};  //0x
 errorCode watchdogEvent = {"Watchdog Event",          0b0000000100000000};  //0x0100
 errorCode i2cRunning    = {"I2C Running Error",       0b0000000010000000};  //0x0080
 errorCode ethernetError = {"ADB Bad Checksum",        0b0000000001000000};  //0x0040
-errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000100000};  //0x0020
-errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000010000};  //0x0010
-errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000001000};  //0x0008
-errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000000100};  //0x0004
-errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000000010};  //0x0002
-errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000000001};  //0x0001
+//errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000100000};  //0x0020
+//errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000010000};  //0x0010
+//errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000001000};  //0x0008
+//errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000000100};  //0x0004
+//errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000000010};  //0x0002
+//errorCode adbBad        = {"ADB Bad Checksum",        0b0000000000000001};  //0x0001
 
 
 //=================================================//
 //          Define Status Word 3 Values            //
 //=================================================//
+
+
+*/
+#endif

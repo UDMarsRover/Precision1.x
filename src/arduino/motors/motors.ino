@@ -1,5 +1,5 @@
 #include "HardwareSerial.h"
-#include "SoftwareSerial.h"
+//#include "SoftwareSerial.h"
 #include "UDMRTDrivetrain.h"
 #include <ros.h>
 #include <ros/time.h>
@@ -16,9 +16,9 @@ float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
-int numberOfMotors = 4;
-int driveStatus[4];
-int rightMotors[] = {3,4};
+int numberOfMotors = 5;
+int* driveStatus;
+int rightMotors[] = {3,4,5};
 int leftMotors[] = {1,2};
 int mid = 2;
 int led = 7;
@@ -31,18 +31,19 @@ UDMRTDrivetrain driveTrain = UDMRTDrivetrain(numberOfMotors, &Serial1);
 
 std_msgs::String currentDriveGear;
 diagnostic_msgs::DiagnosticStatus currentDriveStatus;
-ros::NodeHandle driverNode;
-ros::Publisher DriveGear("DriveGear", &currentDriveGear);
-ros::Publisher DriveError("DriveStatus", &currentDriveStatus);
+//ros::NodeHandle driverNode;
+//ros::Publisher DriveGear("DriveGear", &currentDriveGear);
+//ros::Publisher DriveError("DriveStatus", &currentDriveStatus);
 
+/*
 void runTankDrive(geometry_msgs::Accel command){
   float kmh = command.linear.x;     // km/h
   float ds = command.angular.x;     // deg/sec
   if(driveTrain.drive(kmh, ds, acceleration)) {
-    driverNode.loginfo("Running Tankd Drive ...");
-    currentDriveGear.data = "D";
+    //driverNode.loginfo("Running Tankd Drive ...");
+    //currentDriveGear.data = "D";
   } else {
-    driverNode.loginfo("!!! Tank Drive Error !!!");
+    //driverNode.loginfo("!!! Tank Drive Error !!!");
     currentDriveGear.data = "X";
   }
   
@@ -53,83 +54,83 @@ void keyboard_teleop_ros(std_msgs::String msg){
   digitalWrite(led,HIGH);
   if(input == "w"){
     if(driveTrain.drive(linearVelocity, 0, acceleration)) {
-      driverNode.loginfo("Running Forward...");
+      //driverNode.loginfo("Running Forward...");
       currentDriveGear.data = "D";
     } else {
-      driverNode.loginfo("!!! Forward Drive Error !!!");
+      //driverNode.loginfo("!!! Forward Drive Error !!!");
       currentDriveGear.data = "X";
     }
   }
 
   else if (input == "s"){
     if(driveTrain.drive(-linearVelocity, 0, acceleration)) {
-      driverNode.loginfo("Running In Reverse...");
+      //driverNode.loginfo("Running In Reverse...");
       currentDriveGear.data = "D";
     } else {
-      driverNode.loginfo("!!! Reverse Drive Error !!!");
+      //driverNode.loginfo("!!! Reverse Drive Error !!!");
       currentDriveGear.data = "X";
     }
   }
 
   else if (input == "d"){
     if(driveTrain.drive(0, angularVelocity, acceleration)) {
-      driverNode.loginfo("Turning Right...");
+      //driverNode.loginfo("Turning Right...");
       currentDriveGear.data = "D";
     } else {
-      driverNode.loginfo("!!! Right Drive Error !!!");
+      //driverNode.loginfo("!!! Right Drive Error !!!");
       currentDriveGear.data = "X";
     }
   }
 
   else if (input == "a"){
     if(driveTrain.drive(0, -angularVelocity, acceleration)) {
-      driverNode.loginfo("Turning Left...");
+      //driverNode.loginfo("Turning Left...");
       currentDriveGear.data = "D";
     } else {
-      driverNode.loginfo("!!! Left Drive Error !!!");
+      //driverNode.loginfo("!!! Left Drive Error !!!");
       currentDriveGear.data = "X";
     }
   }
 
   else if(input == "e"){
     if(driveTrain.drive(0, 0, acceleration)) {
-      driverNode.loginfo("Stopping...");
+      //driverNode.loginfo("Stopping...");
       currentDriveGear.data = "D";
     } else {
-      driverNode.loginfo("!!! Stop Drive Error !!!");
+      //driverNode.loginfo("!!! Stop Drive Error !!!");
       currentDriveGear.data = "X";
     }
   }
 
   else if (input == "q"){
     driveTrain.setup(leftMotors, rightMotors);
-    driverNode.loginfo("Startup...");
+    //driverNode.loginfo("Startup...");
   }
 
   else if (input == "p"){
     driveTrain.setGear(PARK);
-    driverNode.loginfo("Break Engaged..");
+    //driverNode.loginfo("Break Engaged..");
     currentDriveGear.data = "P";
   }
 
   else if (input == "x"){
     driveTrain.ESHUTDOWN();
-    driverNode.loginfo("ESHUTDOWN..");
+    //driverNode.loginfo("ESHUTDOWN..");
   }
 
   else if (input == "n"){
     driveTrain.setGear(NEUTRAL);
-    driverNode.loginfo("In Nutural...");
+    //driverNode.loginfo("In Nutural...");
     currentDriveGear.data = "N";
     
   }
 
   else if (input == "r"){
     driveTrain.reset();
-    driverNode.loginfo("Reseting Tags");
+    //driverNode.loginfo("Reseting Tags");
   }
   
-  DriveGear.publish(&currentDriveGear);
+  //DriveGear.publish(&currentDriveGear);
   
   digitalWrite(led,LOW);
 }
@@ -137,32 +138,40 @@ void keyboard_teleop_ros(std_msgs::String msg){
 ros::Subscriber<std_msgs::String> commandsIn("DriveCommand", &keyboard_teleop_ros);
 ros::Subscriber<geometry_msgs::Accel> velocityIn("DriveVelocity", &runTankDrive);
 
-
+*/
 void setup() {
 
-  //Serial.begin(9600); //Start a serial to take in keyboard commands
+  Serial.begin(9600); //Start a serial to take in keyboard commands
 
-  driverNode.initNode();
-  driverNode.advertise(DriveGear);
-  driverNode.advertise(DriveError);
-  driverNode.subscribe(commandsIn);
-  driverNode.subscribe(velocityIn);
+  delay(100);
+  Serial.println("Hi Setup 1");
+
+  //driverNode.initNode();
+  //driverNode.advertise(DriveGear);
+  //driverNode.advertise(DriveError);
+  //driverNode.subscribe(commandsIn);
+  //driverNode.subscribe(velocityIn);
   
   pinMode(led,OUTPUT);
   currentDriveStatus.name = "Drivetrain Software";
   currentDriveStatus.message = "Drivetrain Motors Status";
   currentDriveStatus.hardware_id = "Arduino Mega - Drivetrain";
 
+  driveTrain.setup(leftMotors, rightMotors);
+
 }
 
 void loop() {
-  driverNode.spinOnce();
+  //driverNode.spinOnce();
 
-  driveStatus = *driveTrain.getStatus();
-  fautedDrive = 0;
+  //driveStatus = *driveTrain.getStatus();
+  //fautedDrive = 0;
   error = false;
   warn = false;
   ok = false;
+
+  Serial.print(driveTrain.drive(10, 0, acceleration));
+  Serial.println("Hi Start");
 
   for (int i = 1; i <= sizeof(driveStatus); i ++) {
 
@@ -186,11 +195,9 @@ void loop() {
     currentDriveStatus.level = 0;
   }
 
+  //DriveError.publish(&currentDriveStatus);
 
-
-  DriveError.publish(&currentDriveStatus);
-
-  //delay(50);
+  delay(50);
 
 }
 

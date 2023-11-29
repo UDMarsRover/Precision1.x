@@ -11,8 +11,8 @@
 
 MoogMotor::MoogMotor(int id, HardwareSerial* serial)
 {
-  serial = serial;
-  serial->setTimeout(50); // In Milliseconds
+  MoogMotor::serial = serial;
+  //serial->setTimeout(50); // In Milliseconds
   id = id;
 }
 
@@ -26,22 +26,23 @@ void MoogMotor::enable(){
   sendCommand("X");        // Send Stop Request'
 }
 
-bool MoogMotor::sendCommand( String command){
+bool MoogMotor::sendCommand(String command){
+  
   char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
-  serial->print(sendAddr);
-  serial->print(command);
-  serial->print(" ");
+  MoogMotor::serial->print(sendAddr);
+  MoogMotor::serial->print(command);
+  MoogMotor::serial->print(" ");
 }
 
 void MoogMotor::statusCheck(){
-  statusCode = getData("RW(0) ");
-  statusCode1 = getData("RW(1) ");
-  statusCode2 = getData("RW(2) ");
-  statusCode3 = getData("RW(3) ");
-  statusCode4 = getData("RW(4) ");
-  statusCode5 = getData("RW(5) ");
-  statusCode6 = getData("RW(6) ");
-  statusCode7 = getData("RW(7) ");
+  statusCode = getData("RW(0)");
+  statusCode1 = getData("RW(1)");
+  statusCode2 = getData("RW(2)");
+  statusCode3 = getData("RW(3)");
+  statusCode4 = getData("RW(4)");
+  statusCode5 = getData("RW(5)");
+  statusCode6 = getData("RW(6)");
+  statusCode7 = getData("RW(7)");
 }
 
 int MoogMotor::getData(char command[]){
@@ -60,9 +61,9 @@ bool MoogMotor::isConnected(){
 }
 
 bool MoogMotor::resetStatusCodes(){
-  sendCommand("ZS ");       // Clear All Warning Tags
+  sendCommand("ZS");       // Clear All Warning Tags
   //park();
-  return statusCode == DRIVEREADY;
+  return statusCode == 1;
 }
 
 void MoogMotor::stop()
@@ -84,16 +85,18 @@ void MoogMotor::ESHUTDOWN(){
 boolean MoogMotor::setVelocity(float rpm, float acceleration){
   // RPM Can only be from -1 to 1
     
-  if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
+  //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
     //rpm = rpm * RPMMAX;
     acceleration = acceleration * ACCMAX;
-
-    sendCommand("MV");     //Set to motor velocity mode
-    sendCommand("VT="+String(rpm));       //Set the rpm
-    sendCommand("ADT="+String(acceleration));      //Set the acceration/deceleration
-    sendCommand("G");      //Go Command
+    
+    
+    MoogMotor::sendCommand("MV");     //Set to motor velocity mode
+    MoogMotor::sendCommand("VT="+String(rpm));       //Set the rpm
+    MoogMotor::sendCommand("ADT="+String(acceleration));      //Set the acceration/deceleration
+    MoogMotor::sendCommand("G");      //Go Command
+  
     return true;
-  }
+  //}
   return false;
 }
 

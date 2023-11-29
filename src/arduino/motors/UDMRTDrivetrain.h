@@ -34,10 +34,12 @@
 
   private:
     MoogMotor motor[13];
-    int leftMotors[6];
-    int rightMotors[6];
+    int* leftMotors;
+    int* rightMotors;
     bool sendCommand(String command, int id = 0);
     bool rosSetup;
+    HardwareSerial *serial = NULL;
+    int numberOfMotors = 0;
 
 };
 
