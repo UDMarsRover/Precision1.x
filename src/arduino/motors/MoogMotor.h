@@ -42,6 +42,7 @@ class MoogMotor
     bool resetStatusCodes();
     int getData(char[]);
     bool sendCommand(String command);
+    int id;
     
   private:
     unsigned int statusCode:17;
@@ -54,7 +55,7 @@ class MoogMotor
     unsigned int statusCode7:17;
     HardwareSerial *serial = NULL;
     bool connected;
-    int id;
+    
   
  };
 #endif

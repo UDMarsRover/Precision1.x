@@ -16,10 +16,10 @@ float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
-int numberOfMotors = 5;
+int numberOfMotors = 6;
 int* driveStatus;
-int rightMotors[] = {3,4,5};
-int leftMotors[] = {1,2};
+int rightMotors[] = {4,5,6};
+int leftMotors[] = {1,2,3};
 int mid = 2;
 int led = 7;
 bool ok = false;
@@ -170,7 +170,7 @@ void loop() {
   warn = false;
   ok = false;
 
-  Serial.print(driveTrain.drive(10, 0, acceleration));
+  Serial.print(driveTrain.drive(50000000, 0, acceleration));
   Serial.println("Hi Start");
 
   for (int i = 1; i <= sizeof(driveStatus); i ++) {

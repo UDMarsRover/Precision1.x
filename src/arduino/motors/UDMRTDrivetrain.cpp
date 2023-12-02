@@ -15,13 +15,13 @@ void UDMRTDrivetrain::setup(int leftMotors[], int rightMotors[]){
   UDMRTDrivetrain::rightMotors = rightMotors;
 
     
-  int delayTime = 10; //in ms
+  int delayTime = 500; //in ms
   motor[0] = MoogMotor(0, serial);
   sendCommand("ECHO");
   
   
   for(int i = 1 ; i <= numberOfMotors; i ++){
-    motor[i] = MoogMotor(i, serial);
+    UDMRTDrivetrain::motor[i] = MoogMotor(i, serial);
     String setAddress = "SADDR" + String(i);
     sendCommand(setAddress);
     delay(delayTime);
@@ -29,6 +29,7 @@ void UDMRTDrivetrain::setup(int leftMotors[], int rightMotors[]){
     delay(delayTime);
     sendCommand("SLEEP",i);
     delay(delayTime);
+    
   }
   
   sendCommand("WAKE");
@@ -76,19 +77,28 @@ bool UDMRTDrivetrain::drive(float kmPerHour, float degPerSecond, float accelerat
   bool good = true;
 
   
-  good = good && motor[0].setVelocity(ldc, acceleration);
-  Serial.println(ldc);
+  //good = good && motor[0].setVelocity(ldc, acceleration);
+  Serial.println(sizeof(motor));
 
-  /*
+  
   // Set every left motor to the left speed
-  for (int i = 1; i <= sizeof(leftMotors); i ++){
-    good = good && motor[0].setVelocity(ldc, acceleration);
+  for (int i = 0; i <= sizeof(leftMotors); i ++){
+    Serial.print(leftMotors[i]);
+    Serial.print(" ");
+    Serial.println(UDMRTDrivetrain::motor[leftMotors[i]].id);
+    good = good && UDMRTDrivetrain::motor[leftMotors[i]].setVelocity(ldc, acceleration);
   }
+  
+  
   // Set every right motor to the rigth speed
-  for (int i = 1; i <= sizeof(rightMotors); i ++){
-    good = good && motor[0].setVelocity(rdc, acceleration);
+  for (int i = 0; i <= sizeof(rightMotors); i ++){
+    //Serial.print(rightMotors[i]);
+    //Serial.print(" ");
+    //Serial.println(motor[rightMotors[i]].id);
+    //good = good && motor[rightMotors[i]].setVelocity(rdc, acceleration);
   }
-  */
+  
+  
   // Return true if executied properly, else return false
   return good;
 }

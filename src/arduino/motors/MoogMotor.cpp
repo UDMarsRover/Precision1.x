@@ -13,7 +13,7 @@ MoogMotor::MoogMotor(int id, HardwareSerial* serial)
 {
   MoogMotor::serial = serial;
   //serial->setTimeout(50); // In Milliseconds
-  id = id;
+  MoogMotor::id = id;
 }
 
 MoogMotor::MoogMotor(){}
@@ -29,6 +29,7 @@ void MoogMotor::enable(){
 bool MoogMotor::sendCommand(String command){
   
   char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
+  Serial.println(MoogMotor::id);
   MoogMotor::serial->print(sendAddr);
   MoogMotor::serial->print(command);
   MoogMotor::serial->print(" ");
