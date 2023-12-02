@@ -9,76 +9,67 @@
 #include "MoogMotor.h"
 
 
-MoogMotor::MoogMotor(HardwareSerial* associatedSerial)
+MoogMotor::MoogMotor(int id, HardwareSerial* serial)
 {
-  serial = associatedSerial;
-  serial->setTimeout(50); // In Milliseconds
+  MoogMotor::serial = serial;
+  //serial->setTimeout(50); // In Milliseconds
+  MoogMotor::id = id;
+}
+
+MoogMotor::MoogMotor(){}
+
+void MoogMotor::enable(){
+  sendCommand("MDT");
+  sendCommand("MDB");
+  sendCommand("BRKSRV");   // Engage Break When not Moving
+  sendCommand("G");        // Go Command to turn on coils
+  sendCommand("X");        // Send Stop Request'
+}
+
+bool MoogMotor::sendCommand(String command){
   
-  //initSerial();
+  char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
+  Serial.println(MoogMotor::id);
+  MoogMotor::serial->print(sendAddr);
+  MoogMotor::serial->print(command);
+  MoogMotor::serial->print(" ");
 }
 
-boolean MoogMotor::setVelocity(float rpm, float acceleration){
-    // RPM Can only be from -1 to 1
-    
-    //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
-        
-
-        //vel = rpm * (32768 / 8000) * 65536;
-        rpm = rpm * 4423680;   // Motor ranged from +- 2,147,483,647
-        //rpm = rpm * 32768;
-        
-        acceleration = int(acceleration * 1000); //Range 0 -> 2147483647
-        serial->print("MV ");     //Set to motor velocity mode
-        serial->print("VT="+String(rpm)+" ");       //Set the rpm
-        serial->print("ADT=" + String(acceleration) + " ");      //Set the acceration/deceleration
-        serial->print("G ");      //Go Command
-        
-        //return true;                //Retrun a true to confirm operation complete
-    //}
-    //return false;                   //Reteun a false if there is an error
+void MoogMotor::statusCheck(){
+  statusCode = getData("RW(0)");
+  statusCode1 = getData("RW(1)");
+  statusCode2 = getData("RW(2)");
+  statusCode3 = getData("RW(3)");
+  statusCode4 = getData("RW(4)");
+  statusCode5 = getData("RW(5)");
+  statusCode6 = getData("RW(6)");
+  statusCode7 = getData("RW(7)");
 }
 
-boolean MoogMotor::setTorque(float torque){
-    if(abs(torque) <= 1){
-        torque = int(torque * 32767.0);//Ranges from +- 32767
-        
-        serial->print("MT \r");     //Set motor to torque mode
-        serial->print("T=");        //Set the torque value
-        serial->print(torque);
-        serial->print("\r");
-        
-        
-        serial->print("G \r");     //Go command
-        delay(1);
-        return true;
-    }
-    return false;
-    
+int MoogMotor::getData(char command[]){
+  sendCommand(command);
+  if (serial->available()) connected = true;
+  else connected = false;
+  return int(serial->parseInt());
 }
 
-boolean MoogMotor::setPosition(float value, float velocity, float acceleration){
-    
-    if(abs(value) <= 1 && 0 <= acceleration <=1){
-        value = int(value * 32768.0);   // Motor ranged from +- 2147483647
-        acceleration = int(acceleration * 2147483647.0); //Range 0 -> 2147483647
-        
-        
-        serial->print("MP ");     //Set to motor position mode
-        serial->print("VT=");       //Set the rpm
-        serial->print(velocity);
-        serial->print(" ");
-        serial->print("ADT=");      //Set the acceration/deceleration
-        serial->print(acceleration);
-        serial->print(" ");
-        serial->print("PT=");
-        serial->print(value);       //Set the position
-        serial->print(" ");
-        
-        serial->print("G ");      //Go Command
-        delay(1);
-        return true;                //Retrun a true to confirm operation complete
-    }
-    return false;
+unsigned int MoogMotor::getStatusCode(){
+  return MoogMotor::statusCode;
+}
+
+bool MoogMotor::isConnected(){
+  return MoogMotor::connected;
+}
+
+bool MoogMotor::resetStatusCodes(){
+  sendCommand("ZS");       // Clear All Warning Tags
+  //park();
+  return statusCode == 1;
+}
+
+void MoogMotor::stop()
+{
+  sendCommand("X"); //Standard stop command
 }
 
 /* ESHUTDOWN
@@ -87,83 +78,67 @@ boolean MoogMotor::setPosition(float value, float velocity, float acceleration){
  * command WILL NOT ENGAGE BREAKING. To do a hard stop with breaking, call the stop() function.
  */
 void MoogMotor::ESHUTDOWN(){
-  serial->print("S ");    // Hard Stop
-  serial->print("OFF ");  // Turn Coils Off
-  serial->print("B(0,0)=0 ");
+  sendCommand("S");    // Hard Stop
+  sendCommand("OFF");  // Turn Coils Off
+  sendCommand("B(0,0)=0");
 }
 
-void MoogMotor::stop()
-{
-  serial->print("X "); //Standard stop command
-}
-
-void MoogMotor::setUp()
-{
-
-  serial->begin(9600);
-  //serial->write("AMPS=1000 ");
-  serial->print("EIGN(2) ");  // Clear Limits
-  serial->print("EIGN(3) ");  // Clear Limits
-  serial->print("ZS ");       // Clear All Warning Tags
-  serial->print("SLD ");
-
-  park();
-
-  statusCheck();
-}
-
-void MoogMotor::drive(){
-  serial->print("MDT ");
-  serial->print("MDB ");
-  serial->print("BRKSRV ");   // Engage Break When not Moving
-  serial->print("G ");        // Go Command to turn on coils
-  serial->print("X ");        // Send Stop Request'
-}
-
-void MoogMotor::neutral(){
-  serial->print("BRKRLS ");   // Disengage breaking system
-  serial->print("OFF ");       // Turn Coils Off
+boolean MoogMotor::setVelocity(float rpm, float acceleration){
+  // RPM Can only be from -1 to 1
+    
+  //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
+    //rpm = rpm * RPMMAX;
+    acceleration = acceleration * ACCMAX;
+    
+    
+    MoogMotor::sendCommand("MV");     //Set to motor velocity mode
+    MoogMotor::sendCommand("VT="+String(rpm));       //Set the rpm
+    MoogMotor::sendCommand("ADT="+String(acceleration));      //Set the acceration/deceleration
+    MoogMotor::sendCommand("G");      //Go Command
   
+    return true;
+  //}
+  return false;
 }
 
-void MoogMotor::park(){
-  serial->print("BRKSRV ");   // Engage Break When not Moving
-  serial->print("G ");        // Go Command to turn on coils
-  serial->print("X ");        // Send Stop Request
+boolean MoogMotor::setTorque(float torque){
+  if(abs(torque) <= 1){
+    torque = torque * TRQMAX;
+    
+    sendCommand("MT");     //Set motor to torque mode
+    sendCommand("T=" + String(torque));        //Set the torque value
+    sendCommand("G");     //Go command
+    
+    return true;
+  }
+  return false;
+}
+
+boolean MoogMotor::setPosition(float position, float velocity, float acceleration){
   
+  if(abs(position) <= 1 && 0 <= acceleration <=1){
+    position = position * POSMAX;         
+    acceleration = acceleration * ACCMAX; 
+    
+    
+    sendCommand("MP");                          //Set to motor position mode
+    sendCommand("VT=" + String(velocity));      //Set the rpm
+    sendCommand("ADT=" + String(acceleration)); //Set the acceration/deceleration
+    sendCommand("PT=" + String(position));      //Set the position
+    sendCommand("G");                           //Go Command
+    return true;                                //Retrun a true to confirm operation complete
+  }
+  return false;
 }
 
-int MoogMotor::getData(char command[]){
-  serial->print(command);
-  if (serial->available()) connected = true;
-  else connected = false;
-  return int(serial->parseInt());
+void MoogMotor::holdOFF(){
+  sendCommand("BRKRLS");   // Disengage breaking system
+  sendCommand("OFF");       // Turn Coils Off
 }
 
-
-
-void MoogMotor::statusCheck(){
-  statusCode = getData("RW(0) ");
-  statusCode1 = getData("RW(1) ");
-  statusCode2 = getData("RW(2) ");
-  statusCode3 = getData("RW(3) ");
-  statusCode4 = getData("RW(4) ");
-  statusCode5 = getData("RW(5) ");
-  statusCode6 = getData("RW(6) ");
-  statusCode7 = getData("RW(7) ");
-}
-
-bool MoogMotor::isConnected(){
-  return MoogMotor::connected;
-}
-
-unsigned int MoogMotor::getStatusCode(){
-  return MoogMotor::statusCode;
-}
-
-bool MoogMotor::resetStatusCodes(){
-  serial->print("ZS ");       // Clear All Warning Tags
-  park();
-  return statusCode == DRIVEREADY;
+void MoogMotor::holdON(){
+  sendCommand("BRKSRV");   // Engage Break When not Moving
+  sendCommand("G");        // Go Command to turn on coils
+  sendCommand("X");        // Send Stop Request
 }
 
