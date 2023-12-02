@@ -8,6 +8,9 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <geometry_msgs/Accel.h>
  
+#define ROVERWIDTH 1.2    // In Meters
+#define WHEELRADIUS 0.254 // In Meters
+#define GEARRATIO 40      // Number of input shaft roations for every output shaft roation
 
 int input;
 float linearVelocity = 15;  //km/h
@@ -26,8 +29,9 @@ bool ok = false;
 bool warn = false;
 bool error = false;
 int faultedDrive = 0;
+int gearRatios[6] = {40,20,40,40,20,40};
 
-UDMRTDrivetrain driveTrain = UDMRTDrivetrain(numberOfMotors, &Serial1);
+UDMRTDrivetrain driveTrain = UDMRTDrivetrain(numberOfMotors, &Serial1, ROVERWIDTH, WHEELRADIUS);
 
 std_msgs::String currentDriveGear;
 diagnostic_msgs::DiagnosticStatus currentDriveStatus;
@@ -157,7 +161,7 @@ void setup() {
   currentDriveStatus.message = "Drivetrain Motors Status";
   currentDriveStatus.hardware_id = "Arduino Mega - Drivetrain";
 
-  driveTrain.setup(leftMotors, rightMotors);
+  driveTrain.setup(leftMotors, rightMotors, gearRatios);
 
 }
 

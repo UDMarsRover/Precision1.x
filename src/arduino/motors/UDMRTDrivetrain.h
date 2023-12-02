@@ -7,9 +7,7 @@
 #define PARK 0
 #define DRIVE 1
 #define NEUTRAL 2
-#define ROVERWIDTH 1      // In Meters
-#define WHEELRADIUS 0.032 // In Meters
-#define GEARRATIO 40      // Number of input shaft roations for every output shaft roation
+
 
 #include "MoogMotor.h"
 #include <ros.h>
@@ -20,11 +18,11 @@
  class UDMRTDrivetrain{
 
   public:
-    UDMRTDrivetrain(int numberOfMotors, HardwareSerial* serialPort);
+    UDMRTDrivetrain(int numberOfMotors, HardwareSerial* serialPort, float roverWidth=1.2, float tireDiameter=0.254);
     void ESHUTDOWN();
     void stop();
     void off();
-    void setup(int leftMotors[], int rightMotors[]);
+    void setup(int leftMotors[], int rightMotors[], int gearRatios[]);
     void setGear(int gear = PARK);
     bool drive(float kmPerHour, float degPerSecond, float acc);
     void rosTankDrive(float kmPerHour, float degPerSecond, float acc);
@@ -36,10 +34,12 @@
     MoogMotor motor[7];
     int* leftMotors;
     int* rightMotors;
-    bool sendCommand(String command, int id = 0);
+    bool sendCommand(String command, int id=0);
     bool rosSetup;
     HardwareSerial *serial = NULL;
     int numberOfMotors;
+    float roverWidth;
+    float tireDiameter;
 
 };
 

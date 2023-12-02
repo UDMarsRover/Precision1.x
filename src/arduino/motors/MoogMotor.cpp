@@ -9,11 +9,12 @@
 #include "MoogMotor.h"
 
 
-MoogMotor::MoogMotor(int id, HardwareSerial* serial)
+MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio)
 {
   MoogMotor::serial = serial;
   //serial->setTimeout(50); // In Milliseconds
   MoogMotor::id = id;
+  MoogMotor::gearRatio = gearRatio;
 }
 
 MoogMotor::MoogMotor(){}
@@ -27,7 +28,6 @@ void MoogMotor::enable(){
 }
 
 bool MoogMotor::sendCommand(String command){
-  
   char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
   Serial.println(MoogMotor::id);
   MoogMotor::serial->print(sendAddr);
@@ -88,11 +88,12 @@ boolean MoogMotor::setVelocity(float rpm, float acceleration){
     
   //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
     //rpm = rpm * RPMMAX;
-    acceleration = acceleration * ACCMAX;
+    //acceleration = acceleration * ACCMAX;
     
+    float eCounts = rpm * REVSPERROTATION * MoogMotor::gearRatio;    // encode counts/min
     
     MoogMotor::sendCommand("MV");     //Set to motor velocity mode
-    MoogMotor::sendCommand("VT="+String(rpm));       //Set the rpm
+    MoogMotor::sendCommand("VT="+String(eCounts));       //Set the rpm
     MoogMotor::sendCommand("ADT="+String(acceleration));      //Set the acceration/deceleration
     MoogMotor::sendCommand("G");      //Go Command
   

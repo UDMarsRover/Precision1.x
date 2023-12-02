@@ -23,7 +23,7 @@ class MoogMotor
  {
   public:
     MoogMotor();
-    MoogMotor(int id, HardwareSerial* associatedSerial);
+    MoogMotor(int id, HardwareSerial* associatedSerial, int gearRatio);
     boolean setVelocity(float rpm, float acceleration);
     boolean setTorque(float torque);
     boolean setPosition(float value,float velocity, float acceleration);
@@ -55,6 +55,7 @@ class MoogMotor
     unsigned int statusCode7:17;
     HardwareSerial *serial = NULL;
     bool connected;
+    int gearRatio;
     
   
  };
