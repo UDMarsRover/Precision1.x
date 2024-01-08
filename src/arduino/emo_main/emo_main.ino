@@ -8,6 +8,7 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/KeyValue.h>
+//#include <DiagnosticStatusWrapper.h>
 
 //Ultrasonic sensor
 #define trigPin 2 //attach pin D3 Arduino to pin Trig of HC-SR04
@@ -37,6 +38,7 @@ double alphaGyro = 0.3;
 #define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
 #define STALE diagnostic_msgs::DiagnosticStatus::STALE;
 
+#define DIAGNOSTIC_STATUS_LENGTH 1
 
 ros::NodeHandle nh;
 
@@ -52,11 +54,11 @@ ros::Publisher voltagePub("voltage_pub", &voltage_msg);
 diagnostic_msgs::DiagnosticStatus dia_imu;
 ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
 
-//diagnostic_msgs::DiagnosticArray dia_array;
-//ros::Publisher diagnosticPub("diagnostic_pub", &dia_array);
+diagnostic_msgs::DiagnosticArray dia_array;
+ros::Publisher diaArrayPub("diaArray_pub", &dia_array);
 
-diagnostic_msgs::KeyValue box_key;
-diagnostic_msgs::KeyValue imu_key;
+//diagnostic_msgs::KeyValue box_key;
+diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
 
 
 //diagnostic_msgs::KeyValue battery_key;
@@ -86,15 +88,15 @@ void setup() {
   nh.advertise(voltagePub);
 
   nh.advertise(diaImuPub);
+  //nh.advertise(diaArrayPub);
 
+  //dia_array.status_length = 1;
+  dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_imu.name = "Gyroscope";
-  //dia_imu.values_length = 2;
-  
-
-
 }
 
 void loop() {
+  delay(10);
   boxTemp_data.data = boxTemperatureData();
   boxTempPub.publish(&boxTemp_data);  
   gyroscopeData();
@@ -103,17 +105,14 @@ void loop() {
   voltagePub.publish(&voltage_msg);
 
   // diagnostic update
-
+  dia_imu.values = imu_key;
+  //dia_array.status[0] = dia_imu;
   
   // diagnostic publish
+  
   diaImuPub.publish(&dia_imu);
+  //diaImuPub.publish(&dia_array);
 
-  /*
-  dia_array.status[0] = diagnostic_msg;
-  diagnostic_msg.level = WARN;
-  dia_array[1].st_status = diagnostic_msg;
-  diagnosticPub.publish(&dia_array);
-  */
   nh.spinOnce(); 
   
   //Serial.println(sensorData);
@@ -142,9 +141,7 @@ float thermistorData(int pin){
 void gyroscopeData() {
   
   if (!IMU.begin()) {
-    //errorCode = 'E';
-    imu_key.key = "Disconnect";
-    imu_key.value = "E";
+    dia_imu.message = "Disconnect";
     dia_imu.level = STALE;
   }
   
@@ -184,10 +181,8 @@ void gyroscopeData() {
     dia_imu.level = OK;
     //All good
   }
-  imu_key.key = ("angular velocity x: ");
-  imu_key.value = "temp";
-  #define diagnostic_updater._diagnostic_status_wrapper.DiagnosticStatusWrapper.add(dia_imu,imu_key.key,imu_key.value);	
-
+  imu_key[0].key = "angular velocity x: ";
+  imu_key[0].value = "temp";
 }
 
 
@@ -197,27 +192,24 @@ float boxTemperatureData() {
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
     //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
-    box_key.key = "All Good";
-    box_key.value = "F";
+    // all good
     if (currTemp < 0) {
       //errorHexBits[3] = '2';
-      box_key.key = "Underheat emergency";
-      box_key.value = "2";
+      // underheat emergency
     }
     else if (currTemp < 10) {
       //errorHexBits[3] = '3';
-      box_key.key = "Underheat warning";
-      box_key.key = "3";
+      // underheat warning
     }
     if (currTemp > 60) {
       //errorHexBits[3] = '1';
-      box_key.key = "Overheat warning";
-      box_key.value = "1";
+      //over heat warning
+
     }
     else if (currTemp > 70) {
       //errorHexBits[3] = '0';
-      box_key.key = "Overheat emergency";
-      box_key.value = "0";
+      // overheat emergency
+      
     }
     // Returns the temperature
     //return temp_reading.substring(0, 3);
@@ -225,8 +217,8 @@ float boxTemperatureData() {
 
   }
   //errorHexBits[3] = 'E';
-  box_key.key = "Disconnect";
-  box_key.value = "E";
+  // disconnect
+
 
   
 }
@@ -241,7 +233,6 @@ void voltageSensorData() {
   voltage_msg.voltage = batteryVoltage;
 
 }
-
 
 // test for different sensors
 // use this within each method for the sensors
