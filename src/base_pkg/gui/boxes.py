@@ -19,7 +19,7 @@ turbo = Turbo(app)
 def before_first_request():
     threading.Thread(target=update_load).start()
     threading.Thread(target=inject_load).start()
-    threading.Thread(target=inject_load2).start()
+    #threading.Thread(target=inject_load2).start()
 
 
 
@@ -153,8 +153,10 @@ def inject_load():
     else:
         status7 = yellow
         
-    
-    return {'speed': status1[0], 'RS': status1[1], 'FD': status1[2], 'Lat': status2[0], 'Roll': status2[1], 'Pitch': status2[2], 'Temp': status3[0], 'OHW': status3[1], 'Pi': status3[2], 'Emo': status4[0], 'load11': status4[1], 'load12': status4[2], 'load13': status5[0], 'load14': status5[1], 'load15': status5[2], 'load16': status6[0], 'load17': status6[1], 'load18': status6[2], 'load19': status7[0], 'load20': status7[1], 'load21': status7[2]}
+    return {'speed': 1, 'RS': 2, 'FD': 3, 'Lat': 4, 'Roll': 5}
+
+
+    #return {'speed': status1[0], 'RS': status1[1], 'FD': status1[2], 'Lat': status2[0], 'Roll': status2[1], 'Pitch': status2[2], 'Temp': status3[0], 'OHW': status3[1], 'Pi': status3[2], 'Emo': status4[0], 'load11': status4[1], 'load12': status4[2], 'load13': status5[0], 'load14': status5[1], 'load15': status5[2], 'load16': status6[0], 'load17': status6[1], 'load18': status6[2], 'load19': status7[0], 'load20': status7[1], 'load21': status7[2]}
 
     #print(str(len(dictOut)))
         
