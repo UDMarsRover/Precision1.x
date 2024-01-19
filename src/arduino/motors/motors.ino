@@ -1,123 +1,131 @@
 #include "HardwareSerial.h"
-#include "MoogMotor.h"
+#include "SoftwareSerial.h"
+#include "UDMRTDrivetrain.h"
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Int16MultiArray.h>
+#include <diagnostic_msgs/DiagnosticStatus.h>
 #include <geometry_msgs/Accel.h>
  
 
 int input;
-float velocity = 0.9;
+float linearVelocity = 15;  //km/h
+float angularVelocity = 10; //deg/sec
 float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
-char rightDriveError[4];
-char leftDriveError[4];
-char driveError[8];
-
+int numberOfMotors = 4;
+int driveStatus[4];
+int rightMotors[] = {3,4};
+int leftMotors[] = {1,2};
+int mid = 2;
 int led = 7;
+bool ok = false;
+bool warn = false;
+bool error = false;
+int faultedDrive = 0;
 
-float roverWidth  = 1;   //meters
-float wheelRad    = 0.032;  //meters
-float gearRatio   = 40;
-float revsperrotate = 4000;
-
-MoogMotor leftDrive = MoogMotor(&Serial2); //Comms for left drive
-MoogMotor rightDrive = MoogMotor(&Serial1); //Comms for right drive
+UDMRTDrivetrain driveTrain = UDMRTDrivetrain(numberOfMotors, &Serial1);
 
 std_msgs::String currentDriveGear;
-std_msgs::String currentDriveError;
+diagnostic_msgs::DiagnosticStatus currentDriveStatus;
 ros::NodeHandle driverNode;
 ros::Publisher DriveGear("DriveGear", &currentDriveGear);
-ros::Publisher DriveError("DriveError", &currentDriveError);
+ros::Publisher DriveError("DriveStatus", &currentDriveStatus);
 
 void runTankDrive(geometry_msgs::Accel command){
   float kmh = command.linear.x;     // km/h
   float ds = command.angular.x;     // deg/sec
-
-  float mpm = (kmh*1000)/60;
-  float dm = ds * 60;
+  if(driveTrain.drive(kmh, ds, acceleration)) {
+    driverNode.loginfo("Running Tankd Drive ...");
+    currentDriveGear.data = "D";
+  } else {
+    driverNode.loginfo("!!! Tank Drive Error !!!");
+    currentDriveGear.data = "X";
+  }
   
-  float rdw = ((mpm + (roverWidth/2) * dm) / wheelRad);   // deg/min
-  float ldw = ((mpm - (roverWidth/2) * dm) / wheelRad);   // deg/min
-
-  float rdc = ((rdw/360) / revsperrotate) * gearRatio;    //counts/min
-  float ldc = ((ldw/360) / revsperrotate) * gearRatio;    //counts/min
-
-  goodr = rightDrive.setVelocity(rdc, acceleration);
-  goodl = leftDrive.setVelocity(-ldc, acceleration);
-  if(goodl && goodr){currentDriveGear.data = "D";}
-
 }
 
 void keyboard_teleop_ros(std_msgs::String msg){
   String input = msg.data;
   digitalWrite(led,HIGH);
   if(input == "w"){
-    goodl = leftDrive.setVelocity(velocity, acceleration);
-    goodr = rightDrive.setVelocity(velocity, acceleration);
-    if(goodl && goodr){driverNode.loginfo("Running Forward");}
-    
+    if(driveTrain.drive(linearVelocity, 0, acceleration)) {
+      driverNode.loginfo("Running Forward...");
+      currentDriveGear.data = "D";
+    } else {
+      driverNode.loginfo("!!! Forward Drive Error !!!");
+      currentDriveGear.data = "X";
+    }
   }
 
   else if (input == "s"){
-    goodl = leftDrive.setVelocity(-velocity,acceleration);
-    goodr = rightDrive.setVelocity(-velocity,acceleration);
-    if(goodl && goodr){driverNode.loginfo("Running Backwards");}
-    currentDriveGear.data = "N";
+    if(driveTrain.drive(-linearVelocity, 0, acceleration)) {
+      driverNode.loginfo("Running In Reverse...");
+      currentDriveGear.data = "D";
+    } else {
+      driverNode.loginfo("!!! Reverse Drive Error !!!");
+      currentDriveGear.data = "X";
+    }
   }
 
   else if (input == "d"){
-    goodl = leftDrive.setVelocity(-velocity,acceleration);
-    goodr = rightDrive.setVelocity(velocity,acceleration);
-    if(goodl && goodr){driverNode.loginfo("Running Left");}
-    currentDriveGear.data = "D";
+    if(driveTrain.drive(0, angularVelocity, acceleration)) {
+      driverNode.loginfo("Turning Right...");
+      currentDriveGear.data = "D";
+    } else {
+      driverNode.loginfo("!!! Right Drive Error !!!");
+      currentDriveGear.data = "X";
+    }
   }
 
   else if (input == "a"){
-    goodl = leftDrive.setVelocity(velocity,acceleration);
-    goodr = rightDrive.setVelocity(-velocity,acceleration);
-    if(goodl && goodr){driverNode.loginfo("Running Right");}
-    currentDriveGear.data = "D";
+    if(driveTrain.drive(0, -angularVelocity, acceleration)) {
+      driverNode.loginfo("Turning Left...");
+      currentDriveGear.data = "D";
+    } else {
+      driverNode.loginfo("!!! Left Drive Error !!!");
+      currentDriveGear.data = "X";
+    }
   }
 
   else if(input == "e"){
-    leftDrive.stop();
-    rightDrive.stop();
-    driverNode.loginfo("Stopping...");
+    if(driveTrain.drive(0, 0, acceleration)) {
+      driverNode.loginfo("Stopping...");
+      currentDriveGear.data = "D";
+    } else {
+      driverNode.loginfo("!!! Stop Drive Error !!!");
+      currentDriveGear.data = "X";
+    }
   }
 
   else if (input == "q"){
-    leftDrive.setUp();
-    rightDrive.setUp();
+    driveTrain.setup(leftMotors, rightMotors);
     driverNode.loginfo("Startup...");
   }
 
   else if (input == "p"){
-    leftDrive.park();
-    rightDrive.park();
+    driveTrain.setGear(PARK);
     driverNode.loginfo("Break Engaged..");
     currentDriveGear.data = "P";
   }
 
   else if (input == "x"){
-    leftDrive.ESHUTDOWN();
-    rightDrive.ESHUTDOWN();
+    driveTrain.ESHUTDOWN();
     driverNode.loginfo("ESHUTDOWN..");
   }
 
   else if (input == "n"){
-    leftDrive.neutral();
-    rightDrive.neutral();
+    driveTrain.setGear(NEUTRAL);
     driverNode.loginfo("In Nutural...");
     currentDriveGear.data = "N";
     
   }
 
   else if (input == "r"){
-    leftDrive.resetStatusCodes();
-    rightDrive.resetStatusCodes();
+    driveTrain.reset();
     driverNode.loginfo("Reseting Tags");
   }
   
@@ -125,8 +133,6 @@ void keyboard_teleop_ros(std_msgs::String msg){
   
   digitalWrite(led,LOW);
 }
-
-
 
 ros::Subscriber<std_msgs::String> commandsIn("DriveCommand", &keyboard_teleop_ros);
 ros::Subscriber<geometry_msgs::Accel> velocityIn("DriveVelocity", &runTankDrive);
@@ -141,48 +147,50 @@ void setup() {
   driverNode.advertise(DriveError);
   driverNode.subscribe(commandsIn);
   driverNode.subscribe(velocityIn);
-  leftDrive.setUp();
-  rightDrive.setUp();
+  
   pinMode(led,OUTPUT);
+  currentDriveStatus.name = "Drivetrain Software";
+  currentDriveStatus.message = "Drivetrain Motors Status";
+  currentDriveStatus.hardware_id = "Arduino Mega - Drivetrain";
 
 }
-
-/*
-void messageCb(const std_msgs::String& dataIn){
-    digitalWrite(13, HIGH-digitalRead(13));   // blink the led
-    commands = dataIn.data;
-
-    motor1 = int(commands[0:2])/100;
-    motor2 = int(commands[3:5])/100;
-    motor3 = int(commands[6:8])/100;
-    motor4 = int(commands[9:11])/100;
-}
-*/
-
-
-/******************************************/
-/*                  Notes
-/ - If you want to switch between forward 
-/   and backward, call stop in between
-/   velocity calls!!!! otherwise an error
-/   will be thrown and the motor will stop.
-/   This is by design of the manufacturer.
-/******************************************/
-
-
-
 
 void loop() {
   driverNode.spinOnce();
-  rightDrive.statusCheck();
-  leftDrive.statusCheck();
-  sprintf(rightDriveError,"%x",rightDrive.getStatusCode());
-  sprintf(leftDriveError,"%x",leftDrive.getStatusCode());
-  sprintf(driveError,"0%-4s0%-4s",leftDriveError,rightDriveError);
-  currentDriveError.data = driveError;
-  DriveError.publish(&currentDriveError);
 
-  delay(100);
+  driveStatus = *driveTrain.getStatus();
+  fautedDrive = 0;
+  error = false;
+  warn = false;
+  ok = false;
+
+  for (int i = 1; i <= sizeof(driveStatus); i ++) {
+
+    error  = (0 == (driveStatus && errorSTAT));
+    if (!error) warn  = (0 == (driveStatus && warnSTAT));
+    else if (!warn) ok = (0 == (driveStatus && okSTAT));
+    if (!ok) {
+      faultedDrive = i;
+      break;
+    }
+  }
+
+
+
+  if (faultedDrive > 0){
+    if (error) currentDriveStatus.level = 2;
+    else if (warn) currentDriveStatus.level = 1;
+    else if (ok) currentDriveStatus.level = 0;
+
+  } else{
+    currentDriveStatus.level = 0;
+  }
+
+
+
+  DriveError.publish(&currentDriveStatus);
+
+  //delay(50);
 
 }
 
@@ -190,7 +198,7 @@ void loop() {
 
 
 
-
+/*
 void keyboard_teleop_dev(){
   if(Serial.available()){
     
@@ -258,3 +266,4 @@ void keyboard_teleop_dev(){
     
   }
 }
+*/

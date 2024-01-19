@@ -11,32 +11,37 @@
 #include "HardwareSerial.h"
 #include "MoogMotorStatusWords.h"
 
+#define ACCMAX 1000
+#define RPMMAX 4423680
+#define TRQMAX 32767
+#define POSMAX 32768
+#define REVSPERROTATION 4000
+
+
+
 class MoogMotor
  {
   public:
-  
-     MoogMotor(HardwareSerial* associatedSerial);
-    //boolean driveMotor(MotorMode operationMode, float value);
-     boolean setVelocity(float rpm, float acceleration);
-     boolean setTorque(float torque);
-     boolean setPosition(float value,float velocity, float acceleration);
-     
-     
-     void ESHUTDOWN();
-     void stop();
-     void setUp();
-     void off();
-     void neutral();
-     void park();
-     
+    MoogMotor();
+    MoogMotor(int id, HardwareSerial* associatedSerial);
+    boolean setVelocity(float rpm, float acceleration);
+    boolean setTorque(float torque);
+    boolean setPosition(float value,float velocity, float acceleration);
+    
+    
+    void ESHUTDOWN();
+    void stop();
+    void enable();
+    void off();
+    void holdON();
+    void holdOFF();
 
     void statusCheck();
     bool isConnected();
     unsigned int getStatusCode();
     bool resetStatusCodes();
-    void drive();
     int getData(char[]);
-    
+    bool sendCommand(String command);
     
   private:
     unsigned int statusCode:17;
@@ -47,9 +52,9 @@ class MoogMotor
     unsigned int statusCode5:17;
     unsigned int statusCode6:17;
     unsigned int statusCode7:17;
-    bool connected;
     HardwareSerial *serial = NULL;
-    bool sendCommand(String);
+    bool connected;
+    int id;
+  
  };
-
 #endif
