@@ -48,16 +48,19 @@ ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
 geometry_msgs::Vector3 angular_velocity;
 ros::Publisher imuPub("imu_pub",&angular_velocity);
 
+//geometry_msgs::Vector3 linear_acceleration;
+//ros::Publisher imuPub("imu_pub", &linear_acceleration);
+
 sensor_msgs::BatteryState voltage_msg;
 ros::Publisher voltagePub("voltage_pub", &voltage_msg);
 
 diagnostic_msgs::DiagnosticStatus dia_imu;
 ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
 
-diagnostic_msgs::DiagnosticArray dia_array;
-ros::Publisher diaArrayPub("diaArray_pub", &dia_array);
+diagnostic_msgs::DiagnosticStatus dia_boxTemp;
+ros::Publisher diaBoxTempPub("diaBoxTemp_pub", &dia_boxTemp);
 
-//diagnostic_msgs::KeyValue box_key;
+diagnostic_msgs::KeyValue box_key[DIAGNOSTIC_STATUS_LENGTH];
 diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
 
 
@@ -69,8 +72,6 @@ char errorCode;
 
 // method that updates the errorCodes array
 //void updateErrorCode(std::string newError);
-
-
 
 void setup() {
   // setup
@@ -86,17 +87,19 @@ void setup() {
   nh.advertise(boxTempPub);
   nh.advertise(imuPub);
   nh.advertise(voltagePub);
-
   nh.advertise(diaImuPub);
-  //nh.advertise(diaArrayPub);
+  nh.advertise(diaBoxTempPub);
 
-  //dia_array.status_length = 1;
   dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_boxTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_imu.name = "Gyroscope";
+  dia_boxTemp.name = "Box Temp";
 }
 
 void loop() {
   delay(10);
+
+  // raw data update and publish
   boxTemp_data.data = boxTemperatureData();
   boxTempPub.publish(&boxTemp_data);  
   gyroscopeData();
@@ -106,12 +109,11 @@ void loop() {
 
   // diagnostic update
   dia_imu.values = imu_key;
-  //dia_array.status[0] = dia_imu;
+  dia_boxTemp.values = box_key;
   
   // diagnostic publish
-  
   diaImuPub.publish(&dia_imu);
-  //diaImuPub.publish(&dia_array);
+  diaBoxTempPub.publish(&dia_boxTemp);
 
   nh.spinOnce(); 
   
@@ -146,17 +148,19 @@ void gyroscopeData() {
   }
   
   if (IMU.gyroscopeAvailable()) {
-    IMU.readAcceleration(curAcelX, curAcelY, curAcelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
+    IMU.readGyroscope(curAcelX, curAcelY, curAcelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
   }
-  curAcelX = expFilter(alphaGyro, acelX, curAcelX);
-  curAcelY = expFilter(alphaGyro, acelY, curAcelY);
-  curAcelXmap = map(curAcelX*100, -100, 100, 0, 360) - 180;//Subtract 180 from this value to measure gyro on a scale of -180 to 180 degrees
-  curAcelYmap = map(curAcelY*100, -100, 100, 0, 360) - 180;//Subtract 180 from this value to measure gyro on a scale of -180 to 180 degrees
-
+  //curAcelX = expFilter(alphaGyro, acelX, curAcelX);
+  //curAcelY = expFilter(alphaGyro, acelY, curAcelY);
+  //curAcelXmap = map(curAcelX*100, -100, 100, 0, 360) - 180;//Subtract 180 from this value to measure gyro on a scale of -180 to 180 degrees
+  //curAcelYmap = map(curAcelY*100, -100, 100, 0, 360) - 180;//Subtract 180 from this value to measure gyro on a scale of -180 to 180 degrees
+  
   acelX = curAcelX;
   acelY = curAcelY;
-  angular_velocity.x = curAcelXmap;
-  angular_velocity.y = curAcelYmap;
+  angular_velocity.x = curAcelX;
+  angular_velocity.y = curAcelY;
+  //linear_acceleration.x = curAcelX;
+  //linear_acceleration.y = curAcelY;
   
   if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
   {
@@ -171,7 +175,6 @@ void gyroscopeData() {
     //error = '1';
 
     dia_imu.message = "Roll over warning";
-
     dia_imu.level = WARN;
     //roll over warning
   }
@@ -181,8 +184,8 @@ void gyroscopeData() {
     dia_imu.level = OK;
     //All good
   }
-  imu_key[0].key = "angular velocity x: ";
-  imu_key[0].value = "temp";
+  imu_key[0].key = "";
+  //imu_key[0].value = "temp";
 }
 
 
@@ -193,31 +196,46 @@ float boxTemperatureData() {
     //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
     // all good
+    dia_boxTemp.message = "All Good";
+    dia_boxTemp.level = OK;
     if (currTemp < 0) {
       //errorHexBits[3] = '2';
       // underheat emergency
+      dia_boxTemp.message = "Underheat Emergency";
+      dia_boxTemp.level = ERROR;
+
     }
     else if (currTemp < 10) {
       //errorHexBits[3] = '3';
       // underheat warning
+      dia_boxTemp.message = "Underheat Warning";
+      dia_boxTemp.level = WARN;
     }
     if (currTemp > 60) {
       //errorHexBits[3] = '1';
       //over heat warning
+      dia_boxTemp.message = "Overheat Warning";
+      dia_boxTemp.level = WARN;
 
     }
     else if (currTemp > 70) {
       //errorHexBits[3] = '0';
       // overheat emergency
-      
+      dia_boxTemp.message = "Overheat Emergency";
+      dia_boxTemp.level = ERROR;
+
     }
     // Returns the temperature
     //return temp_reading.substring(0, 3);
+    box_key[0].key = "box temp";
+    box_key[0].value = "temp";
     return(currTemp);
 
   }
   //errorHexBits[3] = 'E';
   // disconnect
+  dia_boxTemp.message = "Disconnect";
+  dia_boxTemp.level = STALE;
 
 
   
