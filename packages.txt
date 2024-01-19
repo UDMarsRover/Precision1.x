@@ -1,0 +1,7 @@
+opencv-python
+numpy
+empy
+catkin_pkg
+pyyaml
+rospkg
+pyserial
