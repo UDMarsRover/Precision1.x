@@ -1,1 +1,3 @@
 ros-noetic-joy
+qt5-defualt
+python-pyqt5
