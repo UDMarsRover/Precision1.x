@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+</head>
+    
+<style>
+.boxesDesign {
+    border: 4px solid rgb(0, 0, 0);
+    padding: 10%;
+    margin: 10%;
+    background-color: tomato;
+    position: relative;
+    text-align: center;
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+}
+
+.boxesLocation{
+    position: fixed;
+    width: 10%;
+    height: 10%;
+}
+
+    .roll{
+        top: 0%;
+        left: 0%;
+    }       
+
+    .pitch{
+        top: 20%;
+        left: 0%;
+    }
+
+    .temp{
+        top: 40%;
+        left: 0%;
+    }
+
+    .radio{
+        top: 60%;
+        left: 0%;
+    }
+
+    .piError{
+        top: 80%;
+        left: 0%;
+    }
+
+    .emoError{
+        top: 80%;
+        left: 13%;
+    }
+
+    .driveError{
+        top: 80%;
+        left: 26%;
+    }
+
+    .armError{
+        top: 80%;
+        left: 39%;
+    }
+
+    .cameraError{
+        top: 80%;
+        left: 52%;
+
+    }
+
+
+</style>
+
+
+
+<body>
+    
+    <div id = "error_boxes">  
+<div class = "roll boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Roll<br>{{ Roll }}</h3>
+    </div> 
+</div> 
+
+<div class = "pitch boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Pitch<br>{{ Pitch }}</h3>
+    </div> 
+</div> 
+
+<div class = "temp boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Temperature<br></h3>
+    </div> 
+</div> 
+
+<div class = "radio boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Radio Strength<br>{{RS}}</h3>
+    </div> 
+</div> 
+
+<div class = "piError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Pi Error<br></h3>
+    </div> 
+</div>
+
+<div class = "emoError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Emo Error<br></h3>
+    </div> 
+</div> 
+
+<div class = "driveError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Drive Error<br></h3>
+    </div> 
+</div> 
+
+<div class = "armError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Arm Error<br></h3>
+    </div> 
+</div>
+
+<div class = "cameraError boxesLocation">
+    <div class="boxesDesign" width="100%" height="100%">
+        <h3>Camera Error<br></h3>
+    </div> 
+</div> 
+</div>
+
+</body>
+</html>
