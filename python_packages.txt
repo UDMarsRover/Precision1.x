@@ -4,4 +4,5 @@ empy
 catkin_pkg
 pyyaml
 rospkg
+serial
 pyserial
