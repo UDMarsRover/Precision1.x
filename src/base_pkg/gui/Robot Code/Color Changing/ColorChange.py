@@ -1,8 +1,8 @@
-'''
+"""
 Created on Nov 10, 2022
 
 @author: jdunh
-'''
+"""
 
 from multiprocessing import Process
 import time
@@ -13,15 +13,10 @@ app = Flask(__name__)
 
 from flask import abort, redirect, url_for
 
-@app.route('/')
-def colors():
-    return(render_template('index.html'))
 
+@app.route("/")
+def colors():
+    return render_template("index.html")
 
 
 app.run()
-
-
-
-
-

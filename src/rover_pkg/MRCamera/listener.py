@@ -7,16 +7,15 @@ import signal, sys
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 
-class ServeCamera():
+
+class ServeCamera:
     def __init__(self):
         self.frame = None
         self.bridge = CvBridge()
         self.event = Event()
         self.app = Flask(__name__)
 
-
     def serve(self):
-
         def on_image(msg):
             print("bitch")
             self.frame
@@ -24,7 +23,9 @@ class ServeCamera():
             self.frame = cv2.imencode(".jpg", cv_image)[1].tobytes()
             self.event.set()
 
-        Thread(target=lambda: rospy.init_node('cam_listener', disable_signals=True)).start()
+        Thread(
+            target=lambda: rospy.init_node("cam_listener", disable_signals=True)
+        ).start()
         rospy.Subscriber("CameraToBase", Image, on_image)
 
         app = Flask(__name__)
@@ -34,20 +35,20 @@ class ServeCamera():
             self.event.clear()
             return self.frame
 
-        @app.route('/')
+        @app.route("/")
         def index():
-            return render_template('index.html')
+            return render_template("index.html")
 
         def gen():
             while True:
                 frame = get_frame()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                yield (
+                    b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
+                )
 
-        @app.route('/video_feed')
+        @app.route("/video_feed")
         def video_feed():
-            return Response(gen(),
-                            mimetype='multipart/x-mixed-replace; boundary=frame')
+            return Response(gen(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
         def signal_handler(signal, frame):
             rospy.signal_shutdown("end")
@@ -55,10 +56,9 @@ class ServeCamera():
 
         signal.signal(signal.SIGINT, signal_handler)
 
-        app.run(host='0.0.0.0', port=8080, debug=True)
+        app.run(host="0.0.0.0", port=8080, debug=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     server = ServeCamera()
     server.serve()
-
