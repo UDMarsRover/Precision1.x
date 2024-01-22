@@ -1,6 +1,6 @@
 import time
 
-global clk 
+global clk
 global clk2
 
 clk = 0
@@ -11,5 +11,5 @@ while True:
     clk = time.time()
     clk2 = round(clk)
     print(clk2)
-    
+
     print(clk2 % 2)
