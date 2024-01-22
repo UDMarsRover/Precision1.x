@@ -4,20 +4,61 @@
  * Edited by Greg Moldkow Mar 27, 2021
  */
 
-#include "Arduino.h"
-#include "HardwareSerial.h"
+
 #include "MoogMotor.h"
 
 
-MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio)
-{
-  MoogMotor::serial = serial;
-  //serial->setTimeout(50); // In Milliseconds
-  MoogMotor::id = id;
+
+MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution, int samplerate, int delayTime)
+{  
+  MoogMotor::delayTime = delayTime;
   MoogMotor::gearRatio = gearRatio;
+  MoogMotor::resolution = resolution;
+  MoogMotor::sampleRate = samplerate;
+  MoogMotor::serial = serial;
+  
+  MoogMotor::sendCommand("WAKE");
+  MoogMotor::sendCommand("ECHO");
+  //Remove Software Limits
+  MoogMotor::sendCommand("EIGN(2)");
+  MoogMotor::sendCommand("EIGN(3)");
+  MoogMotor::sendCommand("SLD");
+  MoogMotor::sendCommand("ZS");
+  MoogMotor::enable();
+  //Serial.println("Starting a motor");
 }
 
 MoogMotor::MoogMotor(){}
+
+bool MoogMotor::setID(int id){
+
+  if (id != 0) {
+
+    String setAddress = "SADDR" + String(id);
+    sendCommand(setAddress);  // Set address of motor
+    delay(MoogMotor::delayTime);
+
+    MoogMotor::id = id;
+    int setID = MoogMotor::getData("RADDR");
+    //Serial.print("  ID:");
+    //Serial.println(setID);
+    bool complete = (setID == id);
+    MoogMotor::id = 0;
+
+    if (!complete && (MoogMotor::setIDTrys <= MoogMotor::setIDMax)) {
+      MoogMotor::setIDTrys += 1;
+      delay(MoogMotor::delayTime);
+      MoogMotor::setID(id);
+    }
+    
+    MoogMotor::id = id;
+
+    //Serial.print("  Final ID: ");
+    //Serial.println(setID);
+    return complete;
+  }
+  return true;
+}
 
 void MoogMotor::enable(){
   sendCommand("MDT");
@@ -29,10 +70,14 @@ void MoogMotor::enable(){
 
 bool MoogMotor::sendCommand(String command){
   char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
-  Serial.println(MoogMotor::id);
-  MoogMotor::serial->print(sendAddr);
-  MoogMotor::serial->print(command);
-  MoogMotor::serial->print(" ");
+  String messageOut = sendAddr + command + " ";
+  MoogMotor::serial->print(messageOut);
+  Serial.println(messageOut);
+  //Serial.println("Made & snet Output String: "+command);
+  //delay(50);
+  //Serial.println("Sent Output String");
+  //delay(50);
+  delay(MoogMotor::delayTime);
 }
 
 void MoogMotor::statusCheck(){
@@ -47,10 +92,11 @@ void MoogMotor::statusCheck(){
 }
 
 int MoogMotor::getData(char command[]){
-  sendCommand(command);
-  if (serial->available()) connected = true;
-  else connected = false;
-  return int(serial->parseInt());
+  MoogMotor::sendCommand(command);
+  if (MoogMotor::serial->available()) MoogMotor::connected = true;
+  else MoogMotor::connected = false;
+  int data = MoogMotor::serial->parseInt();
+  return data;
 }
 
 unsigned int MoogMotor::getStatusCode(){
@@ -77,29 +123,38 @@ void MoogMotor::stop()
  * error to prevent further use. Use this function in case of an ESTOP button press only. This 
  * command WILL NOT ENGAGE BREAKING. To do a hard stop with breaking, call the stop() function.
  */
-void MoogMotor::ESHUTDOWN(){
+void MoogMotor::ESTOP(){
   sendCommand("S");    // Hard Stop
   sendCommand("OFF");  // Turn Coils Off
   sendCommand("B(0,0)=0");
 }
 
-boolean MoogMotor::setVelocity(float rpm, float acceleration){
+boolean MoogMotor::setVelocity(float rps, float acceleration){
   // RPM Can only be from -1 to 1
     
   //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
     //rpm = rpm * RPMMAX;
-    //acceleration = acceleration * ACCMAX;
-    
-    float eCounts = rpm * REVSPERROTATION * MoogMotor::gearRatio;    // encode counts/min
-    
-    MoogMotor::sendCommand("MV");     //Set to motor velocity mode
-    MoogMotor::sendCommand("VT="+String(eCounts));       //Set the rpm
-    MoogMotor::sendCommand("ADT="+String(acceleration));      //Set the acceration/deceleration
-    MoogMotor::sendCommand("G");      //Go Command
+  acceleration = acceleration * ACCMAX;
   
-    return true;
+  double eCounts = rps * MoogMotor::gearRatio * (MoogMotor::resolution/MoogMotor::sampleRate) * 65536;
+
+  //Serial.print("E Counts: ");
+  //Serial.println(eCounts);
+
+  //Serial.print(eCounts);
+  //Serial.print(", ");
+  //Serial.println(acceleration);
+    
+    
+  MoogMotor::sendCommand("MV");     //Set to motor velocity mode
+  MoogMotor::sendCommand("VT="+String(eCounts));       //Set the rps
+  MoogMotor::sendCommand("AT="+String(acceleration));      //Set the acceration/deceleration
+  MoogMotor::sendCommand("G");      //Go Command
+
+
+  return true;
   //}
-  return false;
+  //return false;
 }
 
 boolean MoogMotor::setTorque(float torque){

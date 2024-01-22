@@ -1,9 +1,9 @@
 import rospy
 from std_msgs.msg import String
-from geometry_msgs.msg import Accel, Vector3
+from geometry_msgs.msg import Twist, Vector3
 
 rospy.init_node('RoverKeyboard', anonymous=True)
-pub = rospy.Publisher('DriveVelocity', Accel, queue_size=10)
+pub = rospy.Publisher('DriveVelocity', Twist, queue_size=1)
 
 while(True):
     v = float(input("Input Linear Vel(m/s):"))
