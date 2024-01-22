@@ -1,36 +1,39 @@
-from copy import deepcopy
 import random
 import re
 import sys
-from flask import Flask, Response, render_template
+from flask import Flask, render_template
 from turbo_flask import Turbo
 import threading
 import time
 import cv2
+#from numpy.distutils.misc_util import red_text
 
+#import struct
 
 
 
 print(random.random())
 
+    
+
+
+
 app = Flask(__name__)
+
 turbo = Turbo(app)
 
 @app.before_first_request
 def before_first_request():
     threading.Thread(target=update_load).start()
-    #threading.Thread(target=inject_load).start()
-    #threading.Thread(target=inject_load2).start()
-
-
 
 def update_load():
     with app.app_context():
         while True:
             time.sleep(0.5)
-            turbo.push(turbo.replace(render_template('load_boxes.html'), 'error_boxes'))
-            #turbo.push(turbo.replace(render_template('box_object_test.html'), 'error_boxes'))
-            
+            #turbo.push(turbo.replace(render_template('loadavg.html'), 'load'))
+            turbo.push(turbo.replace(render_template('box_object_test.html'), 'error_boxes'))
+
+
 
 ##############################################################################################################################
 #All web addresses
@@ -39,7 +42,7 @@ def update_load():
 @app.route('/')
 def index():
     #return render_template('UDMRT_UI.html')
-    return render_template('box_object_test.html')
+    return render_template('speed.html')
 
 #Displays all of the data from the main page in raw format.
 @app.route('/raw')
@@ -56,19 +59,6 @@ def log():
 def page_not_found(error):
     return render_template('Page_Not_Found.html'), 404
 ##############################################################################################################################
-    
-    
-#@app.route('/errors')
-#def errors():
-    #app.logger.debug('A value for debugging')
-    #app.logger.warning('A warning occurred (%d apples)', 42)
-    #app.logger.error('An error occurred')
-    #return render_template('index2.html')
-
-
-    
-#output = {'speed': 1, 'RS': 2, 'FD': 3, 'Lat': 4, 'Roll': 5}
-
 
 @app.context_processor
 def inject_load():
@@ -80,8 +70,8 @@ def inject_load():
     red = [255,0,0]
     yellow = [255,255,0]
     green = [0,255,0]
-    status1 = black
-    status2 = black
+    status1 = black;
+    status2 = black;
     
     if color[1] > 150:
         status1 = red
@@ -154,31 +144,20 @@ def inject_load():
     else:
         status7 = yellow
         
-    #output = {'speed': 1, 'RS': 2, 'FD': 3, 'Lat': 4, 'Roll': 5}
-    #return output
-
-
-    #return deepcopy(output)
-    #return {'load1': status1[0], 'load2': status1[1], 'load3': status1[2], 'load4': status2[0], 'load5': status2[1], 'load6': status2[2], 'load7': status3[0], 'load8': status3[1], 'load9': status3[2], 'load10': status4[0], 'load11': status4[1], 'load12': status4[2], 'load13': status5[0], 'load14': status5[1], 'load15': status5[2], 'load16': status6[0], 'load17': status6[1], 'load18': status6[2], 'load19': status7[0], 'load20': status7[1], 'load21': status7[2]}
-
-
-    return {'speed': status1[0], 'RS': status1[1], 'FD': status1[2], 'Lat': status2[0], 'Roll': status2[1], 'Pitch': status2[2], 'Temp': status3[0], 'OHW': status3[1], 'Pi': status3[2], 'Emo': status4[0], 'load11': status4[1], 'load12': status4[2], 'load13': status5[0], 'load14': status5[1], 'load15': status5[2], 'load16': status6[0], 'load17': status6[1], 'load18': status6[2], 'load19': status7[0], 'load20': status7[1], 'load21': status7[2]}
-
-    #print(str(len(dictOut)))
         
     
-
+        
+    #return {'load1': status1[0], 'load2': status1[1], 'load3': status1[2], 'load4': status2[0], 'load5': status2[1], 'load6': status2[2], 'load7': status3[0], 'load8': status3[1], 'load9': status3[2], 'load10': status4[0], 'load11': status4[1], 'load12': status4[2], 'load13': status5[0], 'load14': status5[1], 'load15': status5[2], 'load16': status6[0], 'load17': status6[1], 'load18': status6[2], 'load19': status7[0], 'load20': status7[1], 'load21': status7[2]}
+    return {'Roll': status7[0], 'Pitch': status7[1], 'RS': status7[2]}
 
 @app.context_processor
 def inject_load2():
     speeding = [int(random.random() * 200) for _ in range(1)]
-    return {'speed6': speeding[0]}
+    return {'speed1': speeding[0]}
 
 
 
-#def running():
-    #app = Flask(__name__)
-    #turbo = Turbo(app)
+
 app.run()
 
 
