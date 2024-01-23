@@ -37,7 +37,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Install ROS
-        run: sh ./precision1_ros.setup
+        run: |
+          ls .
+          sh ./precision1_ros.setup
       - name: Build
         run: |
           cd ./src
