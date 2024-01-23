@@ -38,11 +38,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install ROS
-        run: bash precision1_ros.setup
-      - name: Build
+      - name: ROS Test
         run: |
-          source /opt/ros/noetic/setup.bash
+          bash precision1_ros.setup
           cd ./src
           catkin_make
      
