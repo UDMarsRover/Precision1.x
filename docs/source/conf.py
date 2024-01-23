@@ -26,8 +26,13 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
 ]
+
+autosummary_generate = True
+
+
 templates_path = ['_templates']
 exclude_patterns = []
+autodoc_mock_imports = ["rospy","std_msgs","sensor_msgs","Communications"]
 
 
 

@@ -2,6 +2,7 @@ Rover Code
 ==========
 
 .. autosummary::
-   :toctree: rover_gen
+   :toctree: _rover_api
    
-   rover_pkg.rover
+   :recursive:
+   rover_pkg

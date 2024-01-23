@@ -2,6 +2,7 @@ Base Code
 =========
 
 .. autosummary::
-   :toctree: base_gen
+   :toctree: _base_api
 
-   base_pkg.base
+   :recursive:
+   base_pkg
