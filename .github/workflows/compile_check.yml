@@ -38,7 +38,7 @@ jobs:
     steps:
       - name: Install ROS
         run: |
-          ls .
+          ls . | echo
           sh ./precision1_ros.setup
       - name: Build
         run: |
