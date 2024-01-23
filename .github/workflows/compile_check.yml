@@ -42,6 +42,7 @@ jobs:
         run: bash precision1_ros.setup
       - name: Build
         run: |
+          source /opt/ros/noetic/setup.bash
           cd ./src
           catkin_make
      
