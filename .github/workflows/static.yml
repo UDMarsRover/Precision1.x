@@ -34,7 +34,7 @@ jobs:
       - name: Install Tox
         run: pip install tox
       - name: Build HTML Files
-        run: python -m tox -e testenv:docs
+        run: python -m tox -e docs
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
