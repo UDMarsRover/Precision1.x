@@ -36,10 +36,10 @@ jobs:
   ros:
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Install ROS
-        run: |
-          ls . | echo
-          bash precision1_ros.setup
+        run: bash precision1_ros.setup
       - name: Build
         run: |
           cd ./src
