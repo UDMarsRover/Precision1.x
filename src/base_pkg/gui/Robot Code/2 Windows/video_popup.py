@@ -3,7 +3,7 @@ import cv2 as cv
 
 
 ##################################################################################################
-#THE NUMBER IN THE VIDEOCAPTURE() MAY NEED TO BE CHANGED DEPENDING ON THE DEVICE USING IT!!!!!
+# THE NUMBER IN THE VIDEOCAPTURE() MAY NEED TO BE CHANGED DEPENDING ON THE DEVICE USING IT!!!!!
 ##################################################################################################
 cap = cv.VideoCapture(1)
 if not cap.isOpened():
@@ -17,24 +17,17 @@ while True:
         print("Can't receive frame (stream end?). Exiting ...")
         break
     # Our operations on the frame come here
-    #gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    # gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     # Display the resulting frame
-    
-    
-    #UNCOMMENT TO ALLOW WINDOW TO BE RESIZEABLE
-    cv.namedWindow('Robot Camera', cv.WINDOW_AUTOSIZE)
-    
-    
-    cv.imshow('Robot Camera', frame)
-    cv.setWindowProperty('Robot Camera', cv.WND_PROP_TOPMOST, 1)
-    #cv.setWindowProperty('Robot Camera', cv.WND_PROP_ASPECT_RATIO, 0)
 
-    
-    
-    
-    
-    
-    if cv.waitKey(1) == ord('q'):
+    # UNCOMMENT TO ALLOW WINDOW TO BE RESIZEABLE
+    cv.namedWindow("Robot Camera", cv.WINDOW_AUTOSIZE)
+
+    cv.imshow("Robot Camera", frame)
+    cv.setWindowProperty("Robot Camera", cv.WND_PROP_TOPMOST, 1)
+    # cv.setWindowProperty('Robot Camera', cv.WND_PROP_ASPECT_RATIO, 0)
+
+    if cv.waitKey(1) == ord("q"):
         break
 # When everything done, release the capture
 cap.release()
