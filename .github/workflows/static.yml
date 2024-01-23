@@ -4,7 +4,7 @@ name: HTML Generation
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["deployed"]
+    branches: []
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
       - name: Install Tox
         run: pip install tox
       - name: Build HTML Files
-        run: python -m tox
+        run: python -m tox -e testenv:docs
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
