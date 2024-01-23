@@ -32,4 +32,14 @@ jobs:
         run: | 
           pip install pylama
           pylama --linters=cppcheck src/arduino
+  
+  ros:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install ROS
+        run: sh ./precision1_ros.setup
+      - name: Build
+        run: |
+          cd ./src
+          catkin_make
      
