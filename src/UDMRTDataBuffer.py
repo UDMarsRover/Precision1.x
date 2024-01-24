@@ -1,10 +1,9 @@
-#Composes and decomposes the messageOuts sent between rover and base
+# Composes and decomposes the messageOuts sent between rover and base
+
 
 class UDMRTDataBuffer:
-
     def __init__(self):
-        
-        #Variables
+        # Variables
         self.__errorMessageData__ = ""
         self.__driveMotor1Data__ = ""
         self.__driveMotor2Data__ = ""
@@ -26,85 +25,85 @@ class UDMRTDataBuffer:
         self.__ultrasonicSensor2Data__ = ""
         self.__ultrasonicSensor3Data__ = ""
         self.__ultrasonicSensor4Data__ = ""
-        
+
         self.__driveMotorErrorData__ = ""
         self.__armMotorErrorData__ = ""
         self.__emoErrorData__ = ""
         self.__cameraData__ = ""
 
         self.__messageOut__ = ""
-        
-    #Getter and setter methods... lots of them...
-    
+
+    # Getter and setter methods... lots of them...
+
     def setErrorMessageData(self):
-        # Do some logic for determining error code 
+        # Do some logic for determining error code
 
         strOut = "NULL"
         self.__errorMessageData__ = strOut
-    
+
     def getErrorMessageData(self):
         return self.__errorMessageData__
-    
+
     def getDriveMotor1Data(self):
         return self.__driveMotor1Data__
-    
+
     def getDriveMotor2Data(self):
         return self.__driveMotor2Data__
-    
+
     def getDriveMotor3Data(self):
         return self.__driveMotor3Data__
-    
+
     def getDriveMotor4Data(self):
         return self.__driveMotor4Data__
-    
+
     def getArmMotor1Data(self):
         return self.__armMotor1Data__
-    
+
     def getArmMotor2Data(self):
         return self.__armMotor2Data__
-    
+
     def getArmMotor3Data(self):
         return self.__armMotor3Data__
-    
+
     def getArmMotor4Data(self):
         return self.__armMotor4Data__
-    
+
     def getArmMotor5Data(self):
         return self.__armMotor5Data__
-    
+
     def getArmMotor6Data(self):
         return self.__armMotor6Data__
-    
+
     def getGyroscopeData(self):
         return self.__gyroscopeData__
-    
+
     def getBoxTempData(self):
         return self.__boxTempData__
-    
+
     def getBusMonitorData(self):
         return self.__busMonitorData__
-    
+
     def getBatteryTempData(self):
         return self.__batteryTempData__
-    
+
     def getVoltageConverterTempData(self):
         return self.__voltageConverterTempData__
-    
+
     def getCurrentConversionData(self):
         return self.__currentConversionData__
-    
+
     def getUltrasonicSensor1Data(self):
         return self.__ultrasonicSensor1Data__
-    
+
     def getUltrasonicSensor2Data(self):
         return self.__ultrasonicSensor2Data__
-    
+
     def getUltrasonicSensor3Data(self):
         return self.__ultrasonicSensor3Data__
-    
+
     def getUltrasonicSensor4Data(self):
         return self.__ultrasonicSensor4Data__
-    
+
     def setDriveMotorData(self, dataIn):
         str = dataIn.data
         self.__driveMotorErrorData__ = str[0:2]
@@ -112,7 +111,7 @@ class UDMRTDataBuffer:
         self.__driveMotor2Data__ = str[5:8]
         self.__driveMotor3Data__ = str[8:11]
         self.__driveMotor4Data__ = str[11:14]
-        
+
     def setArmMotorData(self, dataIn):
         str = dataIn.data
         self.__armMotorErrorData__ = str[0:2]
@@ -122,7 +121,7 @@ class UDMRTDataBuffer:
         self.__armMotor4Data__ = str[17:22]
         self.__armMotor5Data__ = str[22:27]
         self.__armMotor6Data__ = str[27:32]
-        
+
     def setEmoData(self, dataIn):
         str = dataIn.data
         self.__emoErrorData__ = str[0:2]
@@ -136,13 +135,12 @@ class UDMRTDataBuffer:
         self.__ultrasonicSensor2Data__ = str[26:30]
         self.__ultrasonicSensor3Data__ = str[30:34]
         self.__ultrasonicSensor4Data__ = str[34:38]
-        
-    #def setCameraData(self, dataIn):
+
+    # def setCameraData(self, dataIn):
     #    self.__cameraData__ = dataIn.data
-    
+
     def composeMessageOut(self):
-        
-        #Concatenate all of the variables together into one __messageOut__
+        # Concatenate all of the variables together into one __messageOut__
         self.__messageOut__ += self.getErrorMessageData()
         self.__messageOut__ += self.getDriveMotor1Data()
         self.__messageOut__ += self.getDriveMotor2Data()
@@ -164,10 +162,10 @@ class UDMRTDataBuffer:
         self.__messageOut__ += self.getUltrasonicSensor2Data()
         self.__messageOut__ += self.getUltrasonicSensor3Data()
         self.__messageOut__ += self.getUltrasonicSensor4Data()
-        
+
         return self.__messageOut__
-    
-    #Checking for any errors
+
+    # Checking for any errors
     def checkForError(self):
-        #If true, no error. If false, there is an error.
+        # If true, no error. If false, there is an error.
         return self.__emoErrorData__.lower() == "ff"

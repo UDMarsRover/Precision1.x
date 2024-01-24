@@ -1,8 +1,8 @@
-'''
+"""
 Created on Oct 6, 2022
 
 @author: jdunh
-'''
+"""
 from multiprocessing import Process
 import time
 from markupsafe import escape
@@ -14,8 +14,8 @@ app = Flask(__name__)
 
 video = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier()
-#face_cascade.load(cv2.samples.findFile("static/haarcascade_frontalface_alt.xml"))
-'''
+# face_cascade.load(cv2.samples.findFile("static/haarcascade_frontalface_alt.xml"))
+"""
 def gen(video):
     while True:
         success, image = video.read()
@@ -36,32 +36,35 @@ def gen(video):
         
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-'''
-@app.route('/')
-def text():
-    print('Hi2')
-    return render_template('text.html')
+"""
 
-@app.route('/item2')
+
+@app.route("/")
+def text():
+    print("Hi2")
+    return render_template("text.html")
+
+
+@app.route("/item2")
 def idk():
     looping()
-    return render_template('file2.html')
+    return render_template("file2.html")
 
 
-@app.route("/input", methods=['GET', 'POST'])
-
+@app.route("/input", methods=["GET", "POST"])
 def index():
-    if request.method == 'POST':
-        if request.form.get('action1') == 'VALUE1':
-            print(1)# do something
-        elif  request.form.get('action2') == 'VALUE2':
-            print(2) # do something else
+    if request.method == "POST":
+        if request.form.get("action1") == "VALUE1":
+            print(1)  # do something
+        elif request.form.get("action2") == "VALUE2":
+            print(2)  # do something else
         else:
-            pass # unknown
-    elif request.method == 'GET':
-        return render_template('index.html')
-    
+            pass  # unknown
+    elif request.method == "GET":
+        return render_template("index.html")
+
     return render_template("index.html")
+
 
 def looping():
     i = 1
@@ -69,23 +72,22 @@ def looping():
         i += 1
         print(i)
         time.sleep(1)
-        
-@app.route('/video_feed')
+
+
+@app.route("/video_feed")
 def video_feed():
-        # Set to global because we refer the video variable on global scope, 
-        # Or in other words outside the function
+    # Set to global because we refer the video variable on global scope,
+    # Or in other words outside the function
     global video
 
-        # Return the result on the web
+    # Return the result on the web
     return Response(video)
 
-    mimetype='multipart/x-mixed-replace; boundary=frame'
-        
+    mimetype = "multipart/x-mixed-replace; boundary=frame"
 
-        
-if __name__ == '__main__':      
-    Process(target = looping).start()
-    
-    
+
+if __name__ == "__main__":
+    Process(target=looping).start()
+
+
 app.run()
-
