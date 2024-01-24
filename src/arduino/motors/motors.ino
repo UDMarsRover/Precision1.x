@@ -194,9 +194,9 @@ void setup() {
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
   Serial.println("Starting Up Motors...");
-  leftMotors.push_back(MoogMotor(0,&Serial1,40));
-  leftMotors.push_back(MoogMotor(0,&Serial1,40));
-  leftMotors.push_back(MoogMotor(0,&Serial1,40));
+  leftMotors.push_back(MoogMotor(1,&Serial1,40));
+  leftMotors.push_back(MoogMotor(2,&Serial1,40));
+  //leftMotors.push_back(MoogMotor(0,&Serial1,40));
   //rightMotors[0] = MoogMotor(0,&Serial2,28);
   //rightMotors[1] = MoogMotor(0,&Serial2,28);
   //rightMotors[2] = MoogMotor(0,&Serial3,40);
@@ -227,13 +227,13 @@ void loop() {
   //delay(1000); // To Avoid improper startup
   
   //driverNode.spinOnce();
-  driveTrain.drive(1, 0, 0.25);
+  driveTrain.drive(5, 0, 0.25);
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, HIGH);
   digitalWrite(GREEN, LOW);
 
   Serial.println("Driving");
-
+  Serial1.print("ZS ");
   /*
   //driveStatus = *driveTrain.getStatus();
   faultedDrive = 0;

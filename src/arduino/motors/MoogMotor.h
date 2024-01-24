@@ -41,8 +41,9 @@ class MoogMotor
     unsigned int getStatusCode();
     bool resetStatusCodes();
     int getData(char[]);
-    bool sendCommand(String command);
+    bool sendCommand(String command, bool global = false);
     int id = 0;
+    bool setID(); 
 
     
     
@@ -63,7 +64,7 @@ class MoogMotor
     int delayTime;   // Time to wait for motors to update in ms
     int setIDMax = 3;    // Number of times the software should try to set the ID on startup
     int setIDTrys = 0;    // The current number of ID sets tried
-    bool setID(int id=0);  
+     
  };
 
 

@@ -16,43 +16,41 @@ MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resoluti
   MoogMotor::resolution = resolution;
   MoogMotor::sampleRate = samplerate;
   MoogMotor::serial = serial;
+  MoogMotor::id = id;
   
-  MoogMotor::sendCommand("WAKE");
-  MoogMotor::sendCommand("ECHO");
+  MoogMotor::sendCommand("WAKE",true);
+  MoogMotor::sendCommand("ECHO",true);
+
   //Remove Software Limits
-  MoogMotor::sendCommand("EIGN(2)");
-  MoogMotor::sendCommand("EIGN(3)");
-  MoogMotor::sendCommand("SLD");
-  MoogMotor::sendCommand("ZS");
+  MoogMotor::sendCommand("EIGN(2)",true);
+  MoogMotor::sendCommand("EIGN(3)",true);
+  MoogMotor::sendCommand("SLD",true);
+  MoogMotor::sendCommand("ZS",true);
   MoogMotor::enable();
   //Serial.println("Starting a motor");
 }
 
 MoogMotor::MoogMotor(){}
 
-bool MoogMotor::setID(int id){
+bool MoogMotor::setID(){
 
-  if (id != 0) {
+  if (MoogMotor::id != 0) {
 
     String setAddress = "SADDR" + String(id);
-    sendCommand(setAddress);  // Set address of motor
+    sendCommand(setAddress,true);  // Set address of motor
     delay(MoogMotor::delayTime);
 
-    MoogMotor::id = id;
     int setID = MoogMotor::getData("RADDR");
     //Serial.print("  ID:");
     //Serial.println(setID);
-    bool complete = (setID == id);
-    MoogMotor::id = 0;
+    bool complete = (setID == MoogMotor::id);
 
     if (!complete && (MoogMotor::setIDTrys <= MoogMotor::setIDMax)) {
       MoogMotor::setIDTrys += 1;
       delay(MoogMotor::delayTime);
-      MoogMotor::setID(id);
+      MoogMotor::setID();
     }
     
-    MoogMotor::id = id;
-
     //Serial.print("  Final ID: ");
     //Serial.println(setID);
     return complete;
@@ -68,11 +66,14 @@ void MoogMotor::enable(){
   sendCommand("X");        // Send Stop Request'
 }
 
-bool MoogMotor::sendCommand(String command){
+bool MoogMotor::sendCommand(String command, bool global){
   char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
+
+  if (global) sendAddr = ((uint8_t) 0 | 0b10000000);
   String messageOut = sendAddr + command + " ";
-  MoogMotor::serial->print(messageOut);
-  Serial.println(messageOut);
+
+  Serial.println(String(MoogMotor::id) + " " + messageOut);
+  Serial1.print(messageOut);
   //Serial.println("Made & snet Output String: "+command);
   //delay(50);
   //Serial.println("Sent Output String");

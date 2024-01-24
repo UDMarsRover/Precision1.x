@@ -9,6 +9,15 @@ UDMRTDrivetrain::UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<
   UDMRTDrivetrain::tireDiameter   = tireDiameter;
   UDMRTDrivetrain::rightMotors    = rightMotors;
   UDMRTDrivetrain::leftMotors     = leftMotors;
+
+  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+    Serial.println(UDMRTDrivetrain::leftMotors[i].setID());
+    UDMRTDrivetrain::leftMotors[i].sendCommand("SLEEP");
+  }
+
+    for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+    UDMRTDrivetrain::leftMotors[i].sendCommand("WAKE",true);
+  }
   
 }
 
@@ -43,15 +52,14 @@ bool UDMRTDrivetrain::drive(float kmPerHour, float degPerSecond, float accelerat
   //UDMRTDrivetrain::motor[4].setVelocity(ldw, acceleration);
   // Set every left motor to the left speed
 
-  //UDMRTDrivetrain::leftMotors[0].setVelocity(ldw, acceleration);
+  UDMRTDrivetrain::leftMotors[1].setVelocity(ldw, acceleration);
 
-    
+  /*
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
-    Serial.println(UDMRTDrivetrain::leftMotors.size());
     UDMRTDrivetrain::leftMotors[i].setVelocity(ldw, acceleration);
     
   }
-  
+  */
   
   /*
   // Set every right motor to the rigth speed
