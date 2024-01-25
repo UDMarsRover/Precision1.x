@@ -67,18 +67,27 @@ void MoogMotor::enable(){
 }
 
 bool MoogMotor::sendCommand(String command, bool global){
-  char sendAddr = ((uint8_t) MoogMotor::id | 0b10000000);
+  MoogMotor::writeToPort(command);
+}
 
-  if (global) sendAddr = ((uint8_t) 0 | 0b10000000);
-  String messageOut = sendAddr + command + " ";
-
-  Serial.println(String(MoogMotor::id) + " " + messageOut);
-  Serial1.print(messageOut);
-  //Serial.println("Made & snet Output String: "+command);
-  //delay(50);
-  //Serial.println("Sent Output String");
-  //delay(50);
+void MoogMotor::writeToPort(String data){
+  // Select the proper output channel of the mux IF it is not the "gobal" motor -1
+  if (MoogMotor::id != -1) MoogMotor::openPort();
+  delay(MoogMotor::delayTime/2);
+  Serial.print(MoogMotor::id);
+  Serial.println(" "+data);
+  Serial1.print(data + " ");
   delay(MoogMotor::delayTime);
+  if (MoogMotor::id != -1) MoogMotor::closePort();
+  delay(MoogMotor::delayTime/2);
+}
+
+void MoogMotor::openPort(){
+  digitalWrite(MoogMotor::id, HIGH);
+}
+
+void MoogMotor::closePort(){
+  digitalWrite(MoogMotor::id, LOW);
 }
 
 void MoogMotor::statusCheck(){

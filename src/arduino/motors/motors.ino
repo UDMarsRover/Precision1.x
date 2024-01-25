@@ -20,6 +20,10 @@
 #define GREEN 23
 #define LED_PWR 25
 
+#define CH1 2
+#define CH2 3
+#define CH3 4
+
 //SoftwareSerial ss1 = SoftwareSerial(2,3);
 //SoftwareSerial ss2 = SoftwareSerial(4,5);
 //SoftwareSerial ss3 = SoftwareSerial(6,7);
@@ -194,9 +198,9 @@ void setup() {
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
   Serial.println("Starting Up Motors...");
-  leftMotors.push_back(MoogMotor(1,&Serial1,40));
-  leftMotors.push_back(MoogMotor(2,&Serial1,40));
-  //leftMotors.push_back(MoogMotor(0,&Serial1,40));
+  leftMotors.push_back(MoogMotor(CH1,&Serial1,40));
+  rightMotors.push_back(MoogMotor(CH3,&Serial1,40));
+  rightMotors.push_back(MoogMotor(CH2,&Serial1,28));
   //rightMotors[0] = MoogMotor(0,&Serial2,28);
   //rightMotors[1] = MoogMotor(0,&Serial2,28);
   //rightMotors[2] = MoogMotor(0,&Serial3,40);
