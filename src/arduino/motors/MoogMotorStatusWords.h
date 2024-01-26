@@ -1,4 +1,9 @@
 
+
+#ifndef MoogMotorStatusWords_h
+#define MoogMotorStatusWords_h
+
+
 #define okSTAT    0b0 // Need To Set
 #define warnSTAT  0b0 // Need To Set
 #define errorSTAT 0b0 // Need To Set

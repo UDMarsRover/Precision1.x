@@ -1,6 +1,6 @@
 import rospy
 from std_msgs.msg import String
-from geometry_msgs.msg import Accel, Vector3
+from geometry_msgs.msg import Twist, Vector3
 
 rospy.init_node("RoverKeyboard", anonymous=True)
 pub = rospy.Publisher("DriveVelocity", Accel, queue_size=10)
