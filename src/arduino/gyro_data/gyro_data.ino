@@ -1,6 +1,9 @@
 
 #include <Arduino_LSM9DS1.h>
 
+
+const float MicrosPerCycle = 0.015625; //Nano 33 BLE Sense operates at 64 MHz -> 15.625 ns/cc.
+const float SecondsPerCycle = 0.000000015625; //Nano 33 BLE Sense operates at 64 MHz -> 15.625 ns/cc.
 float gyroX, gyroY, gyroZ;
 float curGyroX, curGyroY, curGyroZ = 0;
 float curRoll, curPitch, curYaw; 
@@ -37,7 +40,7 @@ void gyroscope() { //returns 3 hex digits
 
   bool negative = gyroX < 0;
   float tan = (gyroX - curGyroX);
-  float integrand = 0.001 * ( pow( (tan), 2 ) / 2 );
+  float integrand = SecondsPerCycle * ( pow( (tan), 2 ) / 2 );
   if (negative) { 
     pitch = pitch - integrand;
   }
@@ -49,6 +52,5 @@ void gyroscope() { //returns 3 hex digits
   Serial.print(", ");
   Serial.println(pitch);
 
-  delay(1);
 
 }
