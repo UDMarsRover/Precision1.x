@@ -24,7 +24,7 @@ class MoogMotor
  {
   public:
     MoogMotor();
-    MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution=4000, int samplerate=8000, int delayTime=10);
+    MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution=4000, int samplerate=8000, int delayTime=10, float acc=0.25);
     boolean setVelocity(float rpm, float acceleration);
     boolean setTorque(float torque);
     boolean setPosition(float value,float velocity, float acceleration);
@@ -67,6 +67,7 @@ class MoogMotor
     int setIDMax = 3;    // Number of times the software should try to set the ID on startup
     int setIDTrys = 0;    // The current number of ID sets tried
     void writeToPort(String data);
+    float acc;
      
  };
 

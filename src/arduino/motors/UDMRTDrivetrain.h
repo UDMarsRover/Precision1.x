@@ -15,14 +15,13 @@
  class UDMRTDrivetrain{
 
   public:
-    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<MoogMotor> rightMotors,float roverWidth=1.2, float tireDiameter=0.254);
+    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<MoogMotor> rightMotors,float roverWidth=1.2, float tireDiameter=0.254, float max_lin_vel=7, float max_ang_vel=1);
     UDMRTDrivetrain();
     void ESTOP();
     void stop();
     void off();
     void setGear(int gear = PARK);
-    bool drive(float kmPerHour, float degPerSecond, float acc);
-    void rosTankDrive(float kmPerHour, float degPerSecond, float acc);
+    bool drive(float kmPerHour_prec, float degPerSecond_prec, float acc);
     void reset();
 
 
@@ -34,6 +33,8 @@
     int numberOfMotors;
     float roverWidth;
     float tireDiameter;
+    float max_lin_vel;
+    float max_ang_vel;
 
 };
 

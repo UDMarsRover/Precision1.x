@@ -9,7 +9,7 @@
 
 
 
-MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution, int samplerate, int delayTime)
+MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution, int samplerate, int delayTime, float acc)
 {  
   MoogMotor::delayTime = delayTime;
   MoogMotor::gearRatio = gearRatio;
@@ -17,17 +17,9 @@ MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resoluti
   MoogMotor::sampleRate = samplerate;
   MoogMotor::serial = serial;
   MoogMotor::id = id;
-  
-  MoogMotor::sendCommand("WAKE",true);
-  MoogMotor::sendCommand("ECHO",true);
+  MoogMotor::acc = acc;
 
-  //Remove Software Limits
-  MoogMotor::sendCommand("EIGN(2)",true);
-  MoogMotor::sendCommand("EIGN(3)",true);
-  MoogMotor::sendCommand("SLD",true);
-  MoogMotor::sendCommand("ZS",true);
   MoogMotor::enable();
-  //Serial.println("Starting a motor");
 }
 
 MoogMotor::MoogMotor(){}
@@ -41,8 +33,6 @@ bool MoogMotor::setID(){
     delay(MoogMotor::delayTime);
 
     int setID = MoogMotor::getData("RADDR");
-    //Serial.print("  ID:");
-    //Serial.println(setID);
     bool complete = (setID == MoogMotor::id);
 
     if (!complete && (MoogMotor::setIDTrys <= MoogMotor::setIDMax)) {
@@ -50,20 +40,26 @@ bool MoogMotor::setID(){
       delay(MoogMotor::delayTime);
       MoogMotor::setID();
     }
-    
-    //Serial.print("  Final ID: ");
-    //Serial.println(setID);
     return complete;
   }
   return true;
 }
 
 void MoogMotor::enable(){
-  sendCommand("MDT");
-  sendCommand("MDB");
-  sendCommand("BRKSRV");   // Engage Break When not Moving
-  sendCommand("G");        // Go Command to turn on coils
-  sendCommand("X");        // Send Stop Request'
+   MoogMotor::sendCommand("WAKE",true);
+  MoogMotor::sendCommand("ECHO",true);
+
+  //Remove Software Limits
+  MoogMotor::sendCommand("EIGN(2)",true);
+  MoogMotor::sendCommand("EIGN(3)",true);
+  MoogMotor::sendCommand("SLD",true);
+  MoogMotor::sendCommand("ZS",true);
+  MoogMotor::sendCommand("MDT");
+  MoogMotor::sendCommand("MDB");
+  MoogMotor::sendCommand("BRKSRV");   // Engage Break When not Moving
+  MoogMotor::sendCommand("G");        // Go Command to turn on coils
+  MoogMotor::sendCommand("X");        // Send Stop Request'
+  MoogMotor::sendCommand("AT="+String(MoogMotor::acc * ACCMAX));      //Set the acceration/deceleration
 }
 
 bool MoogMotor::sendCommand(String command, bool global){
@@ -73,13 +69,11 @@ bool MoogMotor::sendCommand(String command, bool global){
 void MoogMotor::writeToPort(String data){
   // Select the proper output channel of the mux IF it is not the "gobal" motor -1
   if (MoogMotor::id != -1) MoogMotor::openPort();
-  delay(MoogMotor::delayTime/2);
-  Serial.print(MoogMotor::id);
-  Serial.println(" "+data);
+  //delay(MoogMotor::delayTime/2);
   Serial1.print(data + " ");
   delay(MoogMotor::delayTime);
   if (MoogMotor::id != -1) MoogMotor::closePort();
-  delay(MoogMotor::delayTime/2);
+  //delay(MoogMotor::delayTime/2);
 }
 
 void MoogMotor::openPort(){
@@ -140,31 +134,13 @@ void MoogMotor::ESTOP(){
 }
 
 boolean MoogMotor::setVelocity(float rps, float acceleration){
-  // RPM Can only be from -1 to 1
-    
-  //if(abs(rpm) <= 1 && 0 <= acceleration <= 1){
-    //rpm = rpm * RPMMAX;
-  acceleration = acceleration * ACCMAX;
   
-  double eCounts = rps * MoogMotor::gearRatio * (MoogMotor::resolution/MoogMotor::sampleRate) * 65536;
+  double eCounts = rps * MoogMotor::gearRatio * (MoogMotor::resolution/MoogMotor::sampleRate) * 65536;    
+  MoogMotor::sendCommand("MV VT="+String(eCounts)+" "+"G");       //Set motors to velocity mode (MV), the rps (VT=), and tell it to go (G)
 
-  //Serial.print("E Counts: ");
-  //Serial.println(eCounts);
-
-  //Serial.print(eCounts);
-  //Serial.print(", ");
-  //Serial.println(acceleration);
-    
-    
-  MoogMotor::sendCommand("MV");     //Set to motor velocity mode
-  MoogMotor::sendCommand("VT="+String(eCounts));       //Set the rps
-  MoogMotor::sendCommand("AT="+String(acceleration));      //Set the acceration/deceleration
-  MoogMotor::sendCommand("G");      //Go Command
 
 
   return true;
-  //}
-  //return false;
 }
 
 boolean MoogMotor::setTorque(float torque){
