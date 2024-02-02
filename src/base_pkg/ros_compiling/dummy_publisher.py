@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# license removed for brevity
+#!/home/udmrt/p1x/bin/python3
 import rospy
 from std_msgs.msg import String
 
