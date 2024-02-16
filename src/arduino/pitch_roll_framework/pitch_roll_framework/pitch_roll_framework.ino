@@ -59,12 +59,7 @@ void loop() {
 
   debug(KalmanAngleRoll);
   debug(", ");
-  debug(KalmanUncertaintyAngleRoll);
-  debug(", ");
-  debug(KalmanAnglePitch);
-  debug(", ");
-  debugln(KalmanUncertaintyAnglePitch);
-  //timing();
+  debugln(KalmanAnglePitch);
   
   while (micros() - LoopTimer < 4000);
   LoopTimer = micros();
@@ -116,24 +111,4 @@ void gyro_signals(void) {
 
   AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
   AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
-}
-
-double expFilter(double alpha, double prevReading, double curReading){ 
-  // Serial.println(alpha);
-  return (alpha * curReading) + ((1 - alpha) * prevReading);
-}
-
-void timing() {
-  if (KalmanAngleRoll > 30) {
-    start = micros();
-    debugln(start);
-  }
-  if (KalmanAngleRoll < -30) {
-    end = micros();
-    debugln(end);
-    testEnd = false;
-    int diff = end - start;
-    debugln(diff);
-    while (1) {}
-  }
 }
