@@ -87,7 +87,7 @@ char errorCode;
 
 // method that updates the errorCodes array
 //void updateErrorCode(std::string newError);
-
+//change
 void setup() {
   // setup
   //Serial.begin(9600);
