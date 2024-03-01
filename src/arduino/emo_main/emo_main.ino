@@ -1,17 +1,32 @@
+//ROS data-type libraries
 #include <ros.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/BatteryState.h>
-#include <Arduino_HTS221.h>
-#include <Arduino_LSM9DS1.h>
 #include <sensor_msgs/Temperature.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 
+#include <Arduino_HTS221.h> // On-board temperature
+#include <Arduino_LSM9DS1.h> // IMU
 
-//Ultrasonic sensor
-#define trigPin 2 //attach pin D3 Arduino to pin Trig of HC-SR04
+// Debug settings for serial printing.
+#define DEBUG 1
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////
+//Object variables for ultrasonic, IMU, thermistors, boxTemp, voltageSense, and GPS
+//////////////////////////////////////////////////////////////////////////////////////
+
+//Ultrasonic sensor variables
+#define trigPin 2 // attach pin D3 Arduino to pin Trig of HC-SR04
 #define echoPinN 3 // attach pin D2 Arduino to pin Echo of HC-SR04_North
 #define echoPinE 4 // attach pin D2 Arduino to pin Echo of HC-SR04_East
 #define echoPinS 5 // attach pin D2 Arduino to pin Echo of HC-SR04_South
@@ -21,18 +36,54 @@ long curDuration;
 String distance; // variable for the distance measurement
 String longD;
 
-// Declare 
-float acelX, acelY, acelZ; 
-float curAcelX, curAcelY, curAcelZ;
-float curAcelXmap, curAcelYmap;
-float plusThreshold = 30, minusThreshold = -30;
+//IMU variables
+float RateRoll, RatePitch, RateYaw = 1; //If set to null, divide by zero in first iteration -> NaN output
+float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw;
+int RateCalibrationNumber;
+float AccX, AccY, AccZ = 1; //If set to null, divide by zero in first iteration -> NaN output
+float AccX_offset, Accy_offset, AccZ_offset;
+float AngleRoll, AnglePitch;
+uint32_t last_power_down;
+float KalmanAngleRoll = 0, KalmanUncertaintyAngleRoll = 2 * 2;
+float KalmanAnglePitch = 0, KalmanUncertaintyAnglePitch = 2 * 2;
+float Kalman1DOutput[] = { 0, 0 };
+// Timing variables for Loop
+uint32_t LoopTimer;
+int LastLoop;
+
+//Thermistor variables
+int voltageConverterTemp = A1;
+int batteryTemp = A2;
+int Vo_v, Vo_b;
+float R1_v, R1_b = 10000;
+float logR2_v, R2_v, T_v, logR2_b, R2_b, T_b; 
+float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+
+//Box temperature variables
+float currTemp;
+
+//Voltage sensor variables
 int voltagePin = A0;
-int sensorValue;
+float sensorValue;
+float prevSensorValue;
+const float Vmax = 683.934; //This is real reading of voltage sensor at V = 57.500 V. Based on equation, reading would be 689.4547242 at 57.5V
+const float Vmin = 630.2345; //This is real reading of voltage sensor at V = 45.505 V. Based on equation, reading would be 629.7072093 at 45.5V
+//Above values were adjusted for accuracy between 45.5-50V, reading >50V results in an output about 0.5-1.0V less than actual
+float diff = Vmax - Vmin;
+float volt;
+
+//GPS variables
+
 
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
 double alphaUltra = 0.7;
 double alphaGyro = 0.3;
+double alphaVoltSense = 0.1;
+
+//////////////////////////////////////////////////////////////////////////////
+//Define ROS nodes, publishers, and subscribers
+//////////////////////////////////////////////////////////////////////////////
 
 #define OK diagnostic_msgs::DiagnosticStatus::OK;
 #define WARN diagnostic_msgs::DiagnosticStatus::WARN;
@@ -82,11 +133,9 @@ diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
 //diagnostic_msgs::KeyValue battery_key;
 //ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
 
-
-char errorCode;
-
-// method that updates the errorCodes array
-//void updateErrorCode(std::string newError);
+////////////////////////////////////////////////////////////////////////////////////////////
+//Main setup, loop, and methods
+////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
   // setup
@@ -149,8 +198,7 @@ void loop() {
   //Serial.println(sensorData);
 }
 
-
-float thermistorData(int pin){
+float thermistorData(int pin){//unncessary, already implemented in voltconverttempdata and batttempdata
   int ThermistorPin = 0;
   int Vo;
   float R1 = 10000;
@@ -167,7 +215,6 @@ float thermistorData(int pin){
   //Serial.print(T);
   //Serial.println(" C");
 }
-
 
 void gyroscopeData() {
   
@@ -217,10 +264,10 @@ void gyroscopeData() {
   //imu_key[0].value = "temp";
 }
 
-
 float boxTemperatureData() {
+  //HTS.begin() is necessary to turn on temp sensor
   if (HTS.begin()){
-    float currTemp = HTS.readTemperature();
+    currTemp = HTS.readTemperature();
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
     //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
@@ -268,93 +315,87 @@ float boxTemperatureData() {
 }
 
 void voltageSensorData() {
-  int sensorValue = analogRead(A0);
+  sensorValue = analogRead(voltagePin);
   // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
-  float voltage = map(sensorValue, 0, 1023, 0, 3.3);
-  float batteryVoltage = map(voltage, 0, 3.3, 0, 53);
+  sensorValue = expFilter(alphaVoltSense, prevSensorValue, sensorValue);
+  prevSensorValue = sensorValue;
+  Serial.print(sensorValue);
+  volt = ( sensorValue * 0.2008451735 ) - 80.97365371; //Linear regression line-of-best-fit
+
+  float voltPercent = ( sensorValue - Vmin ) / diff;
   
-  voltConverter_msg.voltage = batteryVoltage;
+  voltConverter_msg.voltage = volt;
 }
 
 void voltageConverterTempData() {
-  int ThermistorPin = 0;
-  int Vo, E;
-  float R1 = 10000;
-  float logR2, R2, T; 
-  float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
 
-  Vo = analogRead(ThermistorPin);
-  R2 = R1 * (1023.0 / (float)Vo - 1.0);
-  logR2 = log(R2);
-  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
-  T = T - 273.15;
+  Vo = analogRead(voltageConverterTemp);
+  R2_v = R1_v * (1023.0 / (float)Vo_v - 1.0);
+  logR2_v = log(R2_v);
+  T_v = (1.0 / (c1 + c2*logR2_v + c3*logR2_v*logR2_v*logR2_v));
+  T_v = T_v - 273.15;
 
-  voltConverterTemp_msg.temperature = T;
+  voltConverterTemp_msg.temperature = T_v;
 
-  if (T <= 0) { 
+  if (T_v <= 0) { 
     dia_voltConverterTemp.message = "Underheat Emergency"; 
     dia_voltConverterTemp.level = ERROR;
   }
-  else if ((0 < T) && (T <= 5)) {
+  else if ((0 < T_v) && (T_v <= 5)) {
     dia_voltConverterTemp.message = "Underheat Warning"; 
     dia_voltConverterTemp.level = WARN;
   } 
-  else if ((5 < T) && (T < 65)) {
+  else if ((5 < T_v) && (T_v < 65)) {
     dia_voltConverterTemp.message = "OK";
     dia_voltConverterTemp.level = OK;
   }
-  else if ((65 <= T) && (T < 70)) {
+  else if ((65 <= T_v) && (T_v < 70)) {
     dia_voltConverterTemp.message = "Overheat Warning";
     dia_voltConverterTemp.level = WARN;
   }
-  else if( T >= 70) {
+  else if( T_v >= 70) {
     dia_voltConverterTemp.message = "Overheat Emergency";
     dia_voltConverterTemp.level = ERROR;
   }
 }
 
 void batteryTempData(){
-  int ThermistorPin = 0;
-  int Vo, E;
-  float R1 = 10000;
-  float logR2, R2, T; 
-  float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
 
-  Vo = analogRead(ThermistorPin);
-  R2 = R1 * (1023.0 / (float)Vo - 1.0);
-  logR2 = log(R2);
-  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
-  T = T - 273.15;
+  Vo_b = analogRead(batteryTemp);
+  R2_b = R1_b * (1023.0 / (float)Vo_b - 1.0);
+  logR2_b = log(R2_b);
+  T_b = (1.0 / (c1 + c2*logR2_b + c3*logR2_b*logR2_b*logR2_b));
+  T_b = T_b - 273.15;
 
-  batteryTemp_msg.temperature = T;
+  batteryTemp_msg.temperature = T_b;
 
-  if (T <= 30) { 
+  if (T_b <= 30) { 
     dia_batteryTemp.message = "Underheat Emergency"; 
     dia_batteryTemp.level = ERROR;
   }
-  else if ((30 < T) && (T <= 35)) {
+  else if ((30 < T_b) && (T_b <= 35)) {
     dia_batteryTemp.message = "Underheat Warning"; 
     dia_batteryTemp.level = WARN;
   } 
-  else if ((35 < T) && (T < 60)) {
+  else if ((35 < T_b) && (T_b < 60)) {
     dia_batteryTemp.message = "OK";
     dia_batteryTemp.level = OK;
   }
-  else if ((60 <= T) && (T < 80)) {
+  else if ((60 <= T_b) && (T_b < 80)) {
     dia_batteryTemp.message = "Overheat Warning";
     dia_batteryTemp.level = WARN;
   }
-  else if( T >= 80) {
+  else if( T_b >= 80) {
     dia_batteryTemp.message = "Overheat Emergency";
     dia_batteryTemp.level = ERROR;
   }
-
 }
 
-// test for different sensors
-// use this within each method for the sensors
+void gps(){
+  
+}
+
 double expFilter(double alpha, double prevReading, double curReading){ 
-  // Serial.println(alpha);
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
 

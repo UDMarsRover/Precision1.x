@@ -1,82 +1,114 @@
-
 #include <Arduino_LSM9DS1.h>
 
-//The gyroscope and accelerometer methods are switched in this library for some reason. The readGyroscope() method provides speed of angle change in degrees per second and the 
-//readAccelerometer() method provides positional information for X, Y, and Z on a scale of -1 to 1. Therefore, we do not need to use readGyroscope(), even though these are the values
-//we are looking for.
-float acelX, acelY, acelZ; 
-String errorCodes;
-String gyroError;
-/*
-This is an array of error codes. They are inserted into the array as they come in, and we will pull from the start of the array. Once we pull a value, all following values will be shifted up
-so that 
-*/
+// Debug settings for serial printing.
+#define DEBUG 1
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
 
+// Timing variables for Loop
+uint32_t LoopTimer;
+int LastLoop;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//1d Kalman filter setup
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+float RateRoll, RatePitch, RateYaw = 1; //If set to null, divide by zero in first iteration -> NaN output
+float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw;
+int RateCalibrationNumber;
+float AccX, AccY, AccZ = 1; //If set to null, divide by zero in first iteration -> NaN output
+float AccX_offset, Accy_offset, AccZ_offset;
+float AngleRoll, AnglePitch;
+uint32_t last_power_down;
+float KalmanAngleRoll = 0, KalmanUncertaintyAngleRoll = 2 * 2;
+float KalmanAnglePitch = 0, KalmanUncertaintyAnglePitch = 2 * 2;
+float Kalman1DOutput[] = { 0, 0 };
+bool startup = true;
+
+bool testStart = true;
+bool testEnd = true;
+int start;
+int end;
 
 void setup() {
-  // put your setup code here, to run once: 
+  LoopTimer = 0;
+
+  // Initialize Serial
   Serial.begin(9600);
   while (!Serial);
-  Serial.println("Begun");
+  debugln("Begun");
 
+  // Initialize IMU
   if (!IMU.begin()) {
-    Serial.println("Failed to initialize IMU!");
+    debugln("Failed to initialize IMU!");
     while (1);
   }
 }
 
 void loop() {
-  
-  gyroscope();
+  LastLoop = micros();
+  // put your main code here, to run repeatedly:
+  // debugln() -- Use this instead of Print-- See lines 2-9
 
+  gyro_signals();
+  calculate_orientation();
+
+  debug(KalmanAngleRoll);
+  debug(", ");
+  debugln(KalmanAnglePitch);
+  
+  while (micros() - LoopTimer < 4000);
+  LoopTimer = micros();
 }
 
-void gyroscope() { //returns 3 hex digits
+void calculate_orientation() {
+  RateRoll -= RateCalibrationRoll;
+  RatePitch -= RateCalibrationPitch;
+  RateYaw -= RateCalibrationYaw;
+  kalman_1d(KalmanAngleRoll, KalmanUncertaintyAngleRoll, RateRoll, AngleRoll);
+  KalmanAngleRoll = Kalman1DOutput[0];
+  KalmanUncertaintyAngleRoll = Kalman1DOutput[1];
+  kalman_1d(KalmanAnglePitch, KalmanUncertaintyAnglePitch, RatePitch, AnglePitch);
+  KalmanAnglePitch = Kalman1DOutput[0];
+  KalmanUncertaintyAnglePitch = Kalman1DOutput[1];
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//1D Kalman filter
+//inputs: KalmanState, KalmanUncertainty, KalmanInput, KalmanMeasurement => Kalman filter inputs
+//outputs: Kalman1DOutput => Gives Kalman filter outputs
+//-------------------------------------------------------------------------------------------------------------------------------------
+void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, float KalmanMeasurement) {
+  //Don't forget that 0.004 is the time separation (4 ms)
+  KalmanState = KalmanState + 0.004 * KalmanInput;
+  KalmanUncertainty = KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
+  float KalmanGain = KalmanUncertainty * 1 / (1 * KalmanUncertainty + 2); //Edited from original document as Kalman Gain factor was too high for sensitivty of BLE 33 sense's IMU
+  KalmanState = KalmanState + KalmanGain * (KalmanMeasurement - KalmanState);
+  KalmanUncertainty = (1 - KalmanGain) * KalmanUncertainty;
+  Kalman1DOutput[0] = KalmanState;
+  Kalman1DOutput[1] = KalmanUncertainty;
+}
+//-------------------------------------------------------------------------------------------------------------------------------------
+//Get Gyroscope signals
+//inputs: AccX, AccY => For integrating
+//outputs: AngleRoll, AnglePitch => Integrated
+//-------------------------------------------------------------------------------------------------------------------------------------
+void gyro_signals(void) {
+  //if (startup) {delay(10); startup = false;} //Fixed by setting initial RateR,P,Y and AccX,Y,Z to 1 instead of 0. Ensure functionality with EMo
+  
   if (IMU.gyroscopeAvailable()) {
-    //IMU.readGyroscope(gyroX, gyroY, gyroZ); //Provides speed of angle change in degrees per second
-    IMU.readAcceleration(acelX, acelY, acelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
-  }
-  /*
-  if(gyroY < minusThreshold || plusThreshold < gyroY)
-  {
-    gyroError = "2F";
-    Serial.println(gyroError);
-    delay(500);
-  }
-  if(gyroX < minusThreshold || plusThreshold < gyroX)
-  {
-    gyroError = "2F";
-    Serial.println(gyroError);
-    delay(500);
+    IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
+    //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
   }
 
-  if(gyroY < minusThreshold*2 || plusThreshold*2 < gyroY)
-  {
-    gyroError = "30";
-    Serial.println(gyroError);
-    delay(500);
+  if (IMU.accelerationAvailable()) {
+    IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
   }
-  if(gyroX < minusThreshold*2 || plusThreshold*2 < gyroX)
-  {
-    gyroError = "30";
-    Serial.println(gyroError);
-    delay(500);
-  }
-  */
-  Serial.print(acelX);
-  Serial.print(",");
-  Serial.println(acelY);
-  String X = (String)map(acelX*100, -100, 100, 0, 360);
-  String Y = (String)map(acelY*100, -100, 100, 0, 360);
-  Serial.print(X);
-  Serial.print(",");
-  Serial.println(Y);
-  /*
-  String gyro_reading_X = (String)(acelX);
-  String gyro_reading_Y = (String)(acelY);
 
-  Serial.println(gyro_reading_X.substring(0,4) + "," + gyro_reading_Y.substring(0,4));
-  */
-  delay(500);
-
+  AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
+  AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
 }
