@@ -150,7 +150,7 @@ void loop() {
 }
 
 
-float thermistorData(int pin){
+float thermistorData(int pin){//unncessary, already implemented in voltconverttempdata and batttempdata
   int ThermistorPin = 0;
   int Vo;
   float R1 = 10000;

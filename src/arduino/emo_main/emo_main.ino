@@ -11,6 +11,15 @@
 #include <Arduino_HTS221.h> // On-board temperature
 #include <Arduino_LSM9DS1.h> // IMU
 
+//GPS Include
+#include <Arduino.h>
+#include <TinyGPSPlus.h>
+#include <SoftwareSerial.h>
+#include <float.h>
+#include <ros/time.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/NavSatStatus.h>
+
 // Debug settings for serial printing.
 #define DEBUG 1
 #if DEBUG == 1
@@ -26,6 +35,9 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 //Ultrasonic sensor variables
+
+//ULTRASONIC is missing! Will work on after completing rest of eMO
+
 #define trigPin 2 // attach pin D3 Arduino to pin Trig of HC-SR04
 #define echoPinN 3 // attach pin D2 Arduino to pin Echo of HC-SR04_North
 #define echoPinE 4 // attach pin D2 Arduino to pin Echo of HC-SR04_East
@@ -73,7 +85,11 @@ float diff = Vmax - Vmin;
 float volt;
 
 //GPS variables
-
+// IMPORTANT: This code is written specifically for a GPS unit that receives signal at a frequency of 1Hz.
+// If a GPS with a higher refresh rate is used in the future, this code will need to be reworked. -Kaiden
+TinyGPSPlus gps; //Boolean that keeps track of whether the previous reading was zero (prevents duplicate error messages)
+bool error = false;
+int lastSecond = -1;
 
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
@@ -95,6 +111,9 @@ double alphaVoltSense = 0.1;
 ros::NodeHandle nh;
 
 // data messages setup
+geometry_msgs::Vector3 angular_velocity;
+ros::Publisher imuPub("imu_pub",&angular_velocity);
+
 std_msgs::Float64 boxTemp_data;
 ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
 
@@ -104,8 +123,7 @@ ros::Publisher batteryTempPub("batteryTemp_pub", &batteryTemp_msg);
 sensor_msgs::Temperature voltConverterTemp_msg;
 ros::Publisher voltConverterTempPub("voltConverterTemp_pub", &voltConverterTemp_msg);
 
-geometry_msgs::Vector3 angular_velocity;
-ros::Publisher imuPub("imu_pub",&angular_velocity);
+
 
 //geometry_msgs::Vector3 linear_acceleration;
 //ros::Publisher imuPub("imu_pub", &linear_acceleration);
@@ -125,6 +143,9 @@ ros::Publisher diaVoltConverterTempPub("diaVoltConverterTemp_pub",&dia_voltConve
 
 diagnostic_msgs::DiagnosticStatus dia_batteryTemp;
 ros::Publisher diaBatteryTempPub("diaBatteryTemp_pub",&dia_batteryTemp);
+
+sensor_msgs::NavSatFix gpsMessage;
+ros::Publisher pub("GPS", &gpsMessage);
 
 diagnostic_msgs::KeyValue box_key[DIAGNOSTIC_STATUS_LENGTH];
 diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
@@ -170,22 +191,14 @@ void setup() {
 void loop() {
   delay(10);
 
-  // raw data update and publish
-  boxTemp_data.data = boxTemperatureData();
-  boxTempPub.publish(&boxTemp_data);  
-  gyroscopeData();
-  imuPub.publish(&angular_velocity);
-  voltageSensorData();
-  voltConverterPub.publish(&voltConverter_msg);
-  voltageConverterTempData();
-  voltConverterTempPub.publish(&voltConverterTemp_msg);
-  batteryTempData();
-  batteryTempPub.publish(&batteryTemp_msg);
   
-
+  
+  
+  /*
   // diagnostic update
   dia_imu.values = imu_key;
   dia_boxTemp.values = box_key;
+  
   
   // diagnostic publish
   diaImuPub.publish(&dia_imu);
@@ -194,26 +207,7 @@ void loop() {
   diaBatteryTempPub.publish(&dia_batteryTemp);
 
   nh.spinOnce(); 
-  
-  //Serial.println(sensorData);
-}
-
-float thermistorData(int pin){//unncessary, already implemented in voltconverttempdata and batttempdata
-  int ThermistorPin = 0;
-  int Vo;
-  float R1 = 10000;
-  float logR2, R2, T;
-  float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
-  Vo = analogRead(pin);
-  R2 = R1 * (1023.0 / (float)Vo - 1.0);
-  logR2 = log(R2);
-  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
-  T = T - 273.15;
-  T = (T * 9.0)/ 5.0 + 32.0; 
-
-  //Serial.print("Temperature: "); 
-  //Serial.print(T);
-  //Serial.println(" C");
+  */
 }
 
 void gyroscopeData() {
@@ -392,7 +386,52 @@ void batteryTempData(){
 }
 
 void gps(){
-  
+  gpsNode.spinOnce();
+
+  while (Serial2.available() > 0)
+  {
+    if (gps.encode(Serial2.read()) && gps.time.second() != lastSecond)
+    {
+      lastSecond = gps.time.second();
+      if(gps.location.lat() == 0 && gps.location.lng() == 0)
+      {
+        if (!error)
+        {
+          gpsMessage.status.status = 14;
+        }
+        error = true;
+      }
+      else if (gps.location.age() > 500)
+      {
+        if (!error)
+        {
+          gpsMessage.status.status = 14;
+        }
+        error = true;
+      }
+      else
+      {
+        gpsMessage.header.stamp.sec = gps.time.second();
+        gpsMessage.header.stamp.nsec = gps.time.centisecond() * 10000000;
+        gpsMessage.latitude = gps.location.lat();
+        gpsMessage.longitude = gps.location.lng();
+        gpsMessage.altitude = gps.altitude.meters();
+        gpsMessage.status.status = 15;
+        error = false;
+      }
+    }
+  }
+
+  if (millis() > 1000 && gps.charsProcessed() < 10)
+  {
+    
+    gpsMessage.status.status = 14;
+    gpsMessage.latitude = 0;
+    gpsMessage.longitude = 0;
+    //while(true);
+  }
+
+  pub.publish(&gpsMessage);
 }
 
 double expFilter(double alpha, double prevReading, double curReading){ 
