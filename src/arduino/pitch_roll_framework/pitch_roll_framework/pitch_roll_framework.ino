@@ -1,7 +1,9 @@
 #include <Arduino_LSM9DS1.h>
+#include <ros.h>
+#include <sensor_msgs/Imu.h>
 
 // Debug settings for serial printing.
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
 #define debugln(x) Serial.println(x)
@@ -9,6 +11,10 @@
 #define debug(x)
 #define debugln(x)
 #endif
+
+ros::NodeHandle nh;
+geometry_msgs::Vector3 angular_velocity;
+ros::Publisher imuPub("imu_pub",&angular_velocity);
 
 // Timing variables for Loop
 uint32_t LoopTimer;
@@ -38,9 +44,14 @@ void setup() {
   LoopTimer = 0;
 
   // Initialize Serial
+  /*
   Serial.begin(9600);
   while (!Serial);
   debugln("Begun");
+  */
+  nh.initNode();
+  nh.advertise(imuPub);
+
 
   // Initialize IMU
   if (!IMU.begin()) {
@@ -56,13 +67,21 @@ void loop() {
 
   gyro_signals();
   calculate_orientation();
-
+  
   debug(KalmanAngleRoll);
   debug(", ");
   debugln(KalmanAnglePitch);
   
+  
+  angular_velocity.x = KalmanAngleRoll;
+  angular_velocity.y = KalmanAnglePitch;
+  imuPub.publish(&angular_velocity);
+  
+
   while (micros() - LoopTimer < 4000);
   LoopTimer = micros();
+
+  nh.spinOnce();
 }
 
 void calculate_orientation() {
