@@ -2,12 +2,14 @@
 #include <ros.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float32MultiArray.h> // Ultra
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/Temperature.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 
+#include <NewPing.h> // Ultrasonic
 #include <Arduino_HTS221.h> // On-board temperature
 #include <Arduino_LSM9DS1.h> // IMU
 
@@ -36,17 +38,36 @@
 
 //Ultrasonic sensor variables
 
-//ULTRASONIC is missing! Will work on after completing rest of eMO
+#define TRIG1 2
+#define ECHO1 3
 
-#define trigPin 2 // attach pin D3 Arduino to pin Trig of HC-SR04
-#define echoPinN 3 // attach pin D2 Arduino to pin Echo of HC-SR04_North
-#define echoPinE 4 // attach pin D2 Arduino to pin Echo of HC-SR04_East
-#define echoPinS 5 // attach pin D2 Arduino to pin Echo of HC-SR04_South
-#define echoPinW 6 // attach pin D2 Arduino to pin Echo of HC-SR04_West
-long duration; // variable for the duration of sound wave travel
-long curDuration;
-String distance; // variable for the distance measurement
-String longD;
+#define TRIG2 4
+#define ECHO2 5
+
+#define TRIG3 6
+#define ECHO3 7
+
+#define TRIG4 8
+#define ECHO4 9
+
+#define MAX_DISTANCE 100 // maximum distance for sensors in cm
+#define NUM_SONAR 4 // number of ultrasonic sensors
+
+NewPing sonar[NUM_SONAR] = { // array of ultrasonic pings
+  NewPing(TRIG1, ECHO1, MAX_DISTANCE),
+  NewPing(TRIG2, ECHO2, MAX_DISTANCE),
+  NewPing(TRIG3, ECHO3, MAX_DISTANCE),
+  NewPing(TRIG4, ECHO4, MAX_DISTANCE)
+};
+
+double curDuration[NUM_SONAR]; // array for pings in microseconds
+double prevDistance[NUM_SONAR]; // arrays for pings
+double curDistance[NUM_SONAR];// in cm
+
+// arrays to store distance output as string
+String curDistanceCM[NUM_SONAR];
+String curDistanceOutput[NUM_SONAR];
+float ultraArray[4]; // initialize array to assign to msg
 
 //IMU variables
 float RateRoll, RatePitch, RateYaw = 1; //If set to null, divide by zero in first iteration -> NaN output
@@ -93,7 +114,7 @@ int lastSecond = -1;
 
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
-double alphaUltra = 0.7;
+double alphaUltra = 0.1;
 double alphaGyro = 0.3;
 double alphaVoltSense = 0.1;
 
@@ -111,25 +132,27 @@ double alphaVoltSense = 0.1;
 ros::NodeHandle nh;
 
 // data messages setup
+
+std_msgs::Float32MultiArray ultraMsg;
+ros::Publisher ultraPub("ultrasonic_pub", &ultraMsg);
+
 geometry_msgs::Vector3 angular_velocity;
 ros::Publisher imuPub("imu_pub",&angular_velocity);
 
-std_msgs::Float64 boxTemp_data;
+sensor_msgs::Temperature boxTemp_data;
 ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
 
-sensor_msgs::Temperature batteryTemp_msg;
-ros::Publisher batteryTempPub("batteryTemp_pub", &batteryTemp_msg);
+sensor_msgs::BatteryState voltageConverterMsg;
+ros::Publisher voltConverterPub("voltageConverter_pub", &voltageConverterMsg);
 
 sensor_msgs::Temperature voltConverterTemp_msg;
 ros::Publisher voltConverterTempPub("voltConverterTemp_pub", &voltConverterTemp_msg);
 
+sensor_msgs::Temperature batteryTemp_msg;
+ros::Publisher batteryTempPub("batteryTemp_pub", &batteryTemp_msg);
 
-
-//geometry_msgs::Vector3 linear_acceleration;
-//ros::Publisher imuPub("imu_pub", &linear_acceleration);
-
-sensor_msgs::BatteryState voltConverter_msg;
-ros::Publisher voltConverterPub("voltConverter_pub", &voltConverter_msg);
+sensor_msgs::NavSatFix gpsMsg;
+ros::Publisher gpsPub("GPS", &gpsMsg);
 
 // diagnostic messages setup
 diagnostic_msgs::DiagnosticStatus dia_imu;
@@ -143,9 +166,6 @@ ros::Publisher diaVoltConverterTempPub("diaVoltConverterTemp_pub",&dia_voltConve
 
 diagnostic_msgs::DiagnosticStatus dia_batteryTemp;
 ros::Publisher diaBatteryTempPub("diaBatteryTemp_pub",&dia_batteryTemp);
-
-sensor_msgs::NavSatFix gpsMessage;
-ros::Publisher pub("GPS", &gpsMessage);
 
 diagnostic_msgs::KeyValue box_key[DIAGNOSTIC_STATUS_LENGTH];
 diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
@@ -161,20 +181,17 @@ diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
 void setup() {
   // setup
   //Serial.begin(9600);
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
-  pinMode(echoPinN, INPUT); // Sets the echoPin as an INPUT
-  pinMode(echoPinE, INPUT); // Sets the echoPin as an INPUT
-  pinMode(echoPinS, INPUT); // Sets the echoPin as an INPUT
-  pinMode(echoPinW, INPUT); // Sets the echoPin as an INPUT
-  pinMode(voltagePin, INPUT); 
-  
+
+  //Ros setup
   nh.initNode();
-  nh.advertise(boxTempPub);
+  nh.advertise(ultraPub);
   nh.advertise(imuPub);
+  nh.advertise(boxTempPub);
   nh.advertise(voltConverterPub);
   nh.advertise(voltConverterTempPub);
   nh.advertise(batteryTempPub);
-
+  nh.advertise(gpsPub);
+  
   nh.advertise(diaImuPub);
   nh.advertise(diaBoxTempPub);
   nh.advertise(diaVoltConverterTempPub);
@@ -186,14 +203,34 @@ void setup() {
   dia_boxTemp.name = "Box Temp";
   dia_voltConverterTemp.name = "Voltage Converter Temp";
   dia_batteryTemp.name = "Battery Temp";
+
+  //Method setup
+  msg.data_length = 4; // initialize length of ultrasonic msg array
+
+  LoopTimer = 0; //Going to have to find a way to integrate loop into method, not high-level loop
+  if (!IMU.begin()) {
+    debugln("Failed to initialize IMU!");
+    while (1);
+  }
+
+  pinMode(voltagePin, INPUT); // Voltage sensor setup
+  pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
+  pinMmode(batteryTemp, INPUT); // Battery temp setup
+
 }
 
 void loop() {
+  
   delay(10);
 
-  
-  
-  
+  ultrasonicData();
+  gyroscopeData();
+  boxTemperatureData();
+  voltageSensorData();
+  voltageConverterTempData();
+  batteryTempData();
+  gps();
+
   /*
   // diagnostic update
   dia_imu.values = imu_key;
@@ -205,57 +242,87 @@ void loop() {
   diaBoxTempPub.publish(&dia_boxTemp);
   diaVoltConverterTempPub.publish(&dia_voltConverterTemp);
   diaBatteryTempPub.publish(&dia_batteryTemp);
+  */
 
   nh.spinOnce(); 
-  */
 }
 
-void gyroscopeData() {
-  
-  if (!IMU.begin()) {
-    dia_imu.message = "Disconnect";
-    dia_imu.level = STALE;
+void ultrasonicData() {
+  for (int i = 0; i < NUM_SONAR; i++) {
+    curDuration[i] = sonar[i].ping(); // ping distance in microseconds
+    // sonar sensors return 0 if no obstacle is detected
+
+    curDistance[i] = (curDuration[i] * 0.034) / 2; // convert microseconds to cm
+
+    // if no object is detected set current distance to previous 
+    if (curDistance[i] == 0){
+      curDistanceOutput[i] = prevDistance[i];
+    }
+    else{
+      curDistance[i] = expFilter(alphaUltra, prevDistance[i], curDistance[i]); // filter distance values
+      curDistanceCM[i] = String(curDistance[i]); // convert distance in cm to string
+      curDistanceOutput[i] = curDistanceCM[i].substring(0,curDistanceCM[i].length()-1); // concatanate cm with decimal mm
+    }  
+
+    ultraArray[i] = curDistanceOutput[i].toFloat(); // convert output to float and assign to
+    prevDistance[i] = curDistance[i]; // set previous distance to current 
+
   }
+  
+  ultraMsg.data = ultraArray; // update msg with curent array of values
+  ultraPub.publish(&ultraMsg);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//Get Gyroscope signals
+//inputs: AccX, AccY => For integrating
+//outputs: AngleRoll, AnglePitch => Integrated
+//-------------------------------------------------------------------------------------------------------------------------------------
+void gyroscopeData(void) {
+  //if (startup) {delay(10); startup = false;} //Fixed by setting initial RateR,P,Y and AccX,Y,Z to 1 instead of 0. Ensure functionality with EMo
   
   if (IMU.gyroscopeAvailable()) {
-    IMU.readGyroscope(curAcelX, curAcelY, curAcelZ); //Provides positional information for X, Y, and Z on a scale of -1 to 1
+    IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
+    //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
   }
-  curAcelX = expFilter(alphaGyro, acelX, curAcelX);
-  curAcelY = expFilter(alphaGyro, acelY, curAcelY);
-  //curAcelXmap = map(curAcelX*100, -100, 100, 0, 360) - 180;//Subtract 180 from this value to measure gyro on a scale of -180 to 180 degrees
-  //curAcelYmap = map(curAcelY*100, -100, 100, 0, 360) - 180;//Subtract 180 from this value to measure gyro on a scale of -180 to 180 degrees
-  
-  acelX = curAcelX;
-  acelY = curAcelY;
-  angular_velocity.x = curAcelX;
-  angular_velocity.y = curAcelY;
-  //linear_acceleration.x = curAcelX;
-  //linear_acceleration.y = curAcelY;
-  
-  if(curAcelYmap < minusThreshold*2 || plusThreshold*2 < curAcelYmap || curAcelXmap < minusThreshold*2 || plusThreshold*2 < curAcelXmap)
-  {
-    //error = '0';
-    dia_imu.message = "Roll over emergency";
-    dia_imu.level = ERROR;
-    //roll over emergency
-    
-  }
-  else if(curAcelYmap < minusThreshold || plusThreshold < curAcelYmap || curAcelXmap < minusThreshold || plusThreshold < curAcelXmap)
-  {
-    //error = '1';
 
-    dia_imu.message = "Roll over warning";
-    dia_imu.level = WARN;
-    //roll over warning
+  if (IMU.accelerationAvailable()) {
+    IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
   }
-  else{
 
-    dia_imu.message = "All Good";
-    dia_imu.level = OK;
-    //All good
-  }
-  imu_key[0].key = "";
-  //imu_key[0].value = "temp";
+  AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
+  AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
+
+  //calculate_orientation(); <-- needs to be tested!
+}
+
+void calculate_orientation() {
+  RateRoll -= RateCalibrationRoll;
+  RatePitch -= RateCalibrationPitch;
+  RateYaw -= RateCalibrationYaw;
+  kalman_1d(KalmanAngleRoll, KalmanUncertaintyAngleRoll, RateRoll, AngleRoll);
+  angular_velocity.x = KalmanAngleRoll = Kalman1DOutput[0];
+  KalmanUncertaintyAngleRoll = Kalman1DOutput[1];
+  kalman_1d(KalmanAnglePitch, KalmanUncertaintyAnglePitch, RatePitch, AnglePitch);
+  angular_velocity.y = KalmanAnglePitch = Kalman1DOutput[0];
+  KalmanUncertaintyAnglePitch = Kalman1DOutput[1];
+  imuPub.publish(&angular_velocity);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+//1D Kalman filter
+//inputs: KalmanState, KalmanUncertainty, KalmanInput, KalmanMeasurement => Kalman filter inputs
+//outputs: Kalman1DOutput => Gives Kalman filter outputs
+//-------------------------------------------------------------------------------------------------------------------------------------
+void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, float KalmanMeasurement) {
+  //Don't forget that 0.004 is the time separation (4 ms)
+  KalmanState = KalmanState + 0.004 * KalmanInput;
+  KalmanUncertainty = KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
+  float KalmanGain = KalmanUncertainty * 1 / (1 * KalmanUncertainty + 2); //Edited from original document as Kalman Gain factor was too high for sensitivty of BLE 33 sense's IMU
+  KalmanState = KalmanState + KalmanGain * (KalmanMeasurement - KalmanState);
+  KalmanUncertainty = (1 - KalmanGain) * KalmanUncertainty;
+  Kalman1DOutput[0] = KalmanState;
+  Kalman1DOutput[1] = KalmanUncertainty;
 }
 
 float boxTemperatureData() {
@@ -299,13 +366,14 @@ float boxTemperatureData() {
     //return temp_reading.substring(0, 3);
     box_key[0].key = "box temp";
     box_key[0].value = "temp";
-    return(currTemp);
+    boxTemp_data.data = currTemp;
+    boxTempPub.publish(&boxTemp_data);  
 
   }
   //errorHexBits[3] = 'E';
   // disconnect
   dia_boxTemp.message = "Disconnect";
-  dia_boxTemp.level = STALE;
+  dia_boxTemp.level = STALE; 
 }
 
 void voltageSensorData() {
@@ -313,12 +381,12 @@ void voltageSensorData() {
   // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
   sensorValue = expFilter(alphaVoltSense, prevSensorValue, sensorValue);
   prevSensorValue = sensorValue;
-  Serial.print(sensorValue);
   volt = ( sensorValue * 0.2008451735 ) - 80.97365371; //Linear regression line-of-best-fit
 
   float voltPercent = ( sensorValue - Vmin ) / diff;
   
-  voltConverter_msg.voltage = volt;
+  voltConverterMsg.voltage = volt;
+  voltConverterMsg.percentage = voltPercent;
 }
 
 void voltageConverterTempData() {
@@ -386,7 +454,7 @@ void batteryTempData(){
 }
 
 void gps(){
-  gpsNode.spinOnce();
+  nh.spinOnce();
 
   while (Serial2.available() > 0)
   {
@@ -397,7 +465,7 @@ void gps(){
       {
         if (!error)
         {
-          gpsMessage.status.status = 14;
+          gpsMsg.status.status = 14;
         }
         error = true;
       }
@@ -405,18 +473,18 @@ void gps(){
       {
         if (!error)
         {
-          gpsMessage.status.status = 14;
+          gpsMsg.status.status = 14;
         }
         error = true;
       }
       else
       {
-        gpsMessage.header.stamp.sec = gps.time.second();
-        gpsMessage.header.stamp.nsec = gps.time.centisecond() * 10000000;
-        gpsMessage.latitude = gps.location.lat();
-        gpsMessage.longitude = gps.location.lng();
-        gpsMessage.altitude = gps.altitude.meters();
-        gpsMessage.status.status = 15;
+        gpsMsg.header.stamp.sec = gps.time.second();
+        gpsMsg.header.stamp.nsec = gps.time.centisecond() * 10000000;
+        gpsMsg.latitude = gps.location.lat();
+        gpsMsg.longitude = gps.location.lng();
+        gpsMsg.altitude = gps.altitude.meters();
+        gpsMsg.status.status = 15;
         error = false;
       }
     }
@@ -425,13 +493,13 @@ void gps(){
   if (millis() > 1000 && gps.charsProcessed() < 10)
   {
     
-    gpsMessage.status.status = 14;
-    gpsMessage.latitude = 0;
-    gpsMessage.longitude = 0;
+    gpsMsg.status.status = 14;
+    gpsMsg.latitude = 0;
+    gpsMsg.longitude = 0;
     //while(true);
   }
 
-  pub.publish(&gpsMessage);
+  gpsPub.publish(&gpsMsg);
 }
 
 double expFilter(double alpha, double prevReading, double curReading){ 
