@@ -61,25 +61,17 @@ void setup() {
 }
 
 void loop() {
-  LastLoop = micros();
   // put your main code here, to run repeatedly:
   // debugln() -- Use this instead of Print-- See lines 2-9
 
   gyro_signals();
-  calculate_orientation();
   
   debug(KalmanAngleRoll);
   debug(", ");
-  debugln(KalmanAnglePitch);
-  
-  
-  angular_velocity.x = KalmanAngleRoll;
-  angular_velocity.y = KalmanAnglePitch;
-  imuPub.publish(&angular_velocity);
-  
-
-  while (micros() - LoopTimer < 4000);
-  LoopTimer = micros();
+  debug(KalmanAnglePitch);
+  debug(", ");
+  //while (micros() - LoopTimer < 4000);
+  //LoopTimer = micros();
 
   nh.spinOnce();
 }
@@ -89,11 +81,12 @@ void calculate_orientation() {
   RatePitch -= RateCalibrationPitch;
   RateYaw -= RateCalibrationYaw;
   kalman_1d(KalmanAngleRoll, KalmanUncertaintyAngleRoll, RateRoll, AngleRoll);
-  KalmanAngleRoll = Kalman1DOutput[0];
+  angular_velocity.x = KalmanAngleRoll = Kalman1DOutput[0];
   KalmanUncertaintyAngleRoll = Kalman1DOutput[1];
   kalman_1d(KalmanAnglePitch, KalmanUncertaintyAnglePitch, RatePitch, AnglePitch);
-  KalmanAnglePitch = Kalman1DOutput[0];
+  angular_velocity.y = KalmanAnglePitch = Kalman1DOutput[0];
   KalmanUncertaintyAnglePitch = Kalman1DOutput[1];
+  imuPub.publish(&angular_velocity);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -118,16 +111,24 @@ void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, fl
 //-------------------------------------------------------------------------------------------------------------------------------------
 void gyro_signals(void) {
   //if (startup) {delay(10); startup = false;} //Fixed by setting initial RateR,P,Y and AccX,Y,Z to 1 instead of 0. Ensure functionality with EMo
-  
-  if (IMU.gyroscopeAvailable()) {
-    IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
-    //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
-  }
+  debug(micros());
+  debug(", ");
+  debugln(LoopTimer);
+  if (micros() - LoopTimer > 4000) {
+    if (IMU.gyroscopeAvailable()) {
+      IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
+      //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
+    }
 
-  if (IMU.accelerationAvailable()) {
-    IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
-  }
+    if (IMU.accelerationAvailable()) {
+      IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
+    }
 
-  AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
-  AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
+    AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
+    AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
+
+    calculate_orientation();
+    
+    LoopTimer = micros();
+  }
 }
