@@ -1,7 +1,7 @@
 //ROS data-type libraries
 #include <ros.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/String.h>
+//#include <std_msgs/Float64.h>
+//#include <std_msgs/String.h>
 #include <std_msgs/Float32MultiArray.h> // Ultra
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/BatteryState.h>
@@ -14,16 +14,16 @@
 #include <Arduino_LSM9DS1.h> // IMU
 
 //GPS Include
-#include <Arduino.h>
+//#include <Arduino.h> //Causes errors, "__FlashStringHelper already declared"
 #include <TinyGPSPlus.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>    ASK KAIDEN
 #include <float.h>
 #include <ros/time.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/NavSatStatus.h>
 
 // Debug settings for serial printing.
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
 #define debugln(x) Serial.println(x)
@@ -109,7 +109,7 @@ float volt;
 // IMPORTANT: This code is written specifically for a GPS unit that receives signal at a frequency of 1Hz.
 // If a GPS with a higher refresh rate is used in the future, this code will need to be reworked. -Kaiden
 TinyGPSPlus gps; //Boolean that keeps track of whether the previous reading was zero (prevents duplicate error messages)
-bool error = false;
+bool gpsError = false;
 int lastSecond = -1;
 
 // Declare alpha for each sensor as necessary
@@ -136,14 +136,15 @@ ros::NodeHandle nh;
 std_msgs::Float32MultiArray ultraMsg;
 ros::Publisher ultraPub("ultrasonic_pub", &ultraMsg);
 
+//sensor_msgs::Imu imuMsg;
 geometry_msgs::Vector3 angular_velocity;
 ros::Publisher imuPub("imu_pub",&angular_velocity);
 
 sensor_msgs::Temperature boxTemp_data;
 ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
 
-sensor_msgs::BatteryState voltageConverterMsg;
-ros::Publisher voltConverterPub("voltageConverter_pub", &voltageConverterMsg);
+sensor_msgs::BatteryState voltConverterMsg;
+ros::Publisher voltConverterPub("voltageConverter_pub", &voltConverterMsg);
 
 sensor_msgs::Temperature voltConverterTemp_msg;
 ros::Publisher voltConverterTempPub("voltConverterTemp_pub", &voltConverterTemp_msg);
@@ -184,18 +185,18 @@ void setup() {
 
   //Ros setup
   nh.initNode();
-  nh.advertise(ultraPub);
-  nh.advertise(imuPub);
-  nh.advertise(boxTempPub);
-  nh.advertise(voltConverterPub);
+  //nh.advertise(ultraPub);
+  //nh.advertise(imuPub);
+  //nh.advertise(boxTempPub);
+  //nh.advertise(voltConverterPub);
   nh.advertise(voltConverterTempPub);
   nh.advertise(batteryTempPub);
-  nh.advertise(gpsPub);
+  //nh.advertise(gpsPub);
   
-  nh.advertise(diaImuPub);
-  nh.advertise(diaBoxTempPub);
-  nh.advertise(diaVoltConverterTempPub);
-  nh.advertise(diaBatteryTempPub);
+  //nh.advertise(diaImuPub);
+  //nh.advertise(diaBoxTempPub);
+  //nh.advertise(diaVoltConverterTempPub);
+  //nh.advertise(diaBatteryTempPub);
 
   dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_boxTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
@@ -205,7 +206,7 @@ void setup() {
   dia_batteryTemp.name = "Battery Temp";
 
   //Method setup
-  msg.data_length = 4; // initialize length of ultrasonic msg array
+  ultraMsg.data_length = 4; // initialize length of ultrasonic msg array
 
   LoopTimer = 0; //Going to have to find a way to integrate loop into method, not high-level loop
   if (!IMU.begin()) {
@@ -215,7 +216,7 @@ void setup() {
 
   pinMode(voltagePin, INPUT); // Voltage sensor setup
   pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
-  pinMmode(batteryTemp, INPUT); // Battery temp setup
+  pinMode(batteryTemp, INPUT); // Battery temp setup
 
 }
 
@@ -223,13 +224,13 @@ void loop() {
   
   delay(10);
 
-  ultrasonicData();
-  gyroscopeData();
-  boxTemperatureData();
-  voltageSensorData();
+  //ultrasonicData();
+  //gyroscopeData();
+  //boxTemperatureData();
+  //voltageSensorData();
   voltageConverterTempData();
   batteryTempData();
-  gps();
+  //gps();
 
   /*
   // diagnostic update
@@ -256,7 +257,7 @@ void ultrasonicData() {
 
     // if no object is detected set current distance to previous 
     if (curDistance[i] == 0){
-      curDistanceOutput[i] = prevDistance[i];
+      curDistanceOutput[i] = String(prevDistance[i]);
     }
     else{
       curDistance[i] = expFilter(alphaUltra, prevDistance[i], curDistance[i]); // filter distance values
@@ -280,20 +281,23 @@ void ultrasonicData() {
 //-------------------------------------------------------------------------------------------------------------------------------------
 void gyroscopeData(void) {
   //if (startup) {delay(10); startup = false;} //Fixed by setting initial RateR,P,Y and AccX,Y,Z to 1 instead of 0. Ensure functionality with EMo
+  if (micros() - LoopTimer > 4000) {
+    if (IMU.gyroscopeAvailable()) {
+      IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
+      //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
+    }
+
+    if (IMU.accelerationAvailable()) {
+      IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
+    }
+
+    AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
+    AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
+
+    calculate_orientation();
   
-  if (IMU.gyroscopeAvailable()) {
-    IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
-    //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
+    LoopTimer = micros();
   }
-
-  if (IMU.accelerationAvailable()) {
-    IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
-  }
-
-  AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
-  AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
-
-  //calculate_orientation(); <-- needs to be tested!
 }
 
 void calculate_orientation() {
@@ -366,14 +370,15 @@ float boxTemperatureData() {
     //return temp_reading.substring(0, 3);
     box_key[0].key = "box temp";
     box_key[0].value = "temp";
-    boxTemp_data.data = currTemp;
-    boxTempPub.publish(&boxTemp_data);  
+    
 
   }
   //errorHexBits[3] = 'E';
   // disconnect
   dia_boxTemp.message = "Disconnect";
   dia_boxTemp.level = STALE; 
+  boxTemp_data.temperature = currTemp;
+  boxTempPub.publish(&boxTemp_data);  
 }
 
 void voltageSensorData() {
@@ -387,17 +392,21 @@ void voltageSensorData() {
   
   voltConverterMsg.voltage = volt;
   voltConverterMsg.percentage = voltPercent;
+
+  voltConverterPub.publish(&voltConverterMsg);
 }
 
 void voltageConverterTempData() {
 
-  Vo = analogRead(voltageConverterTemp);
+  Vo_v = analogRead(voltageConverterTemp);
   R2_v = R1_v * (1023.0 / (float)Vo_v - 1.0);
   logR2_v = log(R2_v);
   T_v = (1.0 / (c1 + c2*logR2_v + c3*logR2_v*logR2_v*logR2_v));
   T_v = T_v - 273.15;
 
   voltConverterTemp_msg.temperature = T_v;
+
+  voltConverterTempPub.publish(&voltConverterTemp_msg);
 
   if (T_v <= 0) { 
     dia_voltConverterTemp.message = "Underheat Emergency"; 
@@ -431,6 +440,8 @@ void batteryTempData(){
 
   batteryTemp_msg.temperature = T_b;
 
+  batteryTempPub.publish(&batteryTemp_msg);
+
   if (T_b <= 30) { 
     dia_batteryTemp.message = "Underheat Emergency"; 
     dia_batteryTemp.level = ERROR;
@@ -452,9 +463,8 @@ void batteryTempData(){
     dia_batteryTemp.level = ERROR;
   }
 }
-
+/* WAIT UNTIL MEETING TO ASK GREG IF SECOND SERIAL WILL BREAK BOARD
 void gps(){
-  nh.spinOnce();
 
   while (Serial2.available() > 0)
   {
@@ -463,19 +473,19 @@ void gps(){
       lastSecond = gps.time.second();
       if(gps.location.lat() == 0 && gps.location.lng() == 0)
       {
-        if (!error)
+        if (!gpsError)
         {
           gpsMsg.status.status = 14;
         }
-        error = true;
+        gpsError = true;
       }
       else if (gps.location.age() > 500)
       {
-        if (!error)
+        if (!gpsError)
         {
           gpsMsg.status.status = 14;
         }
-        error = true;
+        gpsError = true;
       }
       else
       {
@@ -485,7 +495,7 @@ void gps(){
         gpsMsg.longitude = gps.location.lng();
         gpsMsg.altitude = gps.altitude.meters();
         gpsMsg.status.status = 15;
-        error = false;
+        gpsError = false;
       }
     }
   }
@@ -501,7 +511,7 @@ void gps(){
 
   gpsPub.publish(&gpsMsg);
 }
-
+*/
 double expFilter(double alpha, double prevReading, double curReading){ 
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
