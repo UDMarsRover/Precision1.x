@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+# lidar_widget_with_ros.py
+from random import randint
+import sys
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
+import numpy as np
+import math
+import threading
+import rospy
+from sensor_msgs.msg import LaserScan 
+import random
+
+
+class LidarWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.area_width = 500
+        self.area_height = 500
+        self.setMinimumSize(500, 500)
+        self.setWindowTitle("Random Red Dots")
+        self.canvas = QtGui.QPixmap(self.area_width, self.area_height)
+        self.canvas.fill(QtGui.QColor("black"))
+
+        rospy.init_node("lidar_gui_node", anonymous=True)
+        self.ros_thread = threading.Thread(target=self.update_from_ros)
+        self.ros_thread.start()
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.draw_dots)
+        self.timer.start(200)  # Update every 100ms
+        self.dots = []
+        self.painter = QPainter(self.canvas)
+        self.num_points = 760
+        self.x = np.zeros(self.num_points)
+        self.y = np.zeros(self.num_points)
+
+    def ros_callback(self, data):
+        num_points = len(data.ranges)
+        array = np.zeros((num_points, 2))
+        for i in range(num_points):
+            array[i][0] = (i / float(num_points)) * 2 * math.pi
+            if not math.isinf(data.ranges[i]):
+                array[i][1] = data.ranges[i]
+            else:
+                array[i][1] = 1000
+        for i in range(num_points):
+            array[i][0], array[i][1] = self.pol2cart(array[i][1], array[i][0])
+        x = np.zeros(num_points)
+        y = np.zeros(num_points)
+        for i in range(num_points):
+            x[i] = array[i][0]
+            y[i] = array[i][1]
+        x = x * 100
+        y = y * 100
+        self.y, self.x = -x, -y
+    
+    def update_from_ros(self):
+        
+        sub = rospy.Subscriber("scan", LaserScan, self.ros_callback)
+        rospy.spin()
+
+    def draw_dots(self):
+        # Clear previous dots
+        self.canvas.fill(QtGui.QColor("black"))
+
+        # x, y = self.get_data()
+        x, y = self.x, self.y
+        for i in range(len(x)):
+            x[i] = x[i] + self.area_width / 2
+            y[i] = y[i] + self.area_height / 2
+            self.dots.append((x[i], y[i]))
+            # color = self.random_rainbow_color()
+            color = QtGui.QColor("red")
+            self.painter.setBrush(QBrush(color, Qt.SolidPattern))
+            self.painter.setPen(color)
+            self.painter.drawEllipse(int(x[i]), int(y[i]), 1, 1)
+
+        self.update()
+
+    def random_rainbow_color(self):
+        # Define the rainbow colors (ROYGBIV)
+        rainbow_colors = [
+            QColor(255, 0, 0),   # Red
+            QColor(255, 165, 0), # Orange
+            QColor(255, 255, 0), # Yellow
+            QColor(0, 255, 0),   # Green
+            QColor(0, 0, 255),   # Blue
+            QColor(75, 0, 130),  # Indigo
+            QColor(148, 0, 211)  # Violet
+        ]
+
+        # Choose a random color from the rainbow
+        return random.choice(rainbow_colors)
+
+    def pol2cart(self, rho, phi):
+        x = rho * np.cos(phi)
+        y = rho * np.sin(phi)
+        return(x, y)
+
+    def paintEvent(self, event):
+        painter = QtGui.QPainter(self)
+        painter.drawPixmap(0, 0, self.canvas)
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = LidarWidget()
+    window.show()
+    sys.exit(app.exec_())
