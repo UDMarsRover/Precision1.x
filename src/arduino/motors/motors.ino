@@ -22,6 +22,9 @@
 #define CH1 2
 #define CH2 3
 #define CH3 4
+#define CH4 5
+#define CH5 6
+#define CH6 7
 
 
 int input;
@@ -33,7 +36,6 @@ boolean goodl = false;
 boolean goodr = false;
 int numberOfMotors = 3;
 int* driveStatus;
-int leftMotors[] = {1,2,3};
 int mid = 2;
 int led = 7;
 bool ok = false;
@@ -191,9 +193,12 @@ void setup() {
 
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
-  leftMotors.push_back(MoogMotor(CH1,&Serial1,40));
-  rightMotors.push_back(MoogMotor(CH3,&Serial1,40));
+  leftMotors.push_back(MoogMotor(CH4,&Serial1,40));
+  leftMotors.push_back(MoogMotor(CH5,&Serial1,40));
+  leftMotors.push_back(MoogMotor(CH6,&Serial1,40));
+  rightMotors.push_back(MoogMotor(CH1,&Serial1,28));
   rightMotors.push_back(MoogMotor(CH2,&Serial1,28));
+  rightMotors.push_back(MoogMotor(CH3,&Serial1,40));
 
   driveTrain = UDMRTDrivetrain(leftMotors, rightMotors);
 

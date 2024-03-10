@@ -24,7 +24,7 @@ class MoogMotor
  {
   public:
     MoogMotor();
-    MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution=4000, int samplerate=8000, int delayTime=10, float acc=0.25);
+    MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution=4000, int samplerate=8000, int delayTime=5, float acc=0.25);
     boolean setVelocity(float rpm, float acceleration);
     boolean setTorque(float torque);
     boolean setPosition(float value,float velocity, float acceleration);

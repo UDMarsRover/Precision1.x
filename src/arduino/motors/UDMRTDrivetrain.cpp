@@ -42,10 +42,10 @@ bool UDMRTDrivetrain::drive(float kmPerHour_prec, float degPerSecond_prec, float
 
 void UDMRTDrivetrain::reset(){
   
-  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+  for (int i = 0; i <= UDMRTDrivetrain::leftMotors.size(); i ++){
     UDMRTDrivetrain::rightMotors[i].resetStatusCodes();
   }
-  for (int i = 0; i < UDMRTDrivetrain::rightMotors.size(); i ++){
+  for (int i = 0; i <= UDMRTDrivetrain::rightMotors.size(); i ++){
     UDMRTDrivetrain::leftMotors[i].resetStatusCodes();
   }
 
