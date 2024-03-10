@@ -16,7 +16,7 @@
 //GPS Include
 //#include <Arduino.h> //Causes errors, "__FlashStringHelper already declared"
 #include <TinyGPSPlus.h>
-//#include <SoftwareSerial.h>    ASK KAIDEN
+//#include <SoftwareSerial.h>
 #include <float.h>
 #include <ros/time.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -181,17 +181,17 @@ diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
 
 void setup() {
   // setup
-  //Serial.begin(9600);
+  Serial1.begin(9600);
 
   //Ros setup
   nh.initNode();
   //nh.advertise(ultraPub);
-  //nh.advertise(imuPub);
-  //nh.advertise(boxTempPub);
-  //nh.advertise(voltConverterPub);
-  nh.advertise(voltConverterTempPub);
-  nh.advertise(batteryTempPub);
-  //nh.advertise(gpsPub);
+  //nh.advertise(imuPub); // works
+  //nh.advertise(boxTempPub); // broken
+  //nh.advertise(voltConverterPub); // broken
+  //nh.advertise(voltConverterTempPub); // works
+  //nh.advertise(batteryTempPub); // works
+  nh.advertise(gpsPub);
   
   //nh.advertise(diaImuPub);
   //nh.advertise(diaBoxTempPub);
@@ -228,9 +228,9 @@ void loop() {
   //gyroscopeData();
   //boxTemperatureData();
   //voltageSensorData();
-  voltageConverterTempData();
-  batteryTempData();
-  //gps();
+  //voltageConverterTempData();
+  //batteryTempData();
+  gpsData();
 
   /*
   // diagnostic update
@@ -463,8 +463,8 @@ void batteryTempData(){
     dia_batteryTemp.level = ERROR;
   }
 }
-/* WAIT UNTIL MEETING TO ASK GREG IF SECOND SERIAL WILL BREAK BOARD
-void gps(){
+
+void gpsData() {
 
   while (Serial2.available() > 0)
   {
@@ -511,7 +511,7 @@ void gps(){
 
   gpsPub.publish(&gpsMsg);
 }
-*/
+
 double expFilter(double alpha, double prevReading, double curReading){ 
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
