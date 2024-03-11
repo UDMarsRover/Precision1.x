@@ -1,3 +1,4 @@
+#include <Arduino.h>
 //ROS data-type libraries
 #include <ros.h>
 //#include <std_msgs/Float64.h>
@@ -14,9 +15,7 @@
 #include <Arduino_LSM9DS1.h> // IMU
 
 //GPS Include
-//#include <Arduino.h> //Causes errors, "__FlashStringHelper already declared"
 #include <TinyGPSPlus.h>
-//#include <SoftwareSerial.h>
 #include <float.h>
 #include <ros/time.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -185,13 +184,13 @@ void setup() {
 
   //Ros setup
   nh.initNode();
-  //nh.advertise(ultraPub);
+  //nh.advertise(ultraPub); // works
   //nh.advertise(imuPub); // works
   //nh.advertise(boxTempPub); // broken
   //nh.advertise(voltConverterPub); // broken
   //nh.advertise(voltConverterTempPub); // works
   //nh.advertise(batteryTempPub); // works
-  nh.advertise(gpsPub);
+  //nh.advertise(gpsPub); // works
   
   //nh.advertise(diaImuPub);
   //nh.advertise(diaBoxTempPub);
@@ -230,7 +229,7 @@ void loop() {
   //voltageSensorData();
   //voltageConverterTempData();
   //batteryTempData();
-  gpsData();
+  //gpsData();
 
   /*
   // diagnostic update
@@ -466,9 +465,9 @@ void batteryTempData(){
 
 void gpsData() {
 
-  while (Serial2.available() > 0)
+  while (Serial1.available() > 0)
   {
-    if (gps.encode(Serial2.read()) && gps.time.second() != lastSecond)
+    if (gps.encode(Serial1.read()) && gps.time.second() != lastSecond)
     {
       lastSecond = gps.time.second();
       if(gps.location.lat() == 0 && gps.location.lng() == 0)
