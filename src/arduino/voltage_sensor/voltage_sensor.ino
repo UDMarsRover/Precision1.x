@@ -1,6 +1,10 @@
 
 #include <ros.h>
 #include "C:\Users\Paul\MarsRoverWork\Precision1.x\src\arduino\voltage_sensor\BatteryState.h"
+
+//The following include statement throughs a Checksum does not match error. This means the file imported by this line does not match with the file ros.h is looking for.
+//Why? I do not know. But, if you install the BatteryState file directly, it works.
+
 //#include <sensor_msgs/BatteryState.h>
 
 int voltagePin = A0;

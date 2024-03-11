@@ -5,7 +5,8 @@
 //#include <std_msgs/String.h>
 #include <std_msgs/Float32MultiArray.h> // Ultra
 #include <sensor_msgs/Imu.h>
-#include <sensor_msgs/BatteryState.h>
+#include "C:\Users\Paul\MarsRoverWork\Precision1.x\ros_lib\sensor_msgs\BatteryState.h"
+//#include <sensor_msgs/BatteryState.h> // Does not work, see voltage_sensor.ino
 #include <sensor_msgs/Temperature.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
@@ -187,7 +188,7 @@ void setup() {
   //nh.advertise(ultraPub); // works
   //nh.advertise(imuPub); // works
   //nh.advertise(boxTempPub); // broken
-  //nh.advertise(voltConverterPub); // broken
+  nh.advertise(voltConverterPub); // works
   //nh.advertise(voltConverterTempPub); // works
   //nh.advertise(batteryTempPub); // works
   //nh.advertise(gpsPub); // works
@@ -226,7 +227,7 @@ void loop() {
   //ultrasonicData();
   //gyroscopeData();
   //boxTemperatureData();
-  //voltageSensorData();
+  voltageSensorData();
   //voltageConverterTempData();
   //batteryTempData();
   //gpsData();
