@@ -1,5 +1,7 @@
+
 #include <ros.h>
-#include <std_msgs/Float32.h>
+#include "C:\Users\Paul\MarsRoverWork\Precision1.x\src\arduino\voltage_sensor\BatteryState.h"
+//#include <sensor_msgs/BatteryState.h>
 
 int voltagePin = A0;
 ros::NodeHandle voltage;
@@ -12,51 +14,50 @@ const float Vmin = 630.2345; //This is real reading of voltage sensor at V = 45.
 //Above values were adjusted for accuracy between 45.5-50V, reading >50V results in an output about 0.5-1.0V less than actual
 float diff = Vmax - Vmin;
 float volt;
-std_msgs::Float32 voltage_msg;
 //ros::Publisher voltage_node("Voltage", &voltage_msg);
 float alpha = 0.1;
 int i = 0;
 float sum;
 float avg;
+double alphaVoltSense = 0.1;
 
 //At 57 volts, converter reads 2.2 V
 //At 43 volts, converter reads 1.975
 
+ros::NodeHandle voltNode;
+
+sensor_msgs::BatteryState voltConverterMsg;
+ros::Publisher voltConverterPub("voltageConverter_pub", &voltConverterMsg);
+
 void setup() {
-  //volt.initNode();
-  //volt.advertise(voltage_node);
+  voltNode.initNode();
+  voltNode.advertise(voltConverterPub);
   pinMode(voltagePin, INPUT);
-  Serial.begin(9600);
 }
 
 void loop() {
-  sensorValue = analogRead(voltagePin);
-  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
-  sensorValue = expFilter(alpha, prevSensorValue, sensorValue);
-  prevSensorValue = sensorValue;
-  Serial.print(sensorValue);
-  volt = ( sensorValue * 0.2008451735 ) - 80.97365371; //Linear regression line-of-best-fit
+  delay(10);
+  
+  voltageSensorData();
 
-  float voltPercent = ( sensorValue - Vmin ) / diff;
-  Serial.print(", ");
-  Serial.print(volt, 8);
-  Serial.print(", ");
-  Serial.println(voltPercent, 8);
-  delay(50);
-
-  i += 1;
-  sum += volt;
-  if (i > 200) {
-    avg = sum / i;
-    i = 0;
-    sum = 0;
-    Serial.println(avg,10);
-  }
-  //voltage_msg.data = batteryVoltage;
-  //voltage_node.publish(&voltage_msg);
-  //volt.spinOnce();
+  voltNode.spinOnce();
 }
 
 double expFilter(double alpha, double prevReading, double curReading){ 
   return (alpha * curReading) + ((1 - alpha) * prevReading);
+}
+
+void voltageSensorData() {
+  sensorValue = analogRead(voltagePin);
+  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  sensorValue = expFilter(alphaVoltSense, prevSensorValue, sensorValue);
+  prevSensorValue = sensorValue;
+  volt = ( sensorValue * 0.2008451735 ) - 80.97365371; //Linear regression line-of-best-fit
+
+  float voltPercent = ( sensorValue - Vmin ) / diff;
+  
+  voltConverterMsg.voltage = volt;
+  voltConverterMsg.percentage = voltPercent;
+
+  voltConverterPub.publish(&voltConverterMsg);
 }
