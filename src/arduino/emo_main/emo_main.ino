@@ -140,8 +140,8 @@ ros::Publisher ultraPub("ultrasonic_pub", &ultraMsg);
 geometry_msgs::Vector3 angular_velocity;
 ros::Publisher imuPub("imu_pub",&angular_velocity);
 
-sensor_msgs::Temperature boxTemp_data;
-ros::Publisher boxTempPub("boxTemp_pub", &boxTemp_data);
+sensor_msgs::Temperature boxTemp;
+ros::Publisher boxTempPub("boxTemp_Pub", &boxTemp);
 
 sensor_msgs::BatteryState voltConverterMsg;
 ros::Publisher voltConverterPub("voltageConverter_pub", &voltConverterMsg);
@@ -187,8 +187,8 @@ void setup() {
   nh.initNode();
   //nh.advertise(ultraPub); // works
   //nh.advertise(imuPub); // works
-  //nh.advertise(boxTempPub); // broken
-  nh.advertise(voltConverterPub); // works
+  nh.advertise(boxTempPub); // broken
+  //nh.advertise(voltConverterPub); // works
   //nh.advertise(voltConverterTempPub); // works
   //nh.advertise(batteryTempPub); // works
   //nh.advertise(gpsPub); // works
@@ -214,6 +214,11 @@ void setup() {
     while (1);
   }
 
+  if (!HTS.begin()) {
+    debugln("Failed to initialize temperature sensor!");
+    while (1);
+  }
+
   pinMode(voltagePin, INPUT); // Voltage sensor setup
   pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
   pinMode(batteryTemp, INPUT); // Battery temp setup
@@ -226,8 +231,8 @@ void loop() {
 
   //ultrasonicData();
   //gyroscopeData();
-  //boxTemperatureData();
-  voltageSensorData();
+  boxTemperatureData();
+  //voltageSensorData();
   //voltageConverterTempData();
   //batteryTempData();
   //gpsData();
@@ -331,12 +336,15 @@ void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, fl
 
 float boxTemperatureData() {
   //HTS.begin() is necessary to turn on temp sensor
-  if (HTS.begin()){
+  //if (HTS.begin()){
+    /*
     currTemp = HTS.readTemperature();
     // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
     //String temp_reading = (String)(currTemp);
     //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
     // all good
+
+    /*
     dia_boxTemp.message = "All Good";
     dia_boxTemp.level = OK;
     if (currTemp < 0) {
@@ -370,15 +378,17 @@ float boxTemperatureData() {
     //return temp_reading.substring(0, 3);
     box_key[0].key = "box temp";
     box_key[0].value = "temp";
+    */
     
 
-  }
+  //}
+
+
   //errorHexBits[3] = 'E';
   // disconnect
-  dia_boxTemp.message = "Disconnect";
-  dia_boxTemp.level = STALE; 
-  boxTemp_data.temperature = currTemp;
-  boxTempPub.publish(&boxTemp_data);  
+  //dia_boxTemp.message = "Disconnect";
+  //dia_boxTemp.level = STALE;
+
 }
 
 void voltageSensorData() {
