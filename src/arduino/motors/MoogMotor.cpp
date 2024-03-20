@@ -18,8 +18,16 @@ MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resoluti
   MoogMotor::serial = serial;
   MoogMotor::id = id;
   MoogMotor::acc = acc;
-
+  if(&(MoogMotor::serial)){
+    MoogMotor::serial->end();
+    delay(100);
+    MoogMotor::serial->begin(9600);
+    while(!&(MoogMotor::serial));
+  }
   MoogMotor::enable();
+  delay(100);
+  MoogMotor::serial->end();
+  delay(100);
 }
 
 MoogMotor::MoogMotor(){}
@@ -60,6 +68,7 @@ void MoogMotor::enable(){
   MoogMotor::sendCommand("G");        // Go Command to turn on coils
   MoogMotor::sendCommand("X");        // Send Stop Request'
   MoogMotor::sendCommand("AT="+String(MoogMotor::acc * ACCMAX));      //Set the acceration/deceleration
+  MoogMotor::sendCommand("BAUD115200");
 }
 
 bool MoogMotor::sendCommand(String command, bool global){

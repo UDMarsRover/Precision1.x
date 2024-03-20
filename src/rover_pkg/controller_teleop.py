@@ -10,8 +10,8 @@ from inputs import get_gamepad
 class udmrtMotorController:
     def __init__(self):
         rospy.init_node("Controller_teleop", anonymous=True)
-        self.pub = rospy.Publisher("DriveVelocity", Twist, queue_size=10)
-        self.rate = rospy.Rate(5)
+        self.pub = rospy.Publisher("DriveVelocity", Twist, queue_size=2)
+        self.rate = rospy.Rate(2)
         self.linVelY = 0
         self.angVelZ = 0
         self.sec = time.time()
@@ -50,27 +50,22 @@ class udmrtMotorController:
         linVelY_temp = float(self.buttonBuffer["left_joy_y"])
         angVelZ_temp = float(self.buttonBuffer["left_joy_x"])
 
-        valueCheck = bool((np.abs(linVelY_temp) >= np.abs(self.linVelY) + 0.2) or 
-                      (np.abs(linVelY_temp) <= np.abs(self.linVelY) - 0.2) or
-                      (np.abs(angVelZ_temp) >= np.abs(self.angVelZ) + 0.2) or
-                      (np.abs(angVelZ_temp) <= np.abs(self.angVelZ) - 0.2) or 
-                      self.current_start_state)
+        linVelY_temp = linVelY_temp if np.abs(linVelY_temp) > 0.1 else 0
+        angVelZ_temp = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
+
+        valueCheck = bool((self.linVelY !=  linVelY_temp) or 
+                      (angVelZ_temp != self.angVelZ))
+        self.linVelY = linVelY_temp
+        self.angVelZ = angVelZ_temp
+
+
         print(valueCheck)
 
-        if ((time.time()-self.sec > 0.1) or
-            self.current_start_state):
-
-            self.linVelY = linVelY_temp if np.abs(linVelY_temp) > 0.1 else 0
-            self.angVelZ = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
-
-            if valueCheck:
-
-                self.velOut.linear.y = self.linVelY
-                self.velOut.angular.z = self.angVelZ
-                self.velOut.angular.x = float(self.current_start_state)
-                self.pub.publish(self.velOut)
-            
-            self.sec = time.time()
+        if (valueCheck):
+            self.velOut.linear.y = self.linVelY
+            self.velOut.angular.z = self.angVelZ
+            self.velOut.angular.x = float(self.current_start_state)
+            self.pub.publish(self.velOut)
 
     def __getInput__(self):
         """

@@ -15,8 +15,8 @@ sudo apt update -y
 sudo apt install -y ros-noetic-desktop-full
 
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+echo "source /opt/ros/noetic/setup.bash" >> /home/udmrt/.bashrc
+source /home/udmrt/.bashrc
 
 sudo apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo apt install -y python3-rosdep
@@ -26,16 +26,15 @@ rosdep update
 
 sudo apt-get install -y ros-noetic-rosserial ros-noetic-rosserial-arduino
 
-sudo apt-get install python3-pip python3-venv -y
-python3 -m venv ~/p1x
-
-source ~/p1x/bin/activate
+sudo apt-get install python3-pip python3-venv -ys
+ls .. | echo
+source /home/udmrt/p1x/bin/activate
 pip install --upgrade pip
 pip install -r packages.txt
 
-echo "source ~/p1x/bin/activate" >> ~/.bashrc
-echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-echo "cd /mnt/hgfs/Precision1.x" >> ~/.bashrc
+echo "source /home/udmrt/p1x/bin/activate" >> /home/udmrt/.bashrc
+echo "source /opt/ros/noetic/setup.bash" >> /home/udmrt/.bashrc
+echo "cd /mnt/hgfs/Precision1.x" >> /home/udmrt/.bashrc
 
 # Install xbox controller drivers
 

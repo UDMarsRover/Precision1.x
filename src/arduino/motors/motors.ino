@@ -42,6 +42,7 @@ bool ok = false;
 bool warn = false;
 bool error = false;
 int faultedDrive = 0;
+float accRatio = 28./40.;
 
 
 UDMRTDrivetrain driveTrain = UDMRTDrivetrain();
@@ -60,6 +61,7 @@ void runTankDrive(const geometry_msgs::Twist& command){
   float kmh_prec = command.linear.y;    // km/h in x
   float dps_prec = command.angular.z;   // km/h in y
   float reset = command.angular.x;      // Current indicator for motor reset
+  float timeStamp = driverNode.now().toSec();
   
   if(reset != 0){
     driveTrain.reset();
@@ -68,15 +70,15 @@ void runTankDrive(const geometry_msgs::Twist& command){
     currentDriveStatus.message = "Restarting Drive Train";
     
   } else{
-    if(driveTrain.drive(kmh_prec, dps_prec, acceleration)) {
-      driverNode.loginfo("Running Tankd Drive ...");
-      currentDriveStatus.level = 0;
-      currentDriveStatus.message = "Running";
-    } else {
-      driverNode.loginfo("!!! Tank Drive Error !!!");
-      currentDriveStatus.level = 2;
-      currentDriveStatus.message = "Error Communicating With Motors!";
-    }
+      if (driveTrain.drive(kmh_prec, dps_prec, acceleration)) {
+        driverNode.loginfo("Running Tankd Drive ...");
+        currentDriveStatus.level = 0;
+        currentDriveStatus.message = "Running";
+      } else {
+        driverNode.loginfo("!!! Tank Drive Error !!!");
+        currentDriveStatus.level = 2;
+        currentDriveStatus.message = "Error Communicating With Motors!";
+      }
   }
   
 
@@ -187,18 +189,19 @@ void setup() {
   
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  Serial1.begin(9600);
-  while(!Serial1);
   digitalWrite(BLUE, LOW);
 
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
-  leftMotors.push_back(MoogMotor(CH4,&Serial1,40));
-  leftMotors.push_back(MoogMotor(CH5,&Serial1,40));
-  leftMotors.push_back(MoogMotor(CH6,&Serial1,40));
-  rightMotors.push_back(MoogMotor(CH1,&Serial1,28));
-  rightMotors.push_back(MoogMotor(CH2,&Serial1,28));
-  rightMotors.push_back(MoogMotor(CH3,&Serial1,40));
+  leftMotors.push_back(MoogMotor(CH5,&Serial1,40,4000,8000,5,0.25));
+  leftMotors.push_back(MoogMotor(CH6,&Serial1,40,4000,8000,5,0.25));
+  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,4000,8000,5,0.25));
+  rightMotors.push_back(MoogMotor(CH4,&Serial1,40,4000,8000,5,0.25));
+  rightMotors.push_back(MoogMotor(CH1,&Serial1,28,4000,8000,5,0.25*accRatio));
+  rightMotors.push_back(MoogMotor(CH2,&Serial1,28,4000,8000,5,0.25*accRatio));
+  
+  Serial1.begin(115200);
+  while(!Serial1);
 
   driveTrain = UDMRTDrivetrain(leftMotors, rightMotors);
 
@@ -229,7 +232,7 @@ void loop() {
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, HIGH);
   digitalWrite(GREEN, LOW);
-  DriveStatus.publish(&currentDriveStatus);
+  //DriveStatus.publish(&currentDriveStatus);
 /*
   
   for (int i = 1; i <= sizeof(driveStatus); i ++) {
