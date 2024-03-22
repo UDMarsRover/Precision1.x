@@ -4,12 +4,12 @@ import rospy
 import sys
 import os
 from std_msgs.msg import String
-from rover import Rover as Presision1
+#from rover import Rover as Presision1
 import RPi.GPIO as gpio
 
 # Create a rover instance
 rate = 10  # Hz
-p1 = Presision1(rate)
+#p1 = Presision1(rate)
 gpio.setmode(gpio.BCM)
 
 indicatorLED = {"red": 22, "green": 27, "blue": 17}
@@ -48,13 +48,13 @@ if __name__ == "__main__":
     # While roscore is running
     while not rospy.is_shutdown():
         led_control(0, 1, 0)
-        if p1.hasError():
-            print(" i seem to has an ewwow :( plz hewp me :,(...." + p1.getError())
-        else:
-            p1.publishDataToBase()
+        #if p1.hasError():
+        #    print(" i seem to has an ewwow :( plz hewp me :,(...." + p1.getError())
+        #else:
+        #    p1.publishDataToBase()
 
         # Sleep for a set amount of time to keep our rate
-        p1.rate.sleep()
+        #p1.rate.sleep()
 
     shutdown(False)
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
