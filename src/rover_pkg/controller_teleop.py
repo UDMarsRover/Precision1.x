@@ -1,9 +1,9 @@
-
 import rospy
 from geometry_msgs.msg import Twist
 import time
 import numpy as np
 from inputs import get_gamepad
+
 
 class udmrtMotorController:
     def __init__(self):
@@ -36,7 +36,7 @@ class udmrtMotorController:
             "rb": "",
             "lb": "",
             "rt": "",
-            "lt": ""
+            "lt": "",
         }
 
     def spin(self):
@@ -44,21 +44,26 @@ class udmrtMotorController:
         self.__motor_command_check__()
 
     def __motor_command_check__(self):
-        self.current_start_state = self.buttonBuffer["start"] if self.buttonBuffer["start"] != self.current_start_state else 0
+        self.current_start_state = (
+            self.buttonBuffer["start"]
+            if self.buttonBuffer["start"] != self.current_start_state
+            else 0
+        )
         linVelY_temp = float(self.buttonBuffer["left_joy_y"])
         angVelZ_temp = float(self.buttonBuffer["left_joy_x"])
 
         linVelY_temp = linVelY_temp if np.abs(linVelY_temp) > 0.1 else 0
         angVelZ_temp = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
 
-        valueCheck = bool((self.linVelY != linVelY_temp) or
-                     (angVelZ_temp != self.angVelZ))
+        valueCheck = bool(
+            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ)
+        )
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
 
         print(valueCheck)
 
-        if (valueCheck):
+        if valueCheck:
             self.velOut.linear.y = self.linVelY
             self.velOut.angular.z = self.angVelZ
             self.velOut.angular.x = float(self.current_start_state)
@@ -84,20 +89,26 @@ class udmrtMotorController:
         elif event.code == "BTN_TOP":
             self.buttonBuffer["y"] = event.state
         elif event.code == "ABS_Y":
-            self.buttonBuffer["left_joy_y"] = f"{round((int(event.state) - 128)/-128,1)}"
+            self.buttonBuffer[
+                "left_joy_y"
+            ] = f"{round((int(event.state) - 128)/-128,1)}"
         elif event.code == "ABS_X":
             self.buttonBuffer["left_joy_x"] = f"{round((int(event.state) - 128)/128,1)}"
         elif event.code == "ABS_RZ":
-            self.buttonBuffer["right_joy_y"] = f"{round((int(event.state) - 128)/-128,1)}"
+            self.buttonBuffer[
+                "right_joy_y"
+            ] = f"{round((int(event.state) - 128)/-128,1)}"
         elif event.code == "ABS_Z":
-            self.buttonBuffer["right_joy_x"] = f"{round((int(event.state) - 128)/128,1)}"
+            self.buttonBuffer[
+                "right_joy_x"
+            ] = f"{round((int(event.state) - 128)/128,1)}"
         elif event.code == "ABS_HAT0X":
             self.buttonBuffer["dpad_x"] = event.state
         elif event.code == "ABS_HAT0Y":
             self.buttonBuffer["dpad_y"] = str(int(event.state) * -1)
         elif event.code == "BTN_BASE4":
             self.buttonBuffer["start"] = event.state
-        elif event.code == "BTN_BASE3": 
+        elif event.code == "BTN_BASE3":
             self.buttonBuffer["back"] = event.state
         elif event.code == "BTN_PINKIE":
             self.buttonBuffer["rb"] = event.state

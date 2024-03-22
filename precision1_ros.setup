@@ -32,9 +32,9 @@ source /home/udmrt/p1x/bin/activate
 pip install --upgrade pip
 pip install -r packages.txt
 
-echo "source /home/udmrt/p1x/bin/activate" >> /home/udmrt/.bashrc
-echo "source /opt/ros/noetic/setup.bash" >> /home/udmrt/.bashrc
-echo "cd /mnt/hgfs/Precision1.x" >> /home/udmrt/.bashrc
+echo "source /home/udmrt/p1x/bin/activate" >> ~/.bashrc
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+echo "cd /mnt/hgfs/Precision1.x" >> ~/.bashrc
 
 # Install xbox controller drivers
 
