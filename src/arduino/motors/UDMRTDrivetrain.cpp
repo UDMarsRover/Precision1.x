@@ -3,91 +3,49 @@
 
 UDMRTDrivetrain::UDMRTDrivetrain(){}
 
-UDMRTDrivetrain::UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<MoogMotor> rightMotors,float roverWidth, float tireDiameter){
+UDMRTDrivetrain::UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, 
+    std::vector<MoogMotor> rightMotors,
+    float roverWidth, 
+    float tireDiameter, 
+    float max_lin_vel, 
+    float max_ang_vel){
   UDMRTDrivetrain::numberOfMotors = numberOfMotors;
   UDMRTDrivetrain::roverWidth     = roverWidth;
   UDMRTDrivetrain::tireDiameter   = tireDiameter;
   UDMRTDrivetrain::rightMotors    = rightMotors;
   UDMRTDrivetrain::leftMotors     = leftMotors;
+  UDMRTDrivetrain::max_ang_vel    = max_ang_vel;
+  UDMRTDrivetrain::max_lin_vel    = max_lin_vel;
 
-  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
-    Serial.println(UDMRTDrivetrain::leftMotors[i].setID());
-    UDMRTDrivetrain::leftMotors[i].sendCommand("SLEEP");
-  }
-
-    for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
-    UDMRTDrivetrain::leftMotors[i].sendCommand("WAKE",true);
-  }
   
 }
 
-/*
-bool UDMRTDrivetrain::sendCommand( String command, int addr = 0){
-  motor[addr].sendCommand(command);
-}
+bool UDMRTDrivetrain::drive(float kmPerHour_prec, float degPerSecond_prec, float acceleration){
 
-
-void UDMRTDrivetrain::setGear(int gear){
-  if (gear = PARK) motor[0].holdON();       // Send braking command to all motors
-  else if (gear = DRIVE) motor[0].enable(); // Send enable commands to all motors
-  if (gear = NEUTRAL) motor[0].holdOFF();   // Send breaking-off to all motors
-}
-
-*/
-bool UDMRTDrivetrain::drive(float kmPerHour, float degPerSecond, float acceleration){
-
-  float mps = (kmPerHour*1000)/60/60;  //Meters per sec
-  float ds = degPerSecond;        //Dergees per sec
+  float mps = (UDMRTDrivetrain::max_lin_vel*1000)/60/60 * kmPerHour_prec;  //Meters per sec
+  float ds = UDMRTDrivetrain::max_ang_vel * -degPerSecond_prec;              //Dergees per sec
   
   float rdw = ((mps + (UDMRTDrivetrain::roverWidth/2) * ds) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // right wheel rotations / sec
   float ldw = ((((UDMRTDrivetrain::roverWidth/2) * ds) - mps) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // left wheel rotations / sec
 
   bool good = true;
 
-  
-  //good = good && motor[0].setVelocity(ldc, acceleration);
-
-  //UDMRTDrivetrain::motor[2].setVelocity(ldw, acceleration);
-  //UDMRTDrivetrain::motor[3].setVelocity(ldw, acceleration);
-  //UDMRTDrivetrain::motor[4].setVelocity(ldw, acceleration);
-  // Set every left motor to the left speed
-
-  UDMRTDrivetrain::leftMotors[1].setVelocity(ldw, acceleration);
-
-  /*
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
     UDMRTDrivetrain::leftMotors[i].setVelocity(ldw, acceleration);
-    
   }
-  */
   
-  /*
-  // Set every right motor to the rigth speed
-  UDMRTDrivetrain::rightMotors[0].setVelocity(rdw, acceleration);
-  UDMRTDrivetrain::rightMotors[1].setVelocity(rdw, acceleration);
-  UDMRTDrivetrain::rightMotors[2].setVelocity(rdw, acceleration);
-  */
-  
-  /*
-  for (int j = 0; j <= sizeof(UDMRTDrivetrain::rightMotors); j ++){
-    UDMRTDrivetrain::rightMotors[j].setVelocity(rdw, acceleration);
-    //Serial.print(rightMotors[i]);
-    //Serial.print(" ");
-    //Serial.println(motor[rightMotors[i]].id);
-    //good = good && motor[rightMotors[i]].setVelocity(0, acceleration);
+  for (int i = 0; i < UDMRTDrivetrain::rightMotors.size(); i ++){
+    UDMRTDrivetrain::rightMotors[i].setVelocity(rdw, acceleration);
   }
-  */
-  
-  // Return true if executied properly, else return false
   return good;
 }
 
 void UDMRTDrivetrain::reset(){
   
-  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+  for (int i = 0; i <= UDMRTDrivetrain::leftMotors.size(); i ++){
     UDMRTDrivetrain::rightMotors[i].resetStatusCodes();
   }
-  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+  for (int i = 0; i <= UDMRTDrivetrain::rightMotors.size(); i ++){
     UDMRTDrivetrain::leftMotors[i].resetStatusCodes();
   }
 

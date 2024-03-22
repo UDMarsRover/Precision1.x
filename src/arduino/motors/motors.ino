@@ -2,27 +2,30 @@
 //#include "SoftwareSerial.h"
 #include "UDMRTDrivetrain.h"
 #include "MoogMotor.h"
-//#include <ros.h>
-//#include <ros/time.h>
-//#include <std_msgs/String.h>
-//#include <std_msgs/Float32.h>
-//#include <std_msgs/Int16MultiArray.h>
-//#include <diagnostic_msgs/DiagnosticStatus.h>
-//#include <geometry_msgs/Twist.h>
-//#include <geometry_msgs/Vector3.h>
+#include <ros.h>
+#include <ros/time.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Int16MultiArray.h>
+#include <diagnostic_msgs/DiagnosticStatus.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Vector3.h>
 
  
 #define ROVERWIDTH 1.2    // In Meters
 #define WHEELRADIUS 0.254 // In Meters
-#define GEARRATIO 40      // Number of input shaft roations for every output shaft roation
 #define RED 22     
 #define BLUE 24     
 #define GREEN 23
 #define LED_PWR 25
 
-//SoftwareSerial ss1 = SoftwareSerial(2,3);
-//SoftwareSerial ss2 = SoftwareSerial(4,5);
-//SoftwareSerial ss3 = SoftwareSerial(6,7);
+#define CH1 2
+#define CH2 3
+#define CH3 4
+#define CH4 5
+#define CH5 6
+#define CH6 7
+
 
 int input;
 float linearVelocity = 15;  //km/h
@@ -33,44 +36,52 @@ boolean goodl = false;
 boolean goodr = false;
 int numberOfMotors = 3;
 int* driveStatus;
-int leftMotors[] = {1,2,3};
 int mid = 2;
 int led = 7;
 bool ok = false;
 bool warn = false;
 bool error = false;
 int faultedDrive = 0;
+float accRatio = 28./40.;
 
-//SoftwareSerial s1(2,3);
 
 UDMRTDrivetrain driveTrain = UDMRTDrivetrain();
 
-/*
-std_msgs::Float32 currentDriveGear;
-//diagnostic_msgs::DiagnosticStatus currentDriveStatus;
+
+std_msgs::String currentDriveGear;
+diagnostic_msgs::DiagnosticStatus currentDriveStatus;
 ros::NodeHandle driverNode;
-//ros::Publisher DriveGear("DriveGear", &currentDriveGear);
-//ros::Publisher DriveError("DriveStatus", &currentDriveStatus);
+ros::Publisher DriveGear("DriveGear", &currentDriveGear);
+ros::Publisher DriveStatus("DriveStatus", &currentDriveStatus);
+
+double currTime = 0.0;
 
 
-void runTankDrive(geometry_msgs::Twist command){
-  //geometry_msgs::Vector3 linearVel = command.linear;
-  //geometry_msgs::Vector3 angularVel = command.angular;
-  float kmh = command.linear.x;     // km/h
-  float ds = command.angular.x;     // deg/sec
-  //currentDriveGear.data = kmh;
-  //DriveGear.publish(&currentDriveGear);
-  driveTrain.drive(10, 0, 0.25);
-  /*
-  if(driveTrain.drive(kmh, ds, acceleration)) {
-    //driverNode.loginfo("Running Tankd Drive ...");
-    currentDriveGear.data = "D";
-  } else {
-    //driverNode.loginfo("!!! Tank Drive Error !!!");
-    currentDriveGear.data = "X";
+void runTankDrive(const geometry_msgs::Twist& command){
+  float kmh_prec = command.linear.y;    // km/h in x
+  float dps_prec = command.angular.z;   // km/h in y
+  float reset = command.angular.x;      // Current indicator for motor reset
+  float timeStamp = driverNode.now().toSec();
+  
+  if(reset != 0){
+    driveTrain.reset();
+    driverNode.loginfo("RESETING Tank Drive ...");
+    currentDriveStatus.level = 1;
+    currentDriveStatus.message = "Restarting Drive Train";
+    
+  } else{
+      if (driveTrain.drive(kmh_prec, dps_prec, acceleration)) {
+        driverNode.loginfo("Running Tankd Drive ...");
+        currentDriveStatus.level = 0;
+        currentDriveStatus.message = "Running";
+      } else {
+        driverNode.loginfo("!!! Tank Drive Error !!!");
+        currentDriveStatus.level = 2;
+        currentDriveStatus.message = "Error Communicating With Motors!";
+      }
   }
   
-  delay(50);
+
   
 }
 
@@ -160,13 +171,11 @@ void keyboard_teleop_ros(std_msgs::String msg){
   
   digitalWrite(led,LOW);
 }
-
-
-//ros::Subscriber<std_msgs::String> commandsIn("DriveCommand", &runTankDrive);
-//ros::Subscriber sub = driverNode.subscribe("DriveCommand",10, runTankDrive);
-ros::Subscriber<geometry_msgs::Twist> velocityIn("DriveVelocity", &runTankDrive);
-
 */
+
+ros::Subscriber<geometry_msgs::Twist> velocityIn("DriveVelocity", runTankDrive);
+
+
 
 void setup() {
 
@@ -177,78 +186,54 @@ void setup() {
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, HIGH);
   digitalWrite(GREEN, HIGH);
-
-  Serial.begin(9600); //Start a serial to take in keyboard commands
-  while(!Serial);
-  digitalWrite(BLUE, LOW);
+  
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  Serial1.begin(9600);
-  while(!Serial1);
-  digitalWrite(BLUE, HIGH);
-  digitalWrite(RED, LOW);
-  //Serial1.begin(9600);
-  //Serial2.begin(9600);
-  //Serial3.begin(9600);
-  //Serial.println("Serial Ports Started..");
+  digitalWrite(BLUE, LOW);
+
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
-  Serial.println("Starting Up Motors...");
-  leftMotors.push_back(MoogMotor(1,&Serial1,40));
-  leftMotors.push_back(MoogMotor(2,&Serial1,40));
-  //leftMotors.push_back(MoogMotor(0,&Serial1,40));
-  //rightMotors[0] = MoogMotor(0,&Serial2,28);
-  //rightMotors[1] = MoogMotor(0,&Serial2,28);
-  //rightMotors[2] = MoogMotor(0,&Serial3,40);
-  //Serial.println("Motors Started...");
+  leftMotors.push_back(MoogMotor(CH5,&Serial1,40,4000,8000,5,0.25));
+  leftMotors.push_back(MoogMotor(CH6,&Serial1,40,4000,8000,5,0.25));
+  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,4000,8000,5,0.25));
+  rightMotors.push_back(MoogMotor(CH4,&Serial1,40,4000,8000,5,0.25));
+  rightMotors.push_back(MoogMotor(CH1,&Serial1,28,4000,8000,5,0.25*accRatio));
+  rightMotors.push_back(MoogMotor(CH2,&Serial1,28,4000,8000,5,0.25*accRatio));
+  
+  Serial1.begin(115200);
+  while(!Serial1);
 
   driveTrain = UDMRTDrivetrain(leftMotors, rightMotors);
 
-  //Serial.println("Drivetrain Started...");
-  //driverNode.getHardware()->setBaud(115200);
-  //driverNode.initNode();
-  
-  //driverNode.advertise(DriveGear);
-  //driverNode.advertise(DriveError);
-  //driverNode.subscribe(commandsIn);
-  //driverNode.subscribe(velocityIn);
+  driverNode.initNode();
+
+  driverNode.advertise(DriveGear);
+  driverNode.advertise(DriveStatus);
+  driverNode.subscribe(velocityIn);
   
   //pinMode(led,OUTPUT);
-  //currentDriveStatus.name = "Drivetrain Software";
-  //currentDriveStatus.message = "Drivetrain Motors Status";
-  //currentDriveStatus.hardware_id = "Arduino Mega - Drivetrain";
+  currentDriveStatus.name = "Drivetrain Motors Status";
+  currentDriveStatus.hardware_id = "Arduino Nano - Drivetrain";
+
+  currTime = driverNode.now().toSec();
+
+  digitalWrite(BLUE, HIGH);
+  digitalWrite(RED, LOW);
 
   delay(1000);
-  Serial.println("Motor Setup Complete");
 
 }
 
 void loop() {
   //delay(1000); // To Avoid improper startup
   
-  //driverNode.spinOnce();
-  driveTrain.drive(5, 0, 0.25);
+  driverNode.spinOnce();
+  //driveTrain.drive(5, 0, 0.25);
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, HIGH);
   digitalWrite(GREEN, LOW);
-
-  Serial.println("Driving");
-  Serial1.print("ZS ");
-  /*
-  //driveStatus = *driveTrain.getStatus();
-  faultedDrive = 0;
-  error = false;
-  warn = false;
-  ok = false;
-
-  
-  //driveTrain.drive(8, 0, acceleration);
-  //Serial.println("Trying to Drive...");
-  //rightDrive.setVelocity(10, 100);
-
-  
-  
-  //Serial.println("Hi Start");
+  //DriveStatus.publish(&currentDriveStatus);
+/*
   
   for (int i = 1; i <= sizeof(driveStatus); i ++) {
 
@@ -274,7 +259,7 @@ void loop() {
   */
   
   
-  delay(1000);
+
 
 }
 
