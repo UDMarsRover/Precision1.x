@@ -4,3 +4,6 @@ sphinx
 pytest
 cppcheck
 python3-rpi.gpio
+build-essential
+libdbus-glib-1-dev
+libgirepository1.0-dev
