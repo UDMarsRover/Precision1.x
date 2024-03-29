@@ -38,21 +38,24 @@ then
 echo "Setting up .bashrc ..."
 echo "source /home/udmrt/p1x/bin/activate" >> ~/.bashrc
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-echo "cd /mnt/hgfs/Precision1.x" >> ~/.bashrc
 
-# Setup sudoers config file to allow a shutdown from the udmrt account without a password
-echo "Setting up sudoers ..."
-sudo touch /etc/sudoers.d/udmrt.cfg
-sudo echo "udmrt precision1 =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot" >> /etc/sudoers.d/udmrt.cfg
-sudo echo "udmrt precision1 =NOPASSWD: /sbin/poweroff" >> /etc/sudoers.d/udmrt.cfg
-sudo chmod 0440 /etc/sudoers.d/udmrt.cfg
+    if ["$HOSTNAME" != "precision1"]
+    then
+    echo "cd /mnt/hgfs/Precision1.x" >> ~/.bashrc
+    else
+    # Setup sudoers config file to allow a shutdown from the udmrt account without a password
+    echo "Setting up sudoers ..."
+    sudo touch /etc/sudoers.d/udmrt.cfg
+    sudo echo "udmrt precision1 =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot" >> /etc/sudoers.d/udmrt.cfg
+    sudo echo "udmrt precision1 =NOPASSWD: /sbin/poweroff" >> /etc/sudoers.d/udmrt.cfg
+    sudo chmod 0440 /etc/sudoers.d/udmrt.cfg
 
-# Setup GPIO control for startup
-echo "Setting up startup led ..."
-sudo echo "[gpio]" >> /boot/firmware/usercfg.txt
-sudo echo "gpio=17=op,dh" >> /boot/firmware/usercfg.txt
-sudo echo "gpio=26=op,dh" >> /boot/firmware/usercfg.txt
-
+    # Setup GPIO control for startup
+    echo "Setting up startup led ..."
+    sudo echo "[gpio]" >> /boot/firmware/usercfg.txt
+    sudo echo "gpio=17=op,dh" >> /boot/firmware/usercfg.txt
+    sudo echo "gpio=26=op,dh" >> /boot/firmware/usercfg.txt
+    fi
 # Set flag to ensure no issues if this script is run twice
 sudo echo "export UDMRT_SETUP=1" >> ~/.bashrc
 source ~/.bashrc
