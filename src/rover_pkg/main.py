@@ -31,7 +31,7 @@ def shutdown(check: bool = True):
     if check:
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
-            os.system("echo udmrt | sudo - S systemctl poweroff")
+            os.system("echo udmrt | sudo -S systemctl poweroff")
             
     else:
         led_control(1, 1, 0)
