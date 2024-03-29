@@ -30,18 +30,18 @@ def led_control(r: int, g: int, b: int):
 def shutdown(check: bool = True):
     if check:
         if gpio.input(shutdownPin):
+            gpio.cleanup()
             os.system("systemctl poweroff")
             led_control(1, 1, 0)
     else:
+        gpio.cleanup()
         os.system("systemctl poweroff")
         led_control(1, 1, 0)
 
 
 # The main Loop
 if __name__ == "__main__":
-    temp = os.system(f"ping -c 1 192.168.8.1")
-    while temp == 1:
-        temp = os.system(f"ping -c 1 192.168.8.1")
+    while os.system(f"ping -c 1 192.168.8.1") == 1:
         led_control(1, 0, 0)
         shutdown()
 
