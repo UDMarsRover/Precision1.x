@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$UDMRT_SETUP" != "2" ]
+if [ "$UDMRT_SETUP" == "2" ]
 then
     sudo apt-get update -y 
 
