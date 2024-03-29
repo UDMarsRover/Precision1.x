@@ -76,9 +76,5 @@ if __name__ == "__main__":
         #p1.rate.sleep()
 
     
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    print("!!!!!.....ROVER IS SHUTDOWN.....!!!!!")
     gpio.output(relay,0)
