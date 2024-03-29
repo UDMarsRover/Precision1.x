@@ -6,11 +6,11 @@ import os
 from std_msgs.msg import String
 #from rover import Rover as Presision1
 import RPi.GPIO as gpio
-import dbus
-sys_bus = dbus.SystemBus()
-lg = sys_bus.get_object('org.freedesktop.login1','/org/freedesktop/login1')
-pwr_mgmt =  dbus.Interface(lg,'org.freedesktop.login1.Manager')
-shutdown_method = pwr_mgmt.get_dbus_method("PowerOff")
+from pydbus import SystemBus
+bus = SystemBus()
+
+proxy = bus.get('org.freedesktop.login1', '/org/freedesktop/login1')
+
 
 
 
@@ -40,13 +40,15 @@ def shutdown(check: bool = True):
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
             #os.system("systemctl poweroff")
-            shutdown_method(False)
+            if proxy.CanPowerOff() == 'yes':
+                proxy.PowerOff(False)  # False for 'NOT interactive'
             
     else:
         led_control(1, 1, 0)
         #os.system("systemctl poweroff")
         #stop_method()
-        shutdown_method(True)
+        if proxy.CanPowerOff() == 'yes':
+            proxy.PowerOff(False)  # False for 'NOT interactive'
         
 
 
