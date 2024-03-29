@@ -22,10 +22,13 @@ gpio.setmode(gpio.BCM)
 
 indicatorLED = {"red": 22, "green": 27, "blue": 17}
 shutdownPin = 13
+relay = 26
 
 gpio.setup(indicatorLED["red"], gpio.OUT)
 gpio.setup(indicatorLED["green"], gpio.OUT)
 gpio.setup(indicatorLED["blue"], gpio.OUT)
+gpio.setup(relay,gpio.OUT)
+gpio.output(relay,1)
 gpio.setup(shutdownPin, gpio.IN)
 
 
@@ -40,13 +43,15 @@ def shutdown(check: bool = True):
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
             #os.system("systemctl poweroff")
-            proxy.PowerOff(False)  # False for 'NOT interactive'
+            #proxy.PowerOff(False)  # False for 'NOT interactive'
+            rospy.signal_shutdown("Rover Shutdown Button Pressed")
             
     else:
         led_control(1, 1, 0)
         #os.system("systemctl poweroff")
         #stop_method()
-        proxy.PowerOff(False)  # False for 'NOT interactive'
+        #proxy.PowerOff(False)  # False for 'NOT interactive'
+        rospy.signal_shutdown("Rover Shutdown Button Pressed")
         
 
 
@@ -70,9 +75,10 @@ if __name__ == "__main__":
         # Sleep for a set amount of time to keep our rate
         #p1.rate.sleep()
 
-    shutdown(False)
+    
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
     print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    gpio.output(relay,0)
