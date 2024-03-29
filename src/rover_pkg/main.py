@@ -40,17 +40,17 @@ def shutdown(check: bool = True):
 # The main Loop
 if __name__ == "__main__":
     temp = os.system(f"ping -c 1 192.168.8.1")
-    while temp == 0:
+    while temp == 1:
         temp = os.system(f"ping -c 1 192.168.8.1")
-        print("\n",temp)
         led_control(1, 0, 0)
         shutdown()
 
-    shutdown()
+   
 
     # While roscore is running
     while not rospy.is_shutdown():
         led_control(0, 1, 0)
+        shutdown()
         #if p1.hasError():
         #    print(" i seem to has an ewwow :( plz hewp me :,(...." + p1.getError())
         #else:
