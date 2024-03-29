@@ -6,6 +6,13 @@ import os
 from std_msgs.msg import String
 #from rover import Rover as Presision1
 import RPi.GPIO as gpio
+import dbus
+sys_bus = dbus.SystemBus()
+ck_srv = sys_bus.get_object('org.freedesktop.ConsoleKit',
+                                '/org/freedesktop/ConsoleKit/Manager')
+ck_iface = dbus.Interface(ck_srv, 'org.freedesktop.ConsoleKit.Manager')
+stop_method = ck_iface.get_dbus_method("Stop")
+
 
 # Create a rover instance
 rate = 10  # Hz
@@ -31,11 +38,13 @@ def shutdown(check: bool = True):
     if check:
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
-            os.system("echo udmrt | sudo -S systemctl poweroff")
+            #os.system("sudo systemctl poweroff")
+            stop_method()
             
     else:
         led_control(1, 1, 0)
-        os.system("sudo systemctl poweroff")
+        #os.system("sudo systemctl poweroff")
+        stop_method()
         
 
 
