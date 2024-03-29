@@ -39,7 +39,9 @@ def shutdown(check: bool = True):
 
 # The main Loop
 if __name__ == "__main__":
-    while os.system(f"ping -c 1 192.168.8.1") == 0:
+    temp = os.system(f"ping -c 1 192.168.8.1")
+    while temp == 0:
+        temp = os.system(f"ping -c 1 192.168.8.1")
         led_control(1, 0, 0)
         shutdown()
 
