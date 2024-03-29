@@ -5,4 +5,3 @@ catkin_pkg
 pyyaml
 rospkg
 pyserial
-dbus-python==1.2.18
