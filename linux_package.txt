@@ -3,3 +3,4 @@ tox
 sphinx
 pytest
 cppcheck
+python3-rpi.gpio

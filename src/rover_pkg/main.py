@@ -13,7 +13,7 @@ rate = 10  # Hz
 gpio.setmode(gpio.BCM)
 
 indicatorLED = {"red": 22, "green": 27, "blue": 17}
-shutdownPin = 4
+shutdownPin = 13
 
 gpio.setup(indicatorLED["red"], gpio.OUT)
 gpio.setup(indicatorLED["green"], gpio.OUT)
