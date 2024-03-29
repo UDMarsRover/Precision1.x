@@ -40,15 +40,13 @@ def shutdown(check: bool = True):
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
             #os.system("systemctl poweroff")
-            if proxy.CanPowerOff() == 'yes':
-                proxy.PowerOff(False)  # False for 'NOT interactive'
+            proxy.PowerOff(False)  # False for 'NOT interactive'
             
     else:
         led_control(1, 1, 0)
         #os.system("systemctl poweroff")
         #stop_method()
-        if proxy.CanPowerOff() == 'yes':
-            proxy.PowerOff(False)  # False for 'NOT interactive'
+        proxy.PowerOff(False)  # False for 'NOT interactive'
         
 
 
