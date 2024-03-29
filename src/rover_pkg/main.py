@@ -29,7 +29,7 @@ def led_control(r: int, g: int, b: int):
 
 def shutdown(check: bool = True):
     if check:
-        if gpio.input(not shutdownPin):
+        if not gpio.input(shutdownPin):
             gpio.cleanup(indicatorLED,shutdownPin)
             os.system("systemctl poweroff")
             led_control(1, 1, 0)
