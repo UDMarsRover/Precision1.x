@@ -39,13 +39,13 @@ def shutdown(check: bool = True):
     if check:
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
-            #os.system("sudo systemctl poweroff")
-            stop_method()
+            os.system("systemctl poweroff")
+            #stop_method()
             
     else:
         led_control(1, 1, 0)
-        #os.system("sudo systemctl poweroff")
-        stop_method()
+        os.system("systemctl poweroff")
+        #stop_method()
         
 
 
