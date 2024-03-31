@@ -23,6 +23,7 @@ gpio.setmode(gpio.BCM)
 indicatorLED = {"red": 22, "green": 27, "blue": 17}
 shutdownPin = 13
 relay = 26
+wifiConnected = False
 
 gpio.setwarnings(False)
 gpio.setup(indicatorLED["red"], gpio.OUT)
@@ -58,7 +59,7 @@ def shutdown(check: bool = True):
         time.sleep(0.5)
         gpio.output(relay,0)
         
-def wifiConnected(ip:str = "192.168.8.1"):
+def wifiCheck(ip:str = "192.168.8.1"):
     return os.system(f"ping -c 1 "+ip) == 0
 
 
@@ -70,12 +71,14 @@ if __name__ == "__main__":
         led_control(1, 0, 0)
         shutdown()
 
-   
+    wifiCheck = wifiConnected()
 
     # While roscore is running
     while not rospy.is_shutdown():
         led_control(0, 1, 0)
-        shutdown(wifiConnected())
+        
+        shutdown(wifiCheck)
+        wifiCheck = wifiConnected()
 
 
     
