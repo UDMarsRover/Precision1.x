@@ -57,6 +57,8 @@ def shutdown(check: bool = True):
         time.sleep(0.5)
         gpio.output(relay,0)
         
+def wifiConnected(ip:str = "192.168.8.1"):
+    return os.system(f"ping -c 1 "+ip) == 0
 
 
 # The main Loop
@@ -64,7 +66,7 @@ if __name__ == "__main__":
 
     rospy.init_node('precision1')
 
-    while os.system(f"ping -c 1 192.168.8.1") == 1:
+    while not wifiConnected():
         led_control(1, 0, 0)
         shutdown()
 
@@ -73,14 +75,8 @@ if __name__ == "__main__":
     # While roscore is running
     while not rospy.is_shutdown():
         led_control(0, 1, 0)
-        shutdown()
-        #if p1.hasError():
-        #    print(" i seem to has an ewwow :( plz hewp me :,(...." + p1.getError())
-        #else:
-        #    p1.publishDataToBase()
+        shutdown(wifiConnected())
 
-        # Sleep for a set amount of time to keep our rate
-        #p1.rate.sleep()
 
     
     print("!!!!!.....ROVER IS SHUTDOWN.....!!!!!")
