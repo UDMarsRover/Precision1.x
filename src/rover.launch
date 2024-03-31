@@ -1,6 +1,6 @@
 <launch>
 
     <!-- Start Main Service for the Rover, will kill all nodes if it dies-->
-    <node pkg="rover_pkg" type="main.py" name="main" ns="precision1" required=true />
+    <node pkg="rover_pkg" type="main.py" name="main" ns="precision1" required="true" />
 
 </launch>
