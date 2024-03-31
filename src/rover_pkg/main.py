@@ -67,18 +67,18 @@ def wifiCheck(ip:str = "192.168.8.1"):
 if __name__ == "__main__":
 
 
-    while not wifiConnected():
+    while not wifiCheck():
         led_control(1, 0, 0)
         shutdown()
 
-    wifiCheck = wifiConnected()
+    wifiConnected = wifiCheck()
 
     # While roscore is running
     while not rospy.is_shutdown():
         led_control(0, 1, 0)
         
-        shutdown(wifiCheck)
-        wifiCheck = wifiConnected()
+        shutdown(wifiConnected)
+        wifiConnected = wifiCheck()
 
 
     
