@@ -24,6 +24,7 @@ indicatorLED = {"red": 22, "green": 27, "blue": 17}
 shutdownPin = 13
 relay = 26
 
+gpio.setwarnings(False)
 gpio.setup(indicatorLED["red"], gpio.OUT)
 gpio.setup(indicatorLED["green"], gpio.OUT)
 gpio.setup(indicatorLED["blue"], gpio.OUT)
@@ -75,6 +76,7 @@ if __name__ == "__main__":
     # While roscore is running
     while not rospy.is_shutdown():
         led_control(0, 1, 0)
+        print(wifiConnected())
         shutdown()
 
 
