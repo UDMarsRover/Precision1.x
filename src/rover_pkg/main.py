@@ -16,7 +16,7 @@ proxy = bus.get('org.freedesktop.login1', '/org/freedesktop/login1')
 
 
 # Create a rover instance
-rate = 10  # Hz
+rate = rospy.Rate(10)  # Hz
 #p1 = Presision1(rate)
 gpio.setmode(gpio.BCM)
 
@@ -72,5 +72,6 @@ if __name__ == "__main__":
         if wifiCheck(): led_control(0, 1, 0)
         else: led_control(1,0,0)
         shutdown()
+        rospy.sleep(rate)
 
     led_control(0,0,1)
