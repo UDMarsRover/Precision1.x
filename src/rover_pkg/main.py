@@ -61,6 +61,7 @@ def wifiCheck(ip:str = "192.168.8.1"):
 # The main Loop
 if __name__ == "__main__":
 
+    rospy.init_node("precision1")
 
     while not wifiCheck():
         led_control(1, 0, 0)
