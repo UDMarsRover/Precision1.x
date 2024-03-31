@@ -45,6 +45,8 @@ def shutdown(check: bool = True):
             #os.system("systemctl poweroff")
             #proxy.PowerOff(False)  # False for 'NOT interactive'
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
+            time.sleep(0.5)
+            gpio.output(relay,0)
             
     else:
         led_control(1, 1, 0)
@@ -52,6 +54,8 @@ def shutdown(check: bool = True):
         #stop_method()
         #proxy.PowerOff(False)  # False for 'NOT interactive'
         rospy.signal_shutdown("Rover Shutdown Button Pressed")
+        time.sleep(0.5)
+        gpio.output(relay,0)
         
 
 
@@ -80,4 +84,3 @@ if __name__ == "__main__":
 
     
     print("!!!!!.....ROVER IS SHUTDOWN.....!!!!!")
-    gpio.output(relay,0)
