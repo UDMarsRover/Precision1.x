@@ -45,9 +45,7 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
     else
     # Setup sudoers config file to allow a shutdown from the udmrt account without a password
     echo "Setting up sudoers ..."
-    sudo touch /etc/sudoers.d/udmrt.cfg
-    sudo echo "udmrt precision1 =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot" >> /etc/sudoers.d/udmrt.cfg
-    sudo echo "udmrt precision1 =NOPASSWD: /sbin/poweroff" >> /etc/sudoers.d/udmrt.cfg
+    sudo cp ~/Precision1/.setup_utils/udmrt.cfg /etc/sudoers.d/udmrt.cfg
     sudo chmod 0440 /etc/sudoers.d/udmrt.cfg
 
     # Setup GPIO control for startup
@@ -55,6 +53,16 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
     sudo echo "[gpio]" >> /boot/firmware/usercfg.txt
     sudo echo "gpio=17=op,dh" >> /boot/firmware/usercfg.txt
     sudo echo "gpio=26=op,dh" >> /boot/firmware/usercfg.txt
+
+    # Setup Autostart Service
+    sudo cp ~/Precision1/.setup_utils/udmrt.service /lib/systemd/system/udmrt.service
+
+
+
+    # Setup ROS IPs
+    echo "Setting up ROS IP commands ..." 
+    sudo echo "export ROS_MASTER_URI=http://192.168.8.100:11311" >> ~/.bashrc
+    sudo echo "export ROS_IP=192.168.8.2" >> ~/.bashrc
     fi
 # Set flag to ensure no issues if this script is run twice
 sudo echo "export UDMRT_SETUP=1" >> ~/.bashrc
