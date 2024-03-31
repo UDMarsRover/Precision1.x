@@ -45,7 +45,7 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
     else
     # Setup sudoers config file to allow a shutdown from the udmrt account without a password
     echo "Setting up sudoers ..."
-    sudo cp ~/Precision1/.setup_utils/udmrt.cfg /etc/sudoers.d/udmrt.cfg
+    sudo cp ~/Precision1.x/.setup_utils/udmrt.cfg /etc/sudoers.d/udmrt.cfg
     sudo chmod 0440 /etc/sudoers.d/udmrt.cfg
 
     # Setup GPIO control for startup
@@ -55,7 +55,7 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
     sudo echo "gpio=26=op,dh" >> /boot/firmware/usercfg.txt
 
     # Setup Autostart Service
-    sudo cp ~/Precision1/.setup_utils/udmrt.service /lib/systemd/system/udmrt.service
+    sudo cp ~/Precision1.x/.setup_utils/udmrt.service /lib/systemd/system/udmrt.service
 
 
 
