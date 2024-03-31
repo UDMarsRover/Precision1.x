@@ -74,6 +74,6 @@ if __name__ == "__main__":
         if wifiCheck(): led_control(0, 1, 0)
         else: led_control(1,0,0)
         shutdown()
-        rospy.sleep(rate)
+        rate.sleep
 
     led_control(0,0,1)
