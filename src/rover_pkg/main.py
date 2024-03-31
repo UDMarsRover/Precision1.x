@@ -71,14 +71,12 @@ if __name__ == "__main__":
         led_control(1, 0, 0)
         shutdown()
 
-    wifiConnected = wifiCheck()
 
     # While roscore is running
     while not rospy.is_shutdown():
-        led_control(0, 1, 0)
-        
-        shutdown(wifiConnected)
-        wifiConnected = wifiCheck()
+        if wifiCheck(): led_control(0, 1, 0)
+        else: led_control(1,0,0)
+        shutdown()
 
 
     
