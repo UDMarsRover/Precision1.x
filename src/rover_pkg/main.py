@@ -57,6 +57,9 @@ def shutdown(check: bool = True):
 
 # The main Loop
 if __name__ == "__main__":
+
+    rospy.init_node('precision1')
+
     while os.system(f"ping -c 1 192.168.8.1") == 1:
         led_control(1, 0, 0)
         shutdown()
