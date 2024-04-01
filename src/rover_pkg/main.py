@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 import rospy
+import rostopic
 import sys
 import os
 from std_msgs.msg import String
