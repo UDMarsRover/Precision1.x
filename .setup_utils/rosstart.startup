@@ -1,5 +1,6 @@
 #!/bin/bash
 
 source /home/udmrt/.bashrc
-
-roslaunch /home/udmrt/Precision1/rover.launch
+source /home/udmrt/Precision1.x/devel/setup.bash
+source /home/udmrt/p1x/bin/activate
+roslaunch /home/udmrt/Precision1.x/rover.launch
