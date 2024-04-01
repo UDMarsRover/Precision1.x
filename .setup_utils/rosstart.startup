@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source /home/udmrt/.bashrc
+
+roslaunch /home/udmrt/Precision1/rover.launch

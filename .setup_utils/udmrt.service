@@ -3,7 +3,7 @@ Description=UDMRT ROS Startup Service
 After=network.target
 
 [Service]
-ExecStart=roslaunch /home/udmrt/Precision1/rover.launch
+ExecStart=roslaunch /home/udmrt/Precision1/.setup_utils/rosstart.startup
 User=udmrt
 
 [Install]
