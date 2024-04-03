@@ -49,6 +49,9 @@ void setup() {
   }
 }
 
+
+//IMPORTANT: Implement a counter so that this method only runs every minute or twice a minute or something, making the delay more negligable.
+
 void loop() {
   //delay(20);
   
@@ -56,7 +59,7 @@ void loop() {
     currTemp = HTS.readTemperature();
  // }
   //t_v = 5;
-  delay(40);
+  delay(40);  // Only works with delay greater than or equal to 40 ms
 
   boxTemp.temperature = currTemp;
 

@@ -85,12 +85,23 @@ uint32_t LoopTimer;
 int LastLoop;
 
 //Thermistor variables
-int voltageConverterTemp = A1;
-int batteryTemp = A2;
-int Vo_v, Vo_b;
-float R1_v, R1_b = 10000;
-float logR2_v, R2_v, T_v, logR2_b, R2_b, T_b; 
-float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+// which analog pin to connect
+#define VOLTAGETHERMISTORPIN A2
+#define BATTERYTHERMISTORPIN A1       
+// resistance at 25 degrees C
+#define THERMISTORNOMINAL 100000      
+// temp. for nominal resistance (almost always 25 C)
+#define TEMPERATURENOMINAL 25   
+// how many samples to take and average, more takes longer
+// but is more 'smooth'
+#define NUMSAMPLES 5
+// The beta coefficient of the thermistor (usually 3000-4000)
+#define VOLTAGE_BCOEFFICIENT 4615
+#define BATTERY_BCOEFFICIENT 3965
+// the value of the 'other' resistor
+#define VOLTAGESERIESRESISTOR 100100    
+#define BATTERYSERIESRESISTOR 1980
+
 
 //Box temperature variables
 float currTemp;
@@ -117,6 +128,12 @@ double alphaTemp = 0.5;
 double alphaUltra = 0.1;
 double alphaGyro = 0.3;
 double alphaVoltSense = 0.1;
+
+//Counter variables
+float timer;
+float boxTempTimer;
+
+int queue_size;
 
 //////////////////////////////////////////////////////////////////////////////
 //Define ROS nodes, publishers, and subscribers
@@ -185,13 +202,13 @@ void setup() {
 
   //Ros setup
   nh.initNode();
-  //nh.advertise(ultraPub); // works
-  //nh.advertise(imuPub); // works
+  nh.advertise(ultraPub); // works
+  nh.advertise(imuPub); // works
   nh.advertise(boxTempPub); // broken
-  //nh.advertise(voltConverterPub); // works
-  //nh.advertise(voltConverterTempPub); // works
-  //nh.advertise(batteryTempPub); // works
-  //nh.advertise(gpsPub); // works
+  nh.advertise(voltConverterPub); // works
+  nh.advertise(voltConverterTempPub); // works
+  nh.advertise(batteryTempPub); // works
+  nh.advertise(gpsPub); // works
   
   //nh.advertise(diaImuPub);
   //nh.advertise(diaBoxTempPub);
@@ -220,8 +237,8 @@ void setup() {
   }
 
   pinMode(voltagePin, INPUT); // Voltage sensor setup
-  pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
-  pinMode(batteryTemp, INPUT); // Battery temp setup
+  //pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
+  //pinMode(batteryTemp, INPUT); // Battery temp setup
 
 }
 
@@ -229,13 +246,15 @@ void loop() {
   
   delay(10);
 
-  //ultrasonicData();
-  //gyroscopeData();
+  timer = millis();
+
+  ultrasonicData();
+  gyroscopeData();
   boxTemperatureData();
-  //voltageSensorData();
-  //voltageConverterTempData();
-  //batteryTempData();
-  //gpsData();
+  voltageSensorData();
+  voltageConverterTempData();
+  batteryTempData();
+  gpsData();
 
   /*
   // diagnostic update
@@ -312,9 +331,11 @@ void calculate_orientation() {
   kalman_1d(KalmanAngleRoll, KalmanUncertaintyAngleRoll, RateRoll, AngleRoll);
   angular_velocity.x = KalmanAngleRoll = Kalman1DOutput[0];
   KalmanUncertaintyAngleRoll = Kalman1DOutput[1];
+  debugln(KalmanAngleRoll);
   kalman_1d(KalmanAnglePitch, KalmanUncertaintyAnglePitch, RatePitch, AnglePitch);
   angular_velocity.y = KalmanAnglePitch = Kalman1DOutput[0];
   KalmanUncertaintyAnglePitch = Kalman1DOutput[1];
+  debugln(KalmanAnglePitch);
   imuPub.publish(&angular_velocity);
 }
 
@@ -335,60 +356,17 @@ void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, fl
 }
 
 float boxTemperatureData() {
-  //HTS.begin() is necessary to turn on temp sensor
-  //if (HTS.begin()){
-    /*
+  if ( (timer - boxTempTimer) > 20000 ) {
     currTemp = HTS.readTemperature();
-    // std::string temp_reading = (std::to_string(tempOut * 10)).substr(0, 3);
-    //String temp_reading = (String)(currTemp);
-    //std::string temp_reading = (std::to_string(HTS.readTemperature() * 10)).substr(0, 3);
-    // all good
 
-    /*
-    dia_boxTemp.message = "All Good";
-    dia_boxTemp.level = OK;
-    if (currTemp < 0) {
-      //errorHexBits[3] = '2';
-      // underheat emergency
-      dia_boxTemp.message = "Underheat Emergency";
-      dia_boxTemp.level = ERROR;
+    delay(100);  // Only works with delay greater than or equal to 40 ms
 
-    }
-    else if (currTemp < 10) {
-      //errorHexBits[3] = '3';
-      // underheat warning
-      dia_boxTemp.message = "Underheat Warning";
-      dia_boxTemp.level = WARN;
-    }
-    if (currTemp > 60) {
-      //errorHexBits[3] = '1';
-      //over heat warning
-      dia_boxTemp.message = "Overheat Warning";
-      dia_boxTemp.level = WARN;
+    boxTemp.temperature = currTemp;
 
-    }
-    else if (currTemp > 70) {
-      //errorHexBits[3] = '0';
-      // overheat emergency
-      dia_boxTemp.message = "Overheat Emergency";
-      dia_boxTemp.level = ERROR;
+    boxTempPub.publish(&boxTemp);  
 
-    }
-    // Returns the temperature
-    //return temp_reading.substring(0, 3);
-    box_key[0].key = "box temp";
-    box_key[0].value = "temp";
-    */
-    
-
-  //}
-
-
-  //errorHexBits[3] = 'E';
-  // disconnect
-  //dia_boxTemp.message = "Disconnect";
-  //dia_boxTemp.level = STALE;
-
+    boxTempTimer = timer;
+  }
 }
 
 void voltageSensorData() {
@@ -407,68 +385,96 @@ void voltageSensorData() {
 }
 
 void voltageConverterTempData() {
+  uint8_t i;
+  double average = 0;
 
-  Vo_v = analogRead(voltageConverterTemp);
-  R2_v = R1_v * (1023.0 / (float)Vo_v - 1.0);
-  logR2_v = log(R2_v);
-  T_v = (1.0 / (c1 + c2*logR2_v + c3*logR2_v*logR2_v*logR2_v));
-  T_v = T_v - 273.15;
+  float samples[NUMSAMPLES];
 
-  voltConverterTemp_msg.temperature = T_v;
+  // take N samples in a row, with a slight delay
+  for (i=0; i< NUMSAMPLES; i++) {
+   samples[i] = analogRead(VOLTAGETHERMISTORPIN);
+   average += samples[i];
+  }
+  
+  average /= NUMSAMPLES;
+  
+  // convert the value to resistance
+  average = 1023 / average - 1;
+  average = VOLTAGESERIESRESISTOR / average;
+  
+  double steinhart;
+  
+  steinhart = ( 1 / ( ( ( log(average / THERMISTORNOMINAL) ) / VOLTAGE_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
+
+  voltConverterTemp_msg.temperature = steinhart;
 
   voltConverterTempPub.publish(&voltConverterTemp_msg);
 
-  if (T_v <= 0) { 
+  if (steinhart <= 0) { 
     dia_voltConverterTemp.message = "Underheat Emergency"; 
     dia_voltConverterTemp.level = ERROR;
   }
-  else if ((0 < T_v) && (T_v <= 5)) {
+  else if ((0 < steinhart) && (steinhart <= 5)) {
     dia_voltConverterTemp.message = "Underheat Warning"; 
     dia_voltConverterTemp.level = WARN;
   } 
-  else if ((5 < T_v) && (T_v < 65)) {
+  else if ((5 < steinhart) && (steinhart < 65)) {
     dia_voltConverterTemp.message = "OK";
     dia_voltConverterTemp.level = OK;
   }
-  else if ((65 <= T_v) && (T_v < 70)) {
+  else if ((65 <= steinhart) && (steinhart < 70)) {
     dia_voltConverterTemp.message = "Overheat Warning";
     dia_voltConverterTemp.level = WARN;
   }
-  else if( T_v >= 70) {
+  else if( steinhart >= 70) {
     dia_voltConverterTemp.message = "Overheat Emergency";
     dia_voltConverterTemp.level = ERROR;
   }
 }
 
 void batteryTempData(){
+  uint8_t i;
+  double average = 0;
 
-  Vo_b = analogRead(batteryTemp);
-  R2_b = R1_b * (1023.0 / (float)Vo_b - 1.0);
-  logR2_b = log(R2_b);
-  T_b = (1.0 / (c1 + c2*logR2_b + c3*logR2_b*logR2_b*logR2_b));
-  T_b = T_b - 273.15;
+  float samples[NUMSAMPLES];
 
-  batteryTemp_msg.temperature = T_b;
+  // take N samples in a row, with a slight delay
+  for (i=0; i< NUMSAMPLES; i++) {
+   samples[i] = analogRead(BATTERYTHERMISTORPIN);
+   average += samples[i];
+  }
+  
+  average /= NUMSAMPLES;
+  
+  // convert the value to resistance
+  average = 1023 / average - 1;
+  average = BATTERYSERIESRESISTOR / average;
+  
+  double steinhart;
+  
+  steinhart = ( 1 / ( ( ( log(average / THERMISTORNOMINAL) ) / BATTERY_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
+
+  batteryTemp_msg.temperature = steinhart;
 
   batteryTempPub.publish(&batteryTemp_msg);
 
-  if (T_b <= 30) { 
+  if (steinhart <= 30) { 
     dia_batteryTemp.message = "Underheat Emergency"; 
     dia_batteryTemp.level = ERROR;
   }
-  else if ((30 < T_b) && (T_b <= 35)) {
+  else if ((30 < steinhart) && (steinhart <= 35)) {
     dia_batteryTemp.message = "Underheat Warning"; 
     dia_batteryTemp.level = WARN;
   } 
-  else if ((35 < T_b) && (T_b < 60)) {
+  else if ((35 < steinhart) && (steinhart < 60)) {
     dia_batteryTemp.message = "OK";
     dia_batteryTemp.level = OK;
   }
-  else if ((60 <= T_b) && (T_b < 80)) {
+  else if ((60 <= steinhart) && (steinhart < 80)) {
     dia_batteryTemp.message = "Overheat Warning";
     dia_batteryTemp.level = WARN;
   }
-  else if( T_b >= 80) {
+  else if( steinhart >= 80) {
     dia_batteryTemp.message = "Overheat Emergency";
     dia_batteryTemp.level = ERROR;
   }
