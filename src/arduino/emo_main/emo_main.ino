@@ -361,7 +361,7 @@ float boxTemperatureData() {
 
     delay(100);  // Only works with delay greater than or equal to 40 ms
 
-    boxTemp.temperature = currTemp;
+    boxTemp.temperature = currTemp - 3.0;
 
     boxTempPub.publish(&boxTemp);  
 
