@@ -86,7 +86,7 @@ int LastLoop;
 
 //Thermistor variables
 // which analog pin to connect
-#define VOLTAGETHERMISTORPIN A2
+#define VOLTAGETHERMISTORPIN A2  
 #define BATTERYTHERMISTORPIN A1       
 // resistance at 25 degrees C
 #define THERMISTORNOMINAL 100000      
@@ -385,7 +385,7 @@ void voltageSensorData() {
 }
 
 void voltageConverterTempData() {
-  uint8_t i;
+uint8_t i;
   double average = 0;
 
   float samples[NUMSAMPLES];
@@ -433,7 +433,7 @@ void voltageConverterTempData() {
 }
 
 void batteryTempData(){
-  uint8_t i;
+uint8_t i;
   double average = 0;
 
   float samples[NUMSAMPLES];
