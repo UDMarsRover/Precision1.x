@@ -87,7 +87,7 @@ int LastLoop;
 //Thermistor variables
 // which analog pin to connect
 #define VOLTAGETHERMISTORPIN A2  
-#define BATTERYTHERMISTORPIN A1       
+#define BATTERYTHERMISTORPIN A1      
 // resistance at 25 degrees C
 #define THERMISTORNOMINAL 100000      
 // temp. for nominal resistance (almost always 25 C)
@@ -96,11 +96,11 @@ int LastLoop;
 // but is more 'smooth'
 #define NUMSAMPLES 5
 // The beta coefficient of the thermistor (usually 3000-4000)
-#define VOLTAGE_BCOEFFICIENT 4615
-#define BATTERY_BCOEFFICIENT 3965
+#define VOLTAGE_BCOEFFICIENT 3965
+#define BATTERY_BCOEFFICIENT 4615
 // the value of the 'other' resistor
-#define VOLTAGESERIESRESISTOR 100100    
-#define BATTERYSERIESRESISTOR 1980
+#define VOLTAGESERIESRESISTOR 1980
+#define BATTERYSERIESRESISTOR 100100
 
 
 //Box temperature variables
@@ -125,7 +125,7 @@ int lastSecond = -1;
 
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
-double alphaUltra = 0.1;
+double alphaUltra = 0.5;
 double alphaGyro = 0.3;
 double alphaVoltSense = 0.1;
 
