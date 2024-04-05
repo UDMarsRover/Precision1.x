@@ -23,9 +23,15 @@ def callbackGPS(NavSatFix):
     lat = NavSatFix.latitude
     lng = NavSatFix.longitude
 
-def callbackBAT(BatteryStatus):
+def callbackBAT(BatteryState):
     global battery
-    battery = int(BatteryStatus.percentage * 100)
+    voltage = BatteryState.voltage
+    if (voltage > 54):
+        battery = 100
+    elif (voltage < 48):
+        battery = 0
+    else:
+        battery = int((BatteryState.voltage - 48) / 6 * 100)
 
 rospy.init_node('listener', anonymous=True)
 
@@ -33,7 +39,7 @@ def listener():
     #rospy.Subscriber("DriveCommand", Accel, callback)
     #rospy.Subscriber("gps", NavSatFix, callback)
     rospy.Subscriber("GPS", NavSatFix, callbackGPS)
-    rospy.Subscriber("BatteryStatus", BatteryState, callbackBAT)
+    rospy.Subscriber("voltageConverter_pub", BatteryState, callbackBAT)
     rospy.spin()
     print("listener")
 
