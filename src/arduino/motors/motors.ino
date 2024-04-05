@@ -28,8 +28,6 @@
 
 
 int input;
-float linearVelocity = 15;  //km/h
-float angularVelocity = 10; //deg/sec
 float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
@@ -193,12 +191,12 @@ void setup() {
 
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
-  leftMotors.push_back(MoogMotor(CH5,&Serial1,40,4000,8000,5,0.25));
-  leftMotors.push_back(MoogMotor(CH6,&Serial1,40,4000,8000,5,0.25));
-  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,4000,8000,5,0.25));
+  rightMotors.push_back(MoogMotor(CH5,&Serial1,40,4000,8000,5,0.25));
+  rightMotors.push_back(MoogMotor(CH6,&Serial1,40,4000,8000,5,0.25));
   rightMotors.push_back(MoogMotor(CH4,&Serial1,40,4000,8000,5,0.25));
-  rightMotors.push_back(MoogMotor(CH1,&Serial1,28,4000,8000,5,0.25*accRatio));
-  rightMotors.push_back(MoogMotor(CH2,&Serial1,28,4000,8000,5,0.25*accRatio));
+  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,4000,8000,5,0.25));
+  leftMotors.push_back(MoogMotor(CH1,&Serial1,28,4000,8000,5,0.25*accRatio));
+  leftMotors.push_back(MoogMotor(CH2,&Serial1,28,4000,8000,5,0.25*accRatio));
   
   Serial1.begin(115200);
   while(!Serial1);

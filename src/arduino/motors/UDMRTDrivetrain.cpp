@@ -25,8 +25,8 @@ bool UDMRTDrivetrain::drive(float kmPerHour_prec, float degPerSecond_prec, float
   float mps = (UDMRTDrivetrain::max_lin_vel*1000)/60/60 * kmPerHour_prec;  //Meters per sec
   float ds = UDMRTDrivetrain::max_ang_vel * -degPerSecond_prec;              //Dergees per sec
   
-  float rdw = ((mps + (UDMRTDrivetrain::roverWidth/2) * ds) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // right wheel rotations / sec
-  float ldw = ((((UDMRTDrivetrain::roverWidth/2) * ds) - mps) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // left wheel rotations / sec
+  float ldw = ((mps + (UDMRTDrivetrain::roverWidth/2) * ds) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // right wheel rotations / sec
+  float rdw = ((((UDMRTDrivetrain::roverWidth/2) * ds) - mps) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // left wheel rotations / sec
 
   bool good = true;
 
