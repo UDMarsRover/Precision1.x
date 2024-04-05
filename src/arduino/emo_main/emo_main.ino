@@ -89,18 +89,19 @@ int LastLoop;
 #define VOLTAGETHERMISTORPIN A2  
 #define BATTERYTHERMISTORPIN A1      
 // resistance at 25 degrees C
-#define THERMISTORNOMINAL 100000      
+#define VOLTAGETHERMISTORNOMINAL 100000
+#define BATTERYTHERMISTORNOMINAL 2000      
 // temp. for nominal resistance (almost always 25 C)
 #define TEMPERATURENOMINAL 25   
 // how many samples to take and average, more takes longer
 // but is more 'smooth'
 #define NUMSAMPLES 5
 // The beta coefficient of the thermistor (usually 3000-4000)
-#define VOLTAGE_BCOEFFICIENT 3965
-#define BATTERY_BCOEFFICIENT 4615
+#define VOLTAGE_BCOEFFICIENT 4615
+#define BATTERY_BCOEFFICIENT 3965
 // the value of the 'other' resistor
-#define VOLTAGESERIESRESISTOR 1980
-#define BATTERYSERIESRESISTOR 100100
+#define VOLTAGESERIESRESISTOR 100100
+#define BATTERYSERIESRESISTOR 2010 //1980 when mulitmeter directly on resistor, 2010 when measured relative to ground
 
 
 //Box temperature variables
@@ -404,7 +405,7 @@ uint8_t i;
   
   double steinhart;
   
-  steinhart = ( 1 / ( ( ( log(average / THERMISTORNOMINAL) ) / VOLTAGE_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
+  steinhart = ( 1 / ( ( ( log(average / VOLTAGETHERMISTORNOMINAL) ) / VOLTAGE_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
 
   voltConverterTemp_msg.temperature = steinhart;
 
@@ -452,7 +453,7 @@ uint8_t i;
   
   double steinhart;
   
-  steinhart = ( 1 / ( ( ( log(average / THERMISTORNOMINAL) ) / BATTERY_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
+  steinhart = ( 1 / ( ( ( log(average / BATTERYTHERMISTORNOMINAL) ) / BATTERY_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
 
   batteryTemp_msg.temperature = steinhart;
 
