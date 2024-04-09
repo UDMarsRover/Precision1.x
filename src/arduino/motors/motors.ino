@@ -11,8 +11,6 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
 
- 
-#define ROVERWIDTH 1.2    // In Meters
 #define WHEELRADIUS 0.254 // In Meters
 #define RED 22     
 #define BLUE 24     
@@ -29,7 +27,6 @@
 
 int input;
 float linearVelocity = 15;  //km/h
-float angularVelocity = 10; //deg/sec
 float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
@@ -44,6 +41,20 @@ bool error = false;
 int faultedDrive = 0;
 float accRatio = 28./40.;
 
+/** @breif: The vector which stores the distance form the center of the rover to each motor.
+
+This starts from the right sied (r1 = m1 ,r2 = m2,r3 = m3) and ends with the left side 
+motors (l = m4,l2 = m5,l3 = m6)
+*/
+const std::vector<float> lengths = {
+  64.536,
+  49,
+  65.855,
+  64.536,
+  49,
+  65.855
+};
+
 
 UDMRTDrivetrain driveTrain = UDMRTDrivetrain();
 
@@ -53,8 +64,6 @@ diagnostic_msgs::DiagnosticStatus currentDriveStatus;
 ros::NodeHandle driverNode;
 ros::Publisher DriveGear("DriveGear", &currentDriveGear);
 ros::Publisher DriveStatus("DriveStatus", &currentDriveStatus);
-
-double currTime = 0.0;
 
 
 void runTankDrive(const geometry_msgs::Twist& command){
@@ -80,8 +89,6 @@ void runTankDrive(const geometry_msgs::Twist& command){
         currentDriveStatus.message = "Error Communicating With Motors!";
       }
   }
-  
-
   
 }
 
@@ -193,17 +200,17 @@ void setup() {
 
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
-  leftMotors.push_back(MoogMotor(CH5,&Serial1,40,4000,8000,5,0.25));
-  leftMotors.push_back(MoogMotor(CH6,&Serial1,40,4000,8000,5,0.25));
-  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,4000,8000,5,0.25));
-  rightMotors.push_back(MoogMotor(CH4,&Serial1,40,4000,8000,5,0.25));
-  rightMotors.push_back(MoogMotor(CH1,&Serial1,28,4000,8000,5,0.25*accRatio));
-  rightMotors.push_back(MoogMotor(CH2,&Serial1,28,4000,8000,5,0.25*accRatio));
+  leftMotors.push_back(MoogMotor(CH5,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  leftMotors.push_back(MoogMotor(CH6,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  rightMotors.push_back(MoogMotor(CH4,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  rightMotors.push_back(MoogMotor(CH1,&Serial1,28,WHEELRADIUS,4000,8000,5,acceleration*accRatio));
+  rightMotors.push_back(MoogMotor(CH2,&Serial1,28,WHEELRADIUS,4000,8000,5,acceleration*accRatio));
   
   Serial1.begin(115200);
   while(!Serial1);
 
-  driveTrain = UDMRTDrivetrain(leftMotors, rightMotors);
+  driveTrain = UDMRTDrivetrain(&leftMotors, &rightMotors, &lengths);
 
   driverNode.initNode();
 
@@ -214,8 +221,6 @@ void setup() {
   //pinMode(led,OUTPUT);
   currentDriveStatus.name = "Drivetrain Motors Status";
   currentDriveStatus.hardware_id = "Arduino Nano - Drivetrain";
-
-  currTime = driverNode.now().toSec();
 
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, LOW);
