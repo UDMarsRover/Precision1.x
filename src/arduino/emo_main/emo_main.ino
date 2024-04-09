@@ -386,7 +386,7 @@ void voltageSensorData() {
 }
 
 void voltageConverterTempData() {
-uint8_t i;
+  uint8_t i;
   double average = 0;
 
   float samples[NUMSAMPLES];
@@ -400,8 +400,8 @@ uint8_t i;
   average /= NUMSAMPLES;
   
   // convert the value to resistance
-  average = 1023 / average - 1;
-  average = VOLTAGESERIESRESISTOR / average;
+  //average = 1023 / average - 1;
+  average = ((1023 * VOLTAGESERIESRESISTOR) / average) - VOLTAGESERIESRESISTOR;
   
   double steinhart;
   
@@ -433,8 +433,8 @@ uint8_t i;
   }
 }
 
-void batteryTempData(){
-uint8_t i;
+void batteryTempData() {
+  uint8_t i;
   double average = 0;
 
   float samples[NUMSAMPLES];
@@ -448,8 +448,8 @@ uint8_t i;
   average /= NUMSAMPLES;
   
   // convert the value to resistance
-  average = 1023 / average - 1;
-  average = BATTERYSERIESRESISTOR / average;
+  //average = 1023 / average - 1;
+  average = ((1023 * BATTERYSERIESRESISTOR) / average ) - BATTERYSERIESRESISTOR;
   
   double steinhart;
   

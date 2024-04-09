@@ -1,3 +1,34 @@
+
+/*
+int ThermistorPin = 0;
+int Vo, E;
+float R1 = 10000;
+float logR2, R2, T; 
+float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  delay(50);
+  voltageConverterTempData();
+  Serial.println(T);
+  
+  delay(500);
+}
+
+void voltageConverterTempData() {
+
+  Vo = analogRead(ThermistorPin);
+  R2 = R1 * (1023.0 / (float)Vo - 1.0);
+  logR2 = log(R2);
+  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
+  T = T - 273.15;
+}
+*/
+
 // SPDX-FileCopyrightText: 2011 Limor Fried/ladyada for Adafruit Industries
 //
 // SPDX-License-Identifier: MIT
@@ -7,7 +38,7 @@
 // MIT License - please keep attribution and consider buying parts from Adafruit
 
 // which analog pin to connect
-#define THERMISTORPIN A1         
+#define THERMISTORPIN A2
 // resistance at 25 degrees C
 #define THERMISTORNOMINAL 100000      
 // temp. for nominal resistance (almost always 25 C)
@@ -43,8 +74,11 @@ void loop(void) {
   Serial.println(average);
   
   // convert the value to resistance
+  /*
   average = 1023 / average - 1;
-  average = SERIESRESISTOR / average;
+  average = SERIESRESISTOR * average;
+  */
+  average = ((1023 * SERIESRESISTOR) / average) - SERIESRESISTOR;
   Serial.print("Thermistor resistance "); 
   Serial.println(average);
   
@@ -57,6 +91,7 @@ void loop(void) {
   steinhart = 1.0 / steinhart;                 // Invert
   steinhart -= 273.15;                         // convert absolute temp to C
   */
+  
   steinhart = ( 1 / ( ( ( log(average / THERMISTORNOMINAL) ) / BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
   
   Serial.print("Temperature "); 
