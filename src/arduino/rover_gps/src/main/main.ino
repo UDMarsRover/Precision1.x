@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <TinyGPSPlus.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <float.h>
 #include <ros.h>
 #include <ros/time.h>
@@ -24,16 +24,16 @@ void setup() {
   gpsNode.initNode();
   gpsNode.advertise(pub);
   //Serial.begin(9600);
-  Serial2.begin(9600);
+  Serial1.begin(9600);
 }
 
 void loop() 
 {
   gpsNode.spinOnce();
 
-  while (Serial2.available() > 0)
+  while (Serial1.available() > 0)
   {
-    if (gps.encode(Serial2.read()) && gps.time.second() != lastSecond)
+    if (gps.encode(Serial1.read()) && gps.time.second() != lastSecond)
     {
       lastSecond = gps.time.second();
       if(gps.location.lat() == 0 && gps.location.lng() == 0)
