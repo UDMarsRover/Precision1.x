@@ -23,11 +23,11 @@ ros::Publisher arrayPub("dia_array", &dia_status);
 
 
 void setup() {
-  
+
   nh.initNode();
   nh.advertise(diaPub);
   //dia_array.status = (diagnostic_msgs::DiagnosticStatus*)malloc(DIAGNOSTIC_STATUS_LENGTH * sizeof(diagnostic_msgs::DiagnosticStatus));
-  dia_status.values = (diagnostic_msgs::KeyValue*)malloc(DIAGNOSTIC_STATUS_LENGTH * sizeof(diagnostic_msgs::KeyValue));
+  //dia_status.values = (diagnostic_msgs::KeyValue*)malloc(DIAGNOSTIC_STATUS_LENGTH * sizeof(diagnostic_msgs::KeyValue));
   dia_status.values_length = DIAGNOSTIC_STATUS_LENGTH;
   //dia_array.status_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_status.name = "Diag test";
@@ -39,19 +39,16 @@ void loop() {
   dia_status.message = "All good";
   dia_status.level = OK;
 
- 
+
   key.key = "key";
-  //dia_status.values = key;
+  dia_status.values = &key;
   //dia_array.status[0] = dia_status;
   diaPub.publish(&dia_status);
   //arrayPub.publish(&dia_array);
 
   nh.spinOnce(); 
-  
+
 }
-
-
-
 
 
 

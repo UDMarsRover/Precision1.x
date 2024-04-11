@@ -159,36 +159,39 @@ geometry_msgs::Vector3 angular_velocity;
 ros::Publisher imuPub("imu_pub",&angular_velocity);
 
 sensor_msgs::Temperature boxTemp;
-ros::Publisher boxTempPub("boxTemp_Pub", &boxTemp);
+ros::Publisher boxTempPub("boxTemp_pub", &boxTemp);
 
-sensor_msgs::BatteryState voltConverterMsg;
-ros::Publisher voltConverterPub("voltageConverter_pub", &voltConverterMsg);
+//sensor_msgs::BatteryState voltConverterMsg;
+//ros::Publisher voltConverterPub("voltageConverter_pub", &voltConverterMsg);
+sensor_msgs::BatteryState voltageSensorMsg;
+ros::Publisher voltageSensorPub("voltageSensor_pub", &voltageSensorMsg);
 
-sensor_msgs::Temperature voltConverterTemp_msg;
-ros::Publisher voltConverterTempPub("voltConverterTemp_pub", &voltConverterTemp_msg);
+sensor_msgs::Temperature voltageConverterTempMsg;
+ros::Publisher voltageConverterTempPub("converterTemp_pub", &voltageConverterTempMsg);
 
-sensor_msgs::Temperature batteryTemp_msg;
-ros::Publisher batteryTempPub("batteryTemp_pub", &batteryTemp_msg);
+sensor_msgs::Temperature batteryTempMsg;
+ros::Publisher batteryTempPub("batteryTemp_pub", &batteryTempMsg);
 
 sensor_msgs::NavSatFix gpsMsg;
-ros::Publisher gpsPub("GPS", &gpsMsg);
+ros::Publisher gpsPub("GPS_pub", &gpsMsg);
 
 // diagnostic messages setup
-diagnostic_msgs::DiagnosticStatus dia_imu;
-ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
+//diagnostic_msgs::DiagnosticStatus dia_imu;
+//ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
 
-diagnostic_msgs::DiagnosticStatus dia_boxTemp;
-ros::Publisher diaBoxTempPub("diaBoxTemp_pub", &dia_boxTemp);
+//diagnostic_msgs::DiagnosticStatus dia_boxTemp;
+//ros::Publisher diaBoxTempPub("diaBoxTemp_pub", &dia_boxTemp);
 
-diagnostic_msgs::DiagnosticStatus dia_voltConverterTemp;
-ros::Publisher diaVoltConverterTempPub("diaVoltConverterTemp_pub",&dia_voltConverterTemp);
+diagnostic_msgs::DiagnosticStatus dia_voltageConverterTemp;
+ros::Publisher diaVoltageConverterTempPub("diaVoltConverterTemp_pub",&dia_voltageConverterTemp);
 
 diagnostic_msgs::DiagnosticStatus dia_batteryTemp;
 ros::Publisher diaBatteryTempPub("diaBatteryTemp_pub",&dia_batteryTemp);
 
-diagnostic_msgs::KeyValue box_key[DIAGNOSTIC_STATUS_LENGTH];
-diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
-
+//diagnostic_msgs::KeyValue box_key[DIAGNOSTIC_STATUS_LENGTH];
+//diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
+diagnostic_msgs::KeyValue converter_key;
+diagnostic_msgs::KeyValue battery_key;
 
 //diagnostic_msgs::KeyValue battery_key;
 //ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
@@ -206,22 +209,27 @@ void setup() {
   nh.advertise(ultraPub); // works
   nh.advertise(imuPub); // works
   nh.advertise(boxTempPub); // broken
-  nh.advertise(voltConverterPub); // works
-  nh.advertise(voltConverterTempPub); // works
+  nh.advertise(voltageSensorPub); // works
+  nh.advertise(voltageConverterTempPub); // works
   nh.advertise(batteryTempPub); // works
   nh.advertise(gpsPub); // works
+
+  nh.advertise(diaVoltageConverterTempPub);
+  //nh.advertise(diaBatteryTempPub);
   
   //nh.advertise(diaImuPub);
   //nh.advertise(diaBoxTempPub);
   //nh.advertise(diaVoltConverterTempPub);
   //nh.advertise(diaBatteryTempPub);
 
-  dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
-  dia_boxTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
-  dia_imu.name = "Gyroscope";
-  dia_boxTemp.name = "Box Temp";
-  dia_voltConverterTemp.name = "Voltage Converter Temp";
-  dia_batteryTemp.name = "Battery Temp";
+  //dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  //dia_boxTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  //dia_imu.name = "Gyroscope";
+  //dia_boxTemp.name = "Box Temp";
+  dia_voltageConverterTemp.name = "Voltage Converter Temp";
+  dia_voltageConverterTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  //dia_batteryTemp.name = "Battery Temp";
+  //dia_batteryTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
 
   //Method setup
   ultraMsg.data_length = 4; // initialize length of ultrasonic msg array
@@ -379,10 +387,10 @@ void voltageSensorData() {
 
   float voltPercent = ( sensorValue - Vmin ) / diff;
   
-  voltConverterMsg.voltage = volt;
-  voltConverterMsg.percentage = voltPercent;
+  voltageSensorMsg.voltage = volt;
+  voltageSensorMsg.percentage = voltPercent;
 
-  voltConverterPub.publish(&voltConverterMsg);
+  voltageSensorPub.publish(&voltageSensorMsg);
 }
 
 void voltageConverterTempData() {
@@ -407,30 +415,36 @@ void voltageConverterTempData() {
   
   steinhart = ( 1 / ( ( ( log(average / VOLTAGETHERMISTORNOMINAL) ) / VOLTAGE_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
 
-  voltConverterTemp_msg.temperature = steinhart;
+  voltageConverterTempMsg.temperature = steinhart;
 
-  voltConverterTempPub.publish(&voltConverterTemp_msg);
+  voltageConverterTempPub.publish(&voltageConverterTempMsg);
 
   if (steinhart <= 0) { 
-    dia_voltConverterTemp.message = "Underheat Emergency"; 
-    dia_voltConverterTemp.level = ERROR;
+    dia_voltageConverterTemp.message = "Underheat Emergency"; 
+    dia_voltageConverterTemp.level = ERROR;
   }
   else if ((0 < steinhart) && (steinhart <= 5)) {
-    dia_voltConverterTemp.message = "Underheat Warning"; 
-    dia_voltConverterTemp.level = WARN;
+    dia_voltageConverterTemp.message = "Underheat Warning"; 
+    dia_voltageConverterTemp.level = WARN;
   } 
-  else if ((5 < steinhart) && (steinhart < 65)) {
-    dia_voltConverterTemp.message = "OK";
-    dia_voltConverterTemp.level = OK;
-  }
   else if ((65 <= steinhart) && (steinhart < 70)) {
-    dia_voltConverterTemp.message = "Overheat Warning";
-    dia_voltConverterTemp.level = WARN;
+    dia_voltageConverterTemp.message = "Overheat Warning";
+    dia_voltageConverterTemp.level = WARN;
   }
   else if( steinhart >= 70) {
-    dia_voltConverterTemp.message = "Overheat Emergency";
-    dia_voltConverterTemp.level = ERROR;
+    dia_voltageConverterTemp.message = "Overheat Emergency";
+    dia_voltageConverterTemp.level = ERROR;
   }
+  else {
+    dia_voltageConverterTemp.message = "OK";
+    dia_voltageConverterTemp.level = OK;
+  }
+
+  converter_key.key = "Priority";
+  converter_key.value = "1";
+  dia_voltageConverterTemp.values = &converter_key;
+
+  diaVoltageConverterTempPub.publish(&dia_voltageConverterTemp);
 }
 
 void batteryTempData() {
@@ -455,9 +469,9 @@ void batteryTempData() {
   
   steinhart = ( 1 / ( ( ( log(average / BATTERYTHERMISTORNOMINAL) ) / BATTERY_BCOEFFICIENT ) + ( 1.0 / (TEMPERATURENOMINAL + 273.15) ) ) ) - 273.15; //  1 / ( (ln(R/Ro)/B) + (1/To) ) - 273.15  
 
-  batteryTemp_msg.temperature = steinhart;
+  batteryTempMsg.temperature = steinhart;
 
-  batteryTempPub.publish(&batteryTemp_msg);
+  batteryTempPub.publish(&batteryTempMsg);
 
   if (steinhart <= 30) { 
     dia_batteryTemp.message = "Underheat Emergency"; 
