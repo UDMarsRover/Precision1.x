@@ -176,6 +176,10 @@ sensor_msgs::NavSatFix gpsMsg;
 ros::Publisher gpsPub("GPS_pub", &gpsMsg);
 
 // diagnostic messages setup
+
+// For the diagnostic message, level will be the priority of the error, name will be the component, message will be the type of error (eg. Underheat warning), 
+// and the key will be used to supply numerical information about the error being reported
+
 //diagnostic_msgs::DiagnosticStatus dia_imu;
 //ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
 
@@ -420,28 +424,26 @@ void voltageConverterTempData() {
   voltageConverterTempPub.publish(&voltageConverterTempMsg);
 
   if (steinhart <= 0) { 
-    dia_voltageConverterTemp.message = "Underheat Emergency"; 
-    dia_voltageConverterTemp.level = ERROR;
+    converter_key.key = "Underheat Emergency"; 
+    converter_key.value = "4";
   }
   else if ((0 < steinhart) && (steinhart <= 5)) {
-    dia_voltageConverterTemp.message = "Underheat Warning"; 
-    dia_voltageConverterTemp.level = WARN;
+    converter_key.key = "Underheat Warning"; 
+    converter_key.value = "3";
   } 
   else if ((65 <= steinhart) && (steinhart < 70)) {
-    dia_voltageConverterTemp.message = "Overheat Warning";
-    dia_voltageConverterTemp.level = WARN;
+    converter_key.key = "Overheat Warning";
+    converter_key.value = "2";
   }
   else if( steinhart >= 70) {
-    dia_voltageConverterTemp.message = "Overheat Emergency";
-    dia_voltageConverterTemp.level = ERROR;
+    converter_key.key = "Overheat Emergency";
+    converter_key.value = "1";
   }
   else {
-    dia_voltageConverterTemp.message = "OK";
-    dia_voltageConverterTemp.level = OK;
+    converter_key.key = "OK";
+    converter_key.value = "5";
   }
 
-  converter_key.key = "Priority";
-  converter_key.value = "1";
   dia_voltageConverterTemp.values = &converter_key;
 
   diaVoltageConverterTempPub.publish(&dia_voltageConverterTemp);
