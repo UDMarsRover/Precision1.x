@@ -131,6 +131,7 @@ bool MoogMotor::isConnected(){
 bool MoogMotor::resetStatusCodes(){
   sendCommand("ZS");       // Clear All Warning Tags
   MoogMotor::enable();
+  delay(100);
   //park();
   return statusCode == 1;
 }
