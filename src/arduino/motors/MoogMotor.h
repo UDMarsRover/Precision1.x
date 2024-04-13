@@ -24,10 +24,27 @@ class MoogMotor
  {
   public:
     MoogMotor();
-    MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution=4000, int samplerate=8000, int delayTime=5, float acc=0.25);
-    boolean setVelocity(float rpm, float acceleration);
+    MoogMotor(int id, 
+              HardwareSerial* serial, 
+              int gearRatio, 
+              float wheelDiameter, 
+              int resolution=4000, 
+              int samplerate=8000, 
+              int delayTime=5, 
+              float acc=0.25);
+
+    
+    /** @breif: Function to set the motors velocity
+    @param kmph The desired speed in kilometers per hour
+    @return Boolean value indicating the command has been sent
+    This function takes in the desired kmph, converts it to 
+    motor encoder counts, and sends the required commands
+    */
+    boolean setVelocity(float kmph);
+
+
     boolean setTorque(float torque);
-    boolean setPosition(float value,float velocity, float acceleration);
+    boolean setPosition(float value,float velocity);
     
     
     void ESTOP();
@@ -68,6 +85,8 @@ class MoogMotor
     int setIDTrys = 0;    // The current number of ID sets tried
     void writeToPort(String data);
     float acc;
+    /** @breif: The velocity to rotations multipyer*/
+    float row;
      
  };
 
