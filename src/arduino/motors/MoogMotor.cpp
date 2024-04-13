@@ -25,7 +25,7 @@ MoogMotor::MoogMotor(int id,
   MoogMotor::serial = serial;
   MoogMotor::id = id;
   MoogMotor::acc = acc;
-  MoogMotor::row = 1 / (wheelDiameter * 3.14159 * 60);
+  MoogMotor::row = wheelDiameter * 3.14159 * 60 * 60;
   if(&(MoogMotor::serial)){
     MoogMotor::serial->end();
     delay(100);

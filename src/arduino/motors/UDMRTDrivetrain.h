@@ -15,11 +15,11 @@
 class UDMRTDrivetrain{
 
   public:
-    UDMRTDrivetrain(std::vector<MoogMotor>* leftMotors, 
-                    std::vector<MoogMotor>* rightMotors, 
-                    const std::vector<float>* lengths, 
-                    float max_length=65.855, 
-                    float max_ang_vel=1);
+    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, 
+                    std::vector<MoogMotor> rightMotors, 
+                    const std::vector<float> lengths, 
+                    float max_length=0.00065855, 
+                    float max_lin_vel=1);
   
     UDMRTDrivetrain();
     void ESTOP();
@@ -31,8 +31,8 @@ class UDMRTDrivetrain{
 
 
   private:
-    std::vector<MoogMotor>* leftMotors;
-    std::vector<MoogMotor>* rightMotors;
+    std::vector<MoogMotor> leftMotors;
+    std::vector<MoogMotor> rightMotors;
     bool sendCommand(String command, int id=0);
     bool rosSetup;
     int numberOfMotors;
@@ -41,7 +41,7 @@ class UDMRTDrivetrain{
     float max_lin_vel;
     float max_ang_vel;
 
-    std::vector<float>* lengths;
+    std::vector<float> lengths;
 
 };
 

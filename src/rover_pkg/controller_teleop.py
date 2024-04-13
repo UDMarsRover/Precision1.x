@@ -44,6 +44,7 @@ class udmrtMotorController:
         self.__motor_command_check__()
 
     def __motor_command_check__(self):
+        start_temp = self.current_start_state
         self.current_start_state = (
             self.buttonBuffer["start"]
             if self.buttonBuffer["start"] != self.current_start_state
@@ -56,7 +57,7 @@ class udmrtMotorController:
         angVelZ_temp = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
 
         valueCheck = bool(
-            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ)
+            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ) or (start_temp != self.current_start_state)
         )
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp

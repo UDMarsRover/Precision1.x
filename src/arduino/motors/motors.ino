@@ -11,7 +11,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
 
-#define WHEELRADIUS 0.254 // In Meters
+#define WHEELRADIUS 0.00025 // In KM
 #define RED 22     
 #define BLUE 24     
 #define GREEN 23
@@ -26,7 +26,6 @@
 
 
 int input;
-float linearVelocity = 15;  //km/h
 float acceleration = 0.25;
 float positionM = 0;
 boolean goodl = false;
@@ -47,12 +46,12 @@ This starts from the right sied (r1 = m1 ,r2 = m2,r3 = m3) and ends with the lef
 motors (l = m4,l2 = m5,l3 = m6)
 */
 const std::vector<float> lengths = {
-  64.536,
-  49,
-  65.855,
-  64.536,
-  49,
-  65.855
+  0.00064536,
+  0.00049,
+  0.00065855,
+  0.00064536,
+  0.00049,
+  0.00065855
 };
 
 
@@ -67,10 +66,14 @@ ros::Publisher DriveStatus("DriveStatus", &currentDriveStatus);
 
 
 void runTankDrive(const geometry_msgs::Twist& command){
+
+
   float kmh_prec = command.linear.y;    // km/h in x
   float dps_prec = command.angular.z;   // km/h in y
   float reset = command.angular.x;      // Current indicator for motor reset
   float timeStamp = driverNode.now().toSec();
+  
+
   
   if(reset != 0){
     driveTrain.reset();
@@ -79,16 +82,21 @@ void runTankDrive(const geometry_msgs::Twist& command){
     currentDriveStatus.message = "Restarting Drive Train";
     
   } else{
-      if (driveTrain.drive(kmh_prec, dps_prec, acceleration)) {
-        driverNode.loginfo("Running Tankd Drive ...");
-        currentDriveStatus.level = 0;
-        currentDriveStatus.message = "Running";
-      } else {
-        driverNode.loginfo("!!! Tank Drive Error !!!");
-        currentDriveStatus.level = 2;
-        currentDriveStatus.message = "Error Communicating With Motors!";
-      }
+
+    if (driveTrain.drive(kmh_prec, dps_prec, acceleration)) {
+      driverNode.loginfo("Running Tankd Drive ...");
+      currentDriveStatus.level = 0;
+      currentDriveStatus.message = "Running";
+    } else {
+      driverNode.loginfo("!!! Tank Drive Error !!!");
+      currentDriveStatus.level = 2;
+      currentDriveStatus.message = "Error Communicating With Motors!";
+    }
   }
+  digitalWrite(BLUE, LOW);
+  digitalWrite(RED, HIGH);
+  digitalWrite(GREEN, LOW);
+
   
 }
 
@@ -189,41 +197,66 @@ void setup() {
   pinMode(RED, OUTPUT);
   pinMode(BLUE, OUTPUT);
   pinMode(GREEN, OUTPUT);
-  pinMode(LED_PWR, OUTPUT);
+  //pinMode(LED_PWR, OUTPUT);
+  delay(500);
   digitalWrite(BLUE, HIGH);
   digitalWrite(RED, HIGH);
   digitalWrite(GREEN, HIGH);
-  
-  pinMode(LED_BUILTIN,OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(BLUE, HIGH);
+  digitalWrite(RED, LOW);
+  digitalWrite(GREEN, HIGH);
+  delay(500);
+  digitalWrite(BLUE, HIGH);
+  digitalWrite(RED, HIGH);
+  digitalWrite(GREEN, LOW);
+  delay(500);
   digitalWrite(BLUE, LOW);
+  digitalWrite(RED, HIGH);
+  digitalWrite(GREEN, HIGH);
+  delay(500);
+  digitalWrite(BLUE, HIGH);
+  digitalWrite(RED, HIGH);
+  digitalWrite(GREEN, HIGH);
+  //pinMode(LED_BUILTIN,OUTPUT);
+  //digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(RED, LOW);
+
+
 
   std::vector<MoogMotor> rightMotors;
   std::vector<MoogMotor> leftMotors;
-  leftMotors.push_back(MoogMotor(CH5,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  leftMotors.push_back(MoogMotor(CH5,&Serial1,28,WHEELRADIUS,4000,8000,5,acceleration*accRatio));
   leftMotors.push_back(MoogMotor(CH6,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
-  leftMotors.push_back(MoogMotor(CH3,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
-  rightMotors.push_back(MoogMotor(CH4,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
-  rightMotors.push_back(MoogMotor(CH1,&Serial1,28,WHEELRADIUS,4000,8000,5,acceleration*accRatio));
+  leftMotors.push_back(MoogMotor(CH4,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  rightMotors.push_back(MoogMotor(CH3,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
+  rightMotors.push_back(MoogMotor(CH1,&Serial1,40,WHEELRADIUS,4000,8000,5,acceleration));
   rightMotors.push_back(MoogMotor(CH2,&Serial1,28,WHEELRADIUS,4000,8000,5,acceleration*accRatio));
-  
+
   Serial1.begin(115200);
   while(!Serial1);
 
-  driveTrain = UDMRTDrivetrain(&leftMotors, &rightMotors, &lengths);
+
+
+  driveTrain = UDMRTDrivetrain(leftMotors, rightMotors, lengths, 0.00065855, 10);
+
+
+
+  driverNode.getHardware()->setBaud(115200);
 
   driverNode.initNode();
 
   driverNode.advertise(DriveGear);
   driverNode.advertise(DriveStatus);
   driverNode.subscribe(velocityIn);
-  
+
   //pinMode(led,OUTPUT);
   currentDriveStatus.name = "Drivetrain Motors Status";
   currentDriveStatus.hardware_id = "Arduino Nano - Drivetrain";
 
-  digitalWrite(BLUE, HIGH);
-  digitalWrite(RED, LOW);
+  digitalWrite(RED, HIGH);
+  digitalWrite(BLUE, LOW);
+  digitalWrite(GREEN, LOW);
 
   delay(1000);
 
@@ -233,10 +266,11 @@ void loop() {
   //delay(1000); // To Avoid improper startup
   
   driverNode.spinOnce();
+  delay(10);
   //driveTrain.drive(5, 0, 0.25);
-  digitalWrite(BLUE, HIGH);
-  digitalWrite(RED, HIGH);
-  digitalWrite(GREEN, LOW);
+  //digitalWrite(BLUE, HIGH);
+  //digitalWrite(RED, HIGH);
+  //digitalWrite(GREEN, LOW);
   //DriveStatus.publish(&currentDriveStatus);
 /*
   
