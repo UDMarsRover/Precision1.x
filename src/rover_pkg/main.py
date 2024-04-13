@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-import time
 import rospy
-import sys
 import os
-from std_msgs.msg import String
 from rover import Rover as Presision1
 import RPi.GPIO as gpio
 
