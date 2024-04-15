@@ -12,7 +12,7 @@ struct errorCode {
   String name;
   int code;
 };
-/*
+
 //=================================================//
 //          Define Status Word 0 Values            //
 //=================================================//
@@ -33,7 +33,7 @@ errorCode motorInMotion = {"Rotor In Motion Status",  0b0000000000000100};  //0x
 errorCode motorOff      = {"Motor Coils Turned Off",  0b0000000000000010};  //0x0002
 errorCode driveReady    = {"Motor Is Ready To Use",   0b0000000000000001};  //0x0001
 
-
+/*
 
 //=================================================//
 //          Define Status Word 1 Values            //

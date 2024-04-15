@@ -57,9 +57,22 @@ void UDMRTDrivetrain::reset(){
 
 }
 
-void UDMRTDrivetrain::ESTOP(){
+unsigned int UDMRTDrivetrain::statusCheck(){
   
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+    UDMRTDrivetrain::rightMotors[i].getStatusCode();
+  }
+  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
+    UDMRTDrivetrain::leftMotors[i].getStatusCode();
+  }
+
+  return 1;
+  
+}
+
+void UDMRTDrivetrain::ESTOP(){
+  
+  for (int i = 0; i < UDMRTDrivetrain::rightMotors.size(); i ++){
     UDMRTDrivetrain::rightMotors[i].ESTOP();
   }
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){

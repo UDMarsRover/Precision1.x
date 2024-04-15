@@ -23,6 +23,7 @@ class UDMRTDrivetrain{
   
     UDMRTDrivetrain();
     void ESTOP();
+    unsigned int statusCheck();
     void stop();
     void off();
     void setGear(int gear = PARK);
