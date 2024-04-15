@@ -19,6 +19,7 @@ class udmrtMotorController:
         self.velOut.angular.x = 0
         self.pub.publish(self.velOut)
         self.current_start_state = 0
+        self.start_temp = 1
 
         self.buttonBuffer = {
             "left_joy_y": 0,
@@ -28,7 +29,7 @@ class udmrtMotorController:
             "dpad_x": "",
             "dpad_y": "",
             "back": "",
-            "start": "0",
+            "start": 0,
             "a": "",
             "b": "",
             "x": "",
@@ -44,12 +45,7 @@ class udmrtMotorController:
         self.__motor_command_check__()
 
     def __motor_command_check__(self):
-        start_temp = self.current_start_state
-        self.current_start_state = (
-            self.buttonBuffer["start"]
-            if self.buttonBuffer["start"] != self.current_start_state
-            else 0
-        )
+
         linVelY_temp = float(self.buttonBuffer["left_joy_y"])
         angVelZ_temp = float(self.buttonBuffer["left_joy_x"])
 
@@ -57,7 +53,7 @@ class udmrtMotorController:
         angVelZ_temp = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
 
         valueCheck = bool(
-            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ) or (start_temp != self.current_start_state)
+            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ) or (self.buttonBuffer["start"])
         )
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
@@ -67,7 +63,7 @@ class udmrtMotorController:
         if valueCheck:
             self.velOut.linear.y = self.linVelY
             self.velOut.angular.z = self.angVelZ
-            self.velOut.angular.x = float(self.current_start_state)
+            self.velOut.angular.x = float(self.buttonBuffer["start"])
             self.pub.publish(self.velOut)
 
     def __getInput__(self):

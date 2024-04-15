@@ -238,7 +238,7 @@ void setup() {
 
 
 
-  driveTrain = UDMRTDrivetrain(leftMotors, rightMotors, lengths, 0.00065855, 10);
+  driveTrain = UDMRTDrivetrain(leftMotors, rightMotors, lengths, 0.00065855, 5);
 
 
 

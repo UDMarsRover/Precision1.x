@@ -33,14 +33,14 @@ bool UDMRTDrivetrain::drive(float kmPerHour_prec, float degPerSecond_prec, float
 
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
 
-    UDMRTDrivetrain::leftMotors[i].setVelocity((radph * UDMRTDrivetrain::lengths[i]) - kmph);
+    UDMRTDrivetrain::leftMotors[i].setVelocity(-1 * (kmph + (radph * UDMRTDrivetrain::lengths[i])));
     digitalWrite(24, LOW);
     digitalWrite(22, LOW);
     digitalWrite(23, HIGH);
   }
   
   for (int i = 0; i < UDMRTDrivetrain::rightMotors.size(); i ++){
-    UDMRTDrivetrain::rightMotors[i].setVelocity(kmph + (radph * UDMRTDrivetrain::lengths[i]));
+    UDMRTDrivetrain::rightMotors[i].setVelocity( -1 * ((radph * UDMRTDrivetrain::lengths[i]) - kmph));
   }
   return good;
 }
