@@ -449,37 +449,51 @@ void calculate_orientation() {
 
   
   imuPub.publish(&angular_velocity);
-  gyroscopeDiagnostics(&dia_imu, &diaImuPub, KalmanAngleRoll, "Roll");
-  gyroscopeDiagnostics(&dia_imu, &diaImuPub, KalmanAnglePitch, "Pitch");
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, KalmanAngleRoll, KalmanAnglePitch);
 }
 
-void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, float angle, String degree) {
-  char ang[10];
-  dtostrf(angle, 5, 1, ang);
+void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, float roll, float pitch) {
+  char ro[10], pit[10];
+  dtostrf(roll, 5, 1, ro);
+  dtostrf(pitch, 5, 1, pit);
   /*  CAN USE TO CONVERT STRING TO CHAR ARRAY FOR KEY
   char valWarn[20]; 
   String(degree + " Warning").toCharArray(valWarn, 20);
   char valErr[20];
   String(degree + " Emergency").toCharArray(valErr, 20); */
   
-  if (angle >= 60) {
-    imu_key.key = "1";
+  if (abs(roll) >= 60) {
+    imu_key.key = "0";
     imu_key.value = "Roll Emergency";
-    sensor->message = ang;
+    sensor->message = ro;
     sensor->level = ERROR;
     sensor->values = &imu_key;
   }
-  else if (angle >= 30) {
-    imu_key.key = "0";
+  else if (abs(pitch) >= 60) {
+    imu_key.key = "1";
+    imu_key.value = "Pitch Emergency";
+    sensor->message = pit;
+    sensor->level = ERROR;
+    sensor->values = &imu_key;
+  }
+  else if (abs(roll) >= 30) {
+    imu_key.key = "2";
     imu_key.value = "Roll Warning";
-    sensor->message = ang;
+    sensor->message = ro;
+    sensor->level = WARN;
+    sensor->values = &imu_key;
+  }
+  else if (abs(pitch) >= 30) {
+    imu_key.key = "3";
+    imu_key.value = "Pitch Warning";
+    sensor->message = pit;
     sensor->level = WARN;
     sensor->values = &imu_key;
   }
   else {
-    imu_key.key = "2";
+    imu_key.key = "4";
     imu_key.value = "LEVEL";
-    sensor->message = ang;
+    sensor->message = "";
     sensor->level = OK;
     sensor->values = &imu_key;
     
