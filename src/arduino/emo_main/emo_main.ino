@@ -253,25 +253,26 @@ void setup() {
   nh.advertise(voltageConverterTempPub); // works
   nh.advertise(batteryTempPub); // works
   nh.advertise(gpsPub); // works
-
-  nh.advertise(diaVoltageConverterTempPub);
-  //nh.advertise(diaBatteryTempPub);
   
   nh.advertise(diaUltraPubNW);
   nh.advertise(diaUltraPubNE);
   nh.advertise(diaUltraPubSW);
   nh.advertise(diaUltraPubSE);
   nh.advertise(diaImuPub);
-  //nh.advertise(diaBoxTempPub);
-  //nh.advertise(diaVoltConverterTempPub);
-  //nh.advertise(diaBatteryTempPub);
+  nh.advertise(diaBoxTempPub);
+  nh.advertise(diaVoltageSensorPub);
+  nh.advertise(diaVoltageConverterTempPub);
+  nh.advertise(diaBatteryTempPub);
 
   dia_ultraNW.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_ultraNE.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_ultraSW.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_ultraSE.values_length = DIAGNOSTIC_STATUS_LENGTH;
   dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
-
+  dia_boxTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_voltageSensor.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_voltageConverterTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_batteryTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
 
   dia_ultraNW.name = "NW Ultrasonic";
   dia_ultraNE.name = "NE Ultrasonic";
@@ -320,10 +321,10 @@ void loop() {
 
   ultrasonicData();
   gyroscopeData();
-  //boxTemperatureData();
-  //voltageSensorData();
-  //voltageConverterTempData();
-  //batteryTempData();
+  boxTemperatureData();
+  voltageSensorData();
+  voltageConverterTempData();
+  batteryTempData();
   //gpsData();
 
   /*
@@ -496,7 +497,6 @@ void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
     sensor->message = "";
     sensor->level = OK;
     sensor->values = &imu_key;
-    
   }
 
   publisher->publish(sensor);
@@ -528,33 +528,8 @@ float boxTemperatureData() {
 
     boxTempPub.publish(&boxTemp);  
 
-    if (currTemp <= 15) { 
-      dia_boxTemp.message = "Underheat Emergency"; 
-      dia_boxTemp.level = ERROR;
-    }
-    else if ((15 < currTemp) && (currTemp <= 20)) {
-      dia_boxTemp.message = "Underheat Warning"; 
-      dia_boxTemp.level = WARN;
-    } 
-    else if ((20 < currTemp) && (currTemp < 55)) {
-      dia_boxTemp.message = "OK";
-      dia_boxTemp.level = OK;
-    }
-    else if ((55 <= currTemp) && (currTemp < 65)) {
-      dia_boxTemp.message = "Overheat Warning";
-      dia_boxTemp.level = WARN;
-    }
-    else if(currTemp >= 65) { // Rasberry Pi turns off at 65 C and breaks down at 70 C
-      dia_boxTemp.message = "Overheat Emergency";
-      dia_boxTemp.level = ERROR;
-    }
-    else {
-      dia_boxTemp.message = "OK";
-      dia_boxTemp.level = OK;
-    }
-
-    diaBoxTempPub.publish(&dia_boxTemp);
-
+    temperatureDiagnostics(&dia_boxTemp, &diaBoxTempPub, &box_key, currTemp, 65, 55, 15, 5);
+  
     boxTempTimer = timer;
   }
 }
@@ -571,22 +546,43 @@ void voltageSensorData() {
   voltageSensorMsg.voltage = volt;
   voltageSensorMsg.percentage = voltPercent;
 
-  if (volt <= 47.5) {
-    dia_voltageSensor.message = "Voltage Warning";
-    dia_voltageSensor.level = 1;
-  }
-  else if (volt <= 45.5) {
-    dia_voltageSensor.message = "Voltage Emergency";
-    dia_voltageSensor.level = 0;
-  }
-  else {
-    dia_voltageSensor.message = "OK";
-    dia_voltageSensor.level = OK;
-  }
-
   voltageSensorPub.publish(&voltageSensorMsg);
 
-  diaVoltageSensorPub.publish(&dia_voltageSensor);
+  voltageDiagnostics(&dia_voltageSensor, &diaVoltageSensorPub, &sensor_key, volt);
+}
+
+void voltageDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float volt) {
+  char v[10];
+  dtostrf(volt, 5, 1, v);
+  /*  CAN USE TO CONVERT STRING TO CHAR ARRAY FOR KEY
+  char valWarn[20]; 
+  String(degree + " Warning").toCharArray(valWarn, 20);
+  char valErr[20];
+  String(degree + " Emergency").toCharArray(valErr, 20); */
+  
+  if (volt <= 45.5) {
+    key->key = "2";
+    key->value = "Undervolt Emergency";
+    sensor->message = v;
+    sensor->level = ERROR;
+    sensor->values = key;
+  }
+  else if (volt <= 47.5) {
+    key->key = "1";
+    key->value = "Undervolt Warning";
+    sensor->message = v;
+    sensor->level = WARN;
+    sensor->values = key;
+  }
+  else {
+    key->key = "0";
+    key->value = "Voltage OK";
+    sensor->message = "";
+    sensor->level = OK;
+    sensor->values = key;
+  }
+
+  publisher->publish(sensor);
 }
 
 void voltageConverterTempData() {
@@ -615,30 +611,7 @@ void voltageConverterTempData() {
 
   voltageConverterTempPub.publish(&voltageConverterTempMsg);
 
-  if (steinhart <= 0) { 
-    converter_key.key = "Underheat Emergency"; 
-    converter_key.value = "4";
-  }
-  else if ((0 < steinhart) && (steinhart <= 5)) {
-    converter_key.key = "Underheat Warning"; 
-    converter_key.value = "3";
-  } 
-  else if ((65 <= steinhart) && (steinhart < 70)) {
-    converter_key.key = "Overheat Warning";
-    converter_key.value = "2";
-  }
-  else if( steinhart >= 70) {
-    converter_key.key = "Overheat Emergency";
-    converter_key.value = "1";
-  }
-  else {
-    converter_key.key = "OK";
-    converter_key.value = "5";
-  }
-
-  dia_voltageConverterTemp.values = &converter_key;
-
-  diaVoltageConverterTempPub.publish(&dia_voltageConverterTemp);
+  temperatureDiagnostics(&dia_voltageConverterTemp, &diaVoltageConverterTempPub, &converter_key, steinhart, 70, 65, 5, 0);
 }
 
 void batteryTempData() {
@@ -667,28 +640,56 @@ void batteryTempData() {
 
   batteryTempPub.publish(&batteryTempMsg);
 
-  if (steinhart <= 30) { 
-    dia_batteryTemp.message = "Underheat Emergency"; 
-    dia_batteryTemp.level = ERROR;
-  }
-  else if ((30 < steinhart) && (steinhart <= 35)) {
-    dia_batteryTemp.message = "Underheat Warning"; 
-    dia_batteryTemp.level = WARN;
-  } 
-  else if ((35 < steinhart) && (steinhart < 60)) {
-    dia_batteryTemp.message = "OK";
-    dia_batteryTemp.level = OK;
-  }
-  else if ((60 <= steinhart) && (steinhart < 80)) {
-    dia_batteryTemp.message = "Overheat Warning";
-    dia_batteryTemp.level = WARN;
-  }
-  else if( steinhart >= 80) {
-    dia_batteryTemp.message = "Overheat Emergency";
-    dia_batteryTemp.level = ERROR;
-  }
+  temperatureDiagnostics(&dia_batteryTemp, &diaBatteryTempPub, &battery_key, steinhart, 80, 60, 30, 0);
 }
 
+void temperatureDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float temp, float upperEmer, float upperWarn, float lowEmer, float lowWarn) {
+  char t[10];
+  dtostrf(temp, 5, 1, t);
+  /*  CAN USE TO CONVERT STRING TO CHAR ARRAY FOR KEY
+  char valWarn[20]; 
+  String(degree + " Warning").toCharArray(valWarn, 20);
+  char valErr[20];
+  String(degree + " Emergency").toCharArray(valErr, 20); */
+  
+  if (temp >= upperEmer) {
+    key->key = "0";
+    key->value = "Overheat Emergency";
+    sensor->message = t;
+    sensor->level = ERROR;
+    sensor->values = key;
+  }
+  else if ((temp < upperEmer) && (temp >= upperWarn)) {
+    key->key = "1";
+    key->value = "Overheat Warning";
+    sensor->message = t;
+    sensor->level = WARN;
+    sensor->values = key;
+  }
+  else if ((temp < upperWarn) && (temp >= lowWarn)) {
+    key->key = "2";
+    key->value = "OK";
+    sensor->message = t;
+    sensor->level = OK;
+    sensor->values = key;
+  }
+  else if ((temp < lowWarn) && (temp >= lowEmer)) {
+    key->key = "3";
+    key->value = "Underheat Warning";
+    sensor->message = t;
+    sensor->level = WARN;
+    sensor->values = key;
+  }
+  else { // This is also a good indicator of connection. If device is connected, it will probably never get this cold.
+    key->key = "4";
+    key->value = "Underheat Emergency";
+    sensor->message = t;
+    sensor->level = ERROR;
+    sensor->values = key;
+  }
+
+  publisher->publish(sensor);
+}
 
 void gpsData() {
 
