@@ -1,14 +1,13 @@
 #include <Arduino.h>
-//ROS data-type libraries
 #include <ros.h>
-//#include <std_msgs/Float64.h>
-//#include <std_msgs/String.h>
+#include <avr/dtostrf.h>
 #include <std_msgs/Float32MultiArray.h> // Ultra
 #include <sensor_msgs/Imu.h>
 #include "C:\Users\Paul\MarsRoverWork\Precision1.x\ros_lib\sensor_msgs\BatteryState.h"
 //#include <sensor_msgs/BatteryState.h> // Does not work, see voltage_sensor.ino
 #include <sensor_msgs/Temperature.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/KeyValue.h>
 
 #include <NewPing.h> // Ultrasonic
@@ -38,16 +37,20 @@
 
 //Ultrasonic sensor variables
 
-#define TRIG1 2
+#define NW 0
+#define TRIG1 2 // Northwest
 #define ECHO1 3
 
-#define TRIG2 4
+#define NE 1
+#define TRIG2 4 // Northeast
 #define ECHO2 5
 
-#define TRIG3 6
+#define SW 2
+#define TRIG3 6 // Southwest
 #define ECHO3 7
 
-#define TRIG4 8
+#define SE 3
+#define TRIG4 8 // Southeast
 #define ECHO4 9
 
 #define MAX_DISTANCE 100 // maximum distance for sensors in cm
@@ -147,55 +150,87 @@ int queue_size;
 
 #define DIAGNOSTIC_STATUS_LENGTH 1
 
+#define red 22
+#define green 23
+#define blue 24
+
+/* Example for red light
+
+  digitalWrite(red,LOW);
+  digitalWrite(green,HIGH);
+  digitalWrite(blue,HIGH);
+
+*/
+
 ros::NodeHandle nh;
 
 // data messages setup
 
 std_msgs::Float32MultiArray ultraMsg;
-ros::Publisher ultraPub("ultrasonic_pub", &ultraMsg);
+ros::Publisher ultraPub("emo/ultra", &ultraMsg);
 
-//sensor_msgs::Imu imuMsg;
 geometry_msgs::Vector3 angular_velocity;
-ros::Publisher imuPub("imu_pub",&angular_velocity);
+ros::Publisher imuPub("emo/imu",&angular_velocity);
 
 sensor_msgs::Temperature boxTemp;
-ros::Publisher boxTempPub("boxTemp_pub", &boxTemp);
+ros::Publisher boxTempPub("emo/temp/box", &boxTemp);
 
-//sensor_msgs::BatteryState voltConverterMsg;
-//ros::Publisher voltConverterPub("voltageConverter_pub", &voltConverterMsg);
 sensor_msgs::BatteryState voltageSensorMsg;
-ros::Publisher voltageSensorPub("voltageSensor_pub", &voltageSensorMsg);
+ros::Publisher voltageSensorPub("emo/voltage", &voltageSensorMsg);
 
 sensor_msgs::Temperature voltageConverterTempMsg;
-ros::Publisher voltageConverterTempPub("converterTemp_pub", &voltageConverterTempMsg);
+ros::Publisher voltageConverterTempPub("emo/temp/voltage", &voltageConverterTempMsg);
 
 sensor_msgs::Temperature batteryTempMsg;
-ros::Publisher batteryTempPub("batteryTemp_pub", &batteryTempMsg);
+ros::Publisher batteryTempPub("emo/temp/battery", &batteryTempMsg);
 
 sensor_msgs::NavSatFix gpsMsg;
-ros::Publisher gpsPub("GPS_pub", &gpsMsg);
+ros::Publisher gpsPub("emo/gps", &gpsMsg);
 
 // diagnostic messages setup
 
-// For the diagnostic message, level will be the priority of the error, name will be the component, message will be the type of error (eg. Underheat warning), 
-// and the key will be used to supply numerical information about the error being reported
+// For the diagnostic message, 
+//  level will be the priority of the error, OK, WARN, or ERROR (ERROR can be marked a critical error by the Pi and shutoff)
+//  name will be the component name
+//  message will be the numerical value of error if we want to report it(eg. Underheat warning), 
+//  and the key:
+//     key will be used to return the error code as we denote
+//     value will be the meaning of that error code (eg. key = 15, value = all good)
 
-//diagnostic_msgs::DiagnosticStatus dia_imu;
-//ros::Publisher diaImuPub("diaImu_pub", &dia_imu);
+diagnostic_msgs::DiagnosticStatus dia_ultraNW;
+ros::Publisher diaUltraPubNW("emo/status/ultraNW", &dia_ultraNW);
+diagnostic_msgs::DiagnosticStatus dia_ultraNE;
+ros::Publisher diaUltraPubNE("emo/status/ultraNE", &dia_ultraNE);
+diagnostic_msgs::DiagnosticStatus dia_ultraSW;
+ros::Publisher diaUltraPubSW("emo/status/ultraSW", &dia_ultraSW);
+diagnostic_msgs::DiagnosticStatus dia_ultraSE;
+ros::Publisher diaUltraPubSE("emo/status/ultraSE", &dia_ultraSE);
 
-//diagnostic_msgs::DiagnosticStatus dia_boxTemp;
-//ros::Publisher diaBoxTempPub("diaBoxTemp_pub", &dia_boxTemp);
+diagnostic_msgs::DiagnosticStatus dia_imu;
+ros::Publisher diaImuPub("emo/status/imu", &dia_imu);
+
+diagnostic_msgs::DiagnosticStatus dia_boxTemp;
+ros::Publisher diaBoxTempPub("emo/status/temp/box", &dia_boxTemp);
+
+diagnostic_msgs::DiagnosticStatus dia_voltageSensor;
+ros::Publisher diaVoltageSensorPub("emo/status/voltage", &dia_voltageSensor);
 
 diagnostic_msgs::DiagnosticStatus dia_voltageConverterTemp;
-ros::Publisher diaVoltageConverterTempPub("diaVoltConverterTemp_pub",&dia_voltageConverterTemp);
+ros::Publisher diaVoltageConverterTempPub("emo/status/temp/voltage",&dia_voltageConverterTemp);
 
 diagnostic_msgs::DiagnosticStatus dia_batteryTemp;
-ros::Publisher diaBatteryTempPub("diaBatteryTemp_pub",&dia_batteryTemp);
+ros::Publisher diaBatteryTempPub("emo/status/temp/battery",&dia_batteryTemp);
 
-//diagnostic_msgs::KeyValue box_key[DIAGNOSTIC_STATUS_LENGTH];
-//diagnostic_msgs::KeyValue imu_key[DIAGNOSTIC_STATUS_LENGTH];
+diagnostic_msgs::DiagnosticStatus dia_gps;
+ros::Publisher diaGpsPub("emo/status/gps", &dia_gps);
+
+diagnostic_msgs::KeyValue ultra_key;
+diagnostic_msgs::KeyValue imu_key;
+diagnostic_msgs::KeyValue box_key;
+diagnostic_msgs::KeyValue sensor_key;
 diagnostic_msgs::KeyValue converter_key;
 diagnostic_msgs::KeyValue battery_key;
+diagnostic_msgs::KeyValue gps_key;
 
 //diagnostic_msgs::KeyValue battery_key;
 //ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
@@ -207,6 +242,7 @@ diagnostic_msgs::KeyValue battery_key;
 void setup() {
   // setup
   Serial1.begin(9600);
+
 
   //Ros setup
   nh.initNode();
@@ -221,30 +257,51 @@ void setup() {
   nh.advertise(diaVoltageConverterTempPub);
   //nh.advertise(diaBatteryTempPub);
   
-  //nh.advertise(diaImuPub);
+  nh.advertise(diaUltraPubNW);
+  nh.advertise(diaUltraPubNE);
+  nh.advertise(diaUltraPubSW);
+  nh.advertise(diaUltraPubSE);
+  nh.advertise(diaImuPub);
   //nh.advertise(diaBoxTempPub);
   //nh.advertise(diaVoltConverterTempPub);
   //nh.advertise(diaBatteryTempPub);
 
-  //dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
-  //dia_boxTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
-  //dia_imu.name = "Gyroscope";
-  //dia_boxTemp.name = "Box Temp";
-  dia_voltageConverterTemp.name = "Voltage Converter Temp";
-  dia_voltageConverterTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
-  //dia_batteryTemp.name = "Battery Temp";
-  //dia_batteryTemp.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_ultraNW.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_ultraNE.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_ultraSW.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_ultraSE.values_length = DIAGNOSTIC_STATUS_LENGTH;
+  dia_imu.values_length = DIAGNOSTIC_STATUS_LENGTH;
+
+
+  dia_ultraNW.name = "NW Ultrasonic";
+  dia_ultraNE.name = "NE Ultrasonic";
+  dia_ultraSW.name = "SW Ultrasonic";
+  dia_ultraSE.name = "SE Ultrasonic";
+  dia_imu.name = "Gyroscope";
+  dia_boxTemp.name = "Box Temperature";
+  dia_voltageSensor.name = "Voltage Sensor";
+  dia_voltageConverterTemp.name = "Voltage Converter Sensor";
+  dia_batteryTemp.name = "Battery Temperature Sensor";
+  dia_gps.name = "GPS";
 
   //Method setup
   ultraMsg.data_length = 4; // initialize length of ultrasonic msg array
 
   LoopTimer = 0; //Going to have to find a way to integrate loop into method, not high-level loop
   if (!IMU.begin()) {
+    dia_imu.message = "Failed to initialize IMU";
+    dia_imu.level = STALE;
+    nh.spinOnce();;
+
     debugln("Failed to initialize IMU!");
     while (1);
   }
 
   if (!HTS.begin()) {
+    dia_boxTemp.message = "Failed to intialize box temperature sensor";
+    //dia_boxTemp.message = STALE;
+    nh.spinOnce();
+
     debugln("Failed to initialize temperature sensor!");
     while (1);
   }
@@ -263,11 +320,11 @@ void loop() {
 
   ultrasonicData();
   gyroscopeData();
-  boxTemperatureData();
-  voltageSensorData();
-  voltageConverterTempData();
-  batteryTempData();
-  gpsData();
+  //boxTemperatureData();
+  //voltageSensorData();
+  //voltageConverterTempData();
+  //batteryTempData();
+  //gpsData();
 
   /*
   // diagnostic update
@@ -292,23 +349,61 @@ void ultrasonicData() {
 
     curDistance[i] = (curDuration[i] * 0.034) / 2; // convert microseconds to cm
 
-    // if no object is detected set current distance to previous 
+    // if no object is detected, set current distance to previous 
     if (curDistance[i] == 0){
-      curDistanceOutput[i] = String(prevDistance[i]);
+      curDistance[i] = prevDistance[i];
     }
     else{
       curDistance[i] = expFilter(alphaUltra, prevDistance[i], curDistance[i]); // filter distance values
-      curDistanceCM[i] = String(curDistance[i]); // convert distance in cm to string
-      curDistanceOutput[i] = curDistanceCM[i].substring(0,curDistanceCM[i].length()-1); // concatanate cm with decimal mm
     }  
+    /*  Could use this to create array of current errors, then publish all error statues in a diagnostic status array
+    if (curDistance[i] <= 5) {
+      error[i] = 1;
+    }*/
 
-    ultraArray[i] = curDistanceOutput[i].toFloat(); // convert output to float and assign to
+    ultraArray[i] = curDistance[i]; 
     prevDistance[i] = curDistance[i]; // set previous distance to current 
-
   }
   
   ultraMsg.data = ultraArray; // update msg with curent array of values
   ultraPub.publish(&ultraMsg);
+
+  ultrasonicDiagnostic(&dia_ultraNW, &diaUltraPubNW, ultraArray[NW]);
+  ultrasonicDiagnostic(&dia_ultraNE, &diaUltraPubNE, ultraArray[NE]);
+  ultrasonicDiagnostic(&dia_ultraSW, &diaUltraPubSW, ultraArray[SW]);
+  ultrasonicDiagnostic(&dia_ultraSE, &diaUltraPubSE, ultraArray[SE]);
+
+}
+
+void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, float distance) {
+  //diagnostic_msgs::KeyValue ultra_key
+  char dis[10];
+  dtostrf(distance, 5, 1, dis);
+
+  if ((distance <= 50) && (distance > 30)) {
+    sensor->message = dis;
+    sensor->level = WARN;
+    sensor->values->key = "1";
+    sensor->values->value = "Within 50 CM";
+    //sensor.values = &ultra_key;
+  }
+  else if ((distance <= 30) && (distance > 0)) {
+    sensor->message = dis;
+    sensor->level = ERROR;
+    sensor->values->key = "0";
+    sensor->values->value = "Within 30 CM";
+  }
+  else {
+    ultra_key.key = "2";
+    ultra_key.value = "OK";
+    sensor->message = dis;
+    sensor->level = OK;
+    sensor->values = &ultra_key;
+    //sensor->values->key = "OK";
+    //sensor->values->value = "5";
+  }
+
+  publisher->publish(sensor);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -341,15 +436,56 @@ void calculate_orientation() {
   RateRoll -= RateCalibrationRoll;
   RatePitch -= RateCalibrationPitch;
   RateYaw -= RateCalibrationYaw;
+
   kalman_1d(KalmanAngleRoll, KalmanUncertaintyAngleRoll, RateRoll, AngleRoll);
   angular_velocity.x = KalmanAngleRoll = Kalman1DOutput[0];
   KalmanUncertaintyAngleRoll = Kalman1DOutput[1];
   debugln(KalmanAngleRoll);
+
   kalman_1d(KalmanAnglePitch, KalmanUncertaintyAnglePitch, RatePitch, AnglePitch);
   angular_velocity.y = KalmanAnglePitch = Kalman1DOutput[0];
   KalmanUncertaintyAnglePitch = Kalman1DOutput[1];
   debugln(KalmanAnglePitch);
+
+  
   imuPub.publish(&angular_velocity);
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, KalmanAngleRoll, "Roll");
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, KalmanAnglePitch, "Pitch");
+}
+
+void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, float angle, String degree) {
+  char ang[10];
+  dtostrf(angle, 5, 1, ang);
+  /*  CAN USE TO CONVERT STRING TO CHAR ARRAY FOR KEY
+  char valWarn[20]; 
+  String(degree + " Warning").toCharArray(valWarn, 20);
+  char valErr[20];
+  String(degree + " Emergency").toCharArray(valErr, 20); */
+  
+  if (angle >= 60) {
+    imu_key.key = "1";
+    imu_key.value = "Roll Emergency";
+    sensor->message = ang;
+    sensor->level = ERROR;
+    sensor->values = &imu_key;
+  }
+  else if (angle >= 30) {
+    imu_key.key = "0";
+    imu_key.value = "Roll Warning";
+    sensor->message = ang;
+    sensor->level = WARN;
+    sensor->values = &imu_key;
+  }
+  else {
+    imu_key.key = "2";
+    imu_key.value = "LEVEL";
+    sensor->message = ang;
+    sensor->level = OK;
+    sensor->values = &imu_key;
+    
+  }
+
+  publisher->publish(sensor);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------
@@ -370,13 +506,40 @@ void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, fl
 
 float boxTemperatureData() {
   if ( (timer - boxTempTimer) > 20000 ) {
-    currTemp = HTS.readTemperature();
+    currTemp = HTS.readTemperature() - 3.0; // -3 because of constant on-board temperature increase
 
     delay(100);  // Only works with delay greater than or equal to 40 ms
 
-    boxTemp.temperature = currTemp - 3.0;
+    boxTemp.temperature = currTemp;
 
     boxTempPub.publish(&boxTemp);  
+
+    if (currTemp <= 15) { 
+      dia_boxTemp.message = "Underheat Emergency"; 
+      dia_boxTemp.level = ERROR;
+    }
+    else if ((15 < currTemp) && (currTemp <= 20)) {
+      dia_boxTemp.message = "Underheat Warning"; 
+      dia_boxTemp.level = WARN;
+    } 
+    else if ((20 < currTemp) && (currTemp < 55)) {
+      dia_boxTemp.message = "OK";
+      dia_boxTemp.level = OK;
+    }
+    else if ((55 <= currTemp) && (currTemp < 65)) {
+      dia_boxTemp.message = "Overheat Warning";
+      dia_boxTemp.level = WARN;
+    }
+    else if(currTemp >= 65) { // Rasberry Pi turns off at 65 C and breaks down at 70 C
+      dia_boxTemp.message = "Overheat Emergency";
+      dia_boxTemp.level = ERROR;
+    }
+    else {
+      dia_boxTemp.message = "OK";
+      dia_boxTemp.level = OK;
+    }
+
+    diaBoxTempPub.publish(&dia_boxTemp);
 
     boxTempTimer = timer;
   }
@@ -394,7 +557,22 @@ void voltageSensorData() {
   voltageSensorMsg.voltage = volt;
   voltageSensorMsg.percentage = voltPercent;
 
+  if (volt <= 47.5) {
+    dia_voltageSensor.message = "Voltage Warning";
+    dia_voltageSensor.level = 1;
+  }
+  else if (volt <= 45.5) {
+    dia_voltageSensor.message = "Voltage Emergency";
+    dia_voltageSensor.level = 0;
+  }
+  else {
+    dia_voltageSensor.message = "OK";
+    dia_voltageSensor.level = OK;
+  }
+
   voltageSensorPub.publish(&voltageSensorMsg);
+
+  diaVoltageSensorPub.publish(&dia_voltageSensor);
 }
 
 void voltageConverterTempData() {
@@ -496,6 +674,7 @@ void batteryTempData() {
     dia_batteryTemp.level = ERROR;
   }
 }
+
 
 void gpsData() {
 
