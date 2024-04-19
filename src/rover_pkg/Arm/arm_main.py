@@ -6,13 +6,11 @@ from pyniryo2 import *
 from std_msgs.msg import Float32MultiArray
 #from std_msgs.msg import Bool
 from trajectory_msgs.msg import JointTrajectoryPoint
-#from niryo_listener import ArmController
-
 
 class Arm():
 
 	def __init__(self):
-		rospy.init_node("arm",anonymous = True)
+		rospy.init_node("arm", anonymous = True)
 		robot_ip_address = "10.10.10.10"
 		self.robot = NiryoRobot(robot_ip_address)
 		time.sleep(5)

@@ -12,7 +12,7 @@ class ArmController():
     def __init__(self):    	
         rospy.init_node("arm_controller", anonymous=True)
         self.pub = rospy.Publisher('control_command', Float32MultiArray, queue_size=10)
-        self.pub_controller = rospy.Publisher('controller_state', Float32, queue_size=10)
+        #self.pub_controller = rospy.Publisher('controller_state', Float32, queue_size=10)
         self.grip_pub = rospy.Publisher('grip_state', Bool, queue_size=10)
         
         self.jog_pose_value = 0.02
@@ -26,7 +26,7 @@ class ArmController():
         self.current_command = Float32MultiArray()
         self.current_command.data = [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
         self.pub.publish(self.current_command)
-        self.control_state = 0
+        #self.control_state = 0
 
         self.buttonBuffer = {
         "left_joy_y": 0,
@@ -53,7 +53,7 @@ class ArmController():
         #self.pub_controller.publish(self.control_state)  
         
         self.__update_command__()
-        print(self.current_command)
+
         #self.update_grip()
         #self.grip_pub.publish(self.grip)
         self.pub.publish(self.current_command)
