@@ -319,7 +319,7 @@ void loop() {
 
   timer = millis();
 
-  ultrasonicData();
+  //ultrasonicData();
   gyroscopeData();
   boxTemperatureData();
   voltageSensorData();
@@ -369,39 +369,38 @@ void ultrasonicData() {
   ultraMsg.data = ultraArray; // update msg with curent array of values
   ultraPub.publish(&ultraMsg);
 
-  ultrasonicDiagnostic(&dia_ultraNW, &diaUltraPubNW, ultraArray[NW]);
-  ultrasonicDiagnostic(&dia_ultraNE, &diaUltraPubNE, ultraArray[NE]);
-  ultrasonicDiagnostic(&dia_ultraSW, &diaUltraPubSW, ultraArray[SW]);
-  ultrasonicDiagnostic(&dia_ultraSE, &diaUltraPubSE, ultraArray[SE]);
+  ultrasonicDiagnostic(&dia_ultraNW, &diaUltraPubNW, &ultra_key, ultraArray[NW]);
+  ultrasonicDiagnostic(&dia_ultraNE, &diaUltraPubNE, &ultra_key, ultraArray[NE]);
+  ultrasonicDiagnostic(&dia_ultraSW, &diaUltraPubSW, &ultra_key, ultraArray[SW]);
+  ultrasonicDiagnostic(&dia_ultraSE, &diaUltraPubSE, &ultra_key, ultraArray[SE]);
 
 }
 
-void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, float distance) {
+void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float distance) {
   //diagnostic_msgs::KeyValue ultra_key
   char dis[10];
   dtostrf(distance, 5, 1, dis);
 
   if ((distance <= 50) && (distance > 30)) {
+    key->key = "1";
+    key->value = "Within 50 CM";
     sensor->message = dis;
     sensor->level = WARN;
-    sensor->values->key = "1";
-    sensor->values->value = "Within 50 CM";
-    //sensor.values = &ultra_key;
+    sensor->values = key;
   }
   else if ((distance <= 30) && (distance > 0)) {
+    key->key = "0";
+    key->value = "Within 30 CM";
     sensor->message = dis;
     sensor->level = ERROR;
-    sensor->values->key = "0";
-    sensor->values->value = "Within 30 CM";
+    sensor->values = key;
   }
   else {
-    ultra_key.key = "2";
-    ultra_key.value = "OK";
+    key->key = "2";
+    key->value = "OK";
     sensor->message = dis;
     sensor->level = OK;
-    sensor->values = &ultra_key;
-    //sensor->values->key = "OK";
-    //sensor->values->value = "5";
+    sensor->values = key;
   }
 
   publisher->publish(sensor);
@@ -450,10 +449,10 @@ void calculate_orientation() {
 
   
   imuPub.publish(&angular_velocity);
-  gyroscopeDiagnostics(&dia_imu, &diaImuPub, KalmanAngleRoll, KalmanAnglePitch);
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, KalmanAngleRoll, KalmanAnglePitch);
 }
 
-void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, float roll, float pitch) {
+void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float roll, float pitch) {
   char ro[10], pit[10];
   dtostrf(roll, 5, 1, ro);
   dtostrf(pitch, 5, 1, pit);
@@ -464,39 +463,39 @@ void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   String(degree + " Emergency").toCharArray(valErr, 20); */
   
   if (abs(roll) >= 60) {
-    imu_key.key = "0";
-    imu_key.value = "Roll Emergency";
+    key->key = "0";
+    key->value = "Roll Emergency";
     sensor->message = ro;
     sensor->level = ERROR;
-    sensor->values = &imu_key;
+    sensor->values = key;
   }
   else if (abs(pitch) >= 60) {
-    imu_key.key = "1";
-    imu_key.value = "Pitch Emergency";
+    key->key = "1";
+    key->value = "Pitch Emergency";
     sensor->message = pit;
     sensor->level = ERROR;
-    sensor->values = &imu_key;
+    sensor->values = key;
   }
   else if (abs(roll) >= 30) {
-    imu_key.key = "2";
-    imu_key.value = "Roll Warning";
+    key->key = "2";
+    key->value = "Roll Warning";
     sensor->message = ro;
     sensor->level = WARN;
-    sensor->values = &imu_key;
+    sensor->values = key;
   }
   else if (abs(pitch) >= 30) {
-    imu_key.key = "3";
-    imu_key.value = "Pitch Warning";
+    key->key = "3";
+    key->value = "Pitch Warning";
     sensor->message = pit;
     sensor->level = WARN;
-    sensor->values = &imu_key;
+    sensor->values = key;
   }
   else {
-    imu_key.key = "4";
-    imu_key.value = "LEVEL";
+    key->key = "4";
+    key->value = "LEVEL";
     sensor->message = "";
     sensor->level = OK;
-    sensor->values = &imu_key;
+    sensor->values = key;
   }
 
   publisher->publish(sensor);
@@ -646,11 +645,6 @@ void batteryTempData() {
 void temperatureDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float temp, float upperEmer, float upperWarn, float lowEmer, float lowWarn) {
   char t[10];
   dtostrf(temp, 5, 1, t);
-  /*  CAN USE TO CONVERT STRING TO CHAR ARRAY FOR KEY
-  char valWarn[20]; 
-  String(degree + " Warning").toCharArray(valWarn, 20);
-  char valErr[20];
-  String(degree + " Emergency").toCharArray(valErr, 20); */
   
   if (temp >= upperEmer) {
     key->key = "0";
