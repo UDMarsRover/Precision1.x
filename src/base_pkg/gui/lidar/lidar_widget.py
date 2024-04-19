@@ -26,7 +26,7 @@ class LidarWidget(QtWidgets.QWidget):
         self.setWindowTitle("Lidar Window")
         self.canvas = QtGui.QPixmap(self.area_width, self.area_height)
         self.canvas.fill(QtGui.QColor("black"))
-        rover_real_height = 2
+        rover_real_height = 1.8
         rover_pixel_height = int((rover_real_height / (2 * self.radius)) * self.area_height)
         self.rover_image = QImage("src/base_pkg/gui/lidar/rover.png").scaledToHeight(rover_pixel_height, mode=Qt.FastTransformation)
         self.rover_image_x = self.area_height / 2 - self.rover_image.width() / 2
@@ -74,7 +74,7 @@ class LidarWidget(QtWidgets.QWidget):
         self.canvas.fill(QtGui.QColor("black"))
 
         # x, y = self.get_data()
-        x, y = self.x, self.y
+        x, y = self.x, -self.y
         for i in range(len(x)):
             x[i] = x[i] + self.area_width / 2
             y[i] = y[i] + self.area_height / 2

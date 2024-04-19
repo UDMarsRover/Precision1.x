@@ -12,7 +12,7 @@ class udmrt_gui(QtWidgets.QWidget):
         super().__init__()
         self.layout = QGridLayout(self)
         # Initialize widgets here.
-        self.lidar_widget = LidarWidget(6.0) # Your widget
+        self.lidar_widget = LidarWidget(3.0) # Your widget
         self.lidar_widget_2 = LidarWidget(2.0) # Your widget
         self.layout.addWidget(self.lidar_widget, 0, 0) # Add to the layout
         self.layout.addWidget(self.lidar_widget_2, 0, 1) # Add to the layout
