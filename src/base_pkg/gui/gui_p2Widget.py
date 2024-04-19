@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QLabel
- 
+from rospyTutorialsubs import lstnr
 import rospy
 from std_msgs.msg import String
 
@@ -9,6 +9,7 @@ from std_msgs.msg import String
 class ErrorBoxes(QtWidgets.QWidget):
 
     def __init__(self, *args, **kwargs):
+        self.l = lstnr()
         super(ErrorBoxes, self).__init__(*args, **kwargs)
 
         layout = QtWidgets.QHBoxLayout()
@@ -76,7 +77,7 @@ class Roser:
         # run simultaneously.
         rospy.init_node('listener', anonymous=True)
 
-        rospy.Subscriber('chatter', String)
+        rospy.Subscriber('chatter', String, callback)
 
         # spin() simply keeps python from exiting until this node is stopped
 
