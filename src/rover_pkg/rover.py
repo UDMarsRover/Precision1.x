@@ -1,12 +1,11 @@
 """
 Created By: Greg Molskow
-Use Case:   To be used by the University of Dayton Mars Rover Team as a base class to define the sensors of the rover 
-            and to interact with each of its parts. This code is approved for use only by UDMRT and its affiliates. 
+Use Case:   To be used by the University of Dayton Mars Rover Team as a base class to define the sensors of the rover
+            and to interact with each of its parts. This code is approved for use only by UDMRT and its affiliates.
 """
 
 
 import rospy
-import sys
 from std_msgs.msg import String
 
 from UDMRTDataBuffer import UDMRTDataBuffer as DataBuf

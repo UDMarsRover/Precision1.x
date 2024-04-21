@@ -3,13 +3,20 @@
  * Created by Joe Ditz on Jan 27, 2021
  * Edited by Greg Moldkow Mar 27, 2021
  */
-
-
 #include "MoogMotor.h"
 
+float rps;
+float eCounts;
 
-
-MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resolution, int samplerate, int delayTime, float acc)
+MoogMotor::MoogMotor(int id, 
+                     HardwareSerial* serial, 
+                     int gearRatio, 
+                     float wheelDiameter, 
+                     int resolution, 
+                     int samplerate, 
+                     int delayTime, 
+                     float acc
+                    )
 {  
   MoogMotor::delayTime = delayTime;
   MoogMotor::gearRatio = gearRatio;
@@ -18,6 +25,7 @@ MoogMotor::MoogMotor(int id, HardwareSerial* serial, int gearRatio, int resoluti
   MoogMotor::serial = serial;
   MoogMotor::id = id;
   MoogMotor::acc = acc;
+  MoogMotor::row = wheelDiameter * 3.14159 * 60 * 60;
   if(&(MoogMotor::serial)){
     MoogMotor::serial->end();
     delay(100);
@@ -54,7 +62,7 @@ bool MoogMotor::setID(){
 }
 
 void MoogMotor::enable(){
-   MoogMotor::sendCommand("WAKE",true);
+  MoogMotor::sendCommand("WAKE",true);
   MoogMotor::sendCommand("ECHO",true);
 
   //Remove Software Limits
@@ -123,6 +131,7 @@ bool MoogMotor::isConnected(){
 bool MoogMotor::resetStatusCodes(){
   sendCommand("ZS");       // Clear All Warning Tags
   MoogMotor::enable();
+  delay(100);
   //park();
   return statusCode == 1;
 }
@@ -143,12 +152,12 @@ void MoogMotor::ESTOP(){
   sendCommand("B(0,0)=0");
 }
 
-boolean MoogMotor::setVelocity(float rps, float acceleration){
-  
-  double eCounts = rps * MoogMotor::gearRatio * (MoogMotor::resolution/MoogMotor::sampleRate) * 65536;    
+boolean MoogMotor::setVelocity(float kmph){
+
+  rps = kmph / MoogMotor::row;
+  eCounts = rps * MoogMotor::gearRatio * (MoogMotor::resolution/MoogMotor::sampleRate) * 65536;  
+
   MoogMotor::sendCommand("MV VT="+String(eCounts)+" "+"G");       //Set motors to velocity mode (MV), the rps (VT=), and tell it to go (G)
-
-
 
   return true;
 }
@@ -166,11 +175,11 @@ boolean MoogMotor::setTorque(float torque){
   return false;
 }
 
-boolean MoogMotor::setPosition(float position, float velocity, float acceleration){
+boolean MoogMotor::setPosition(float position, float velocity){
   
-  if(abs(position) <= 1 && 0 <= acceleration <=1){
+  if(abs(position) <= 1 && 0 <= MoogMotor::acc <=1){
     position = position * POSMAX;         
-    acceleration = acceleration * ACCMAX; 
+    float acceleration = MoogMotor::acc * ACCMAX; 
     
     
     sendCommand("MP");                          //Set to motor position mode
