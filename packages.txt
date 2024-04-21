@@ -5,4 +5,5 @@ catkin_pkg
 pyyaml
 rospkg
 pyserial
-
+pyqt5
+RPi.GPIO
