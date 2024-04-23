@@ -135,7 +135,7 @@ double alphaVoltSense = 0.1;
 
 //Counter variables
 float timer;
-float boxTempTimer;
+float sensorTimer;
 
 int queue_size;
 
@@ -315,30 +315,18 @@ void setup() {
 
 void loop() {
   
-  delay(10);
-
   timer = millis();
 
-  //ultrasonicData();
+  ultrasonicData();
   gyroscopeData();
-  boxTemperatureData();
-  voltageSensorData();
-  voltageConverterTempData();
-  batteryTempData();
+  if ( (timer - sensorTimer) > 20000 ) {
+    boxTemperatureData();
+    voltageConverterTempData();
+    batteryTempData();
+    voltageSensorData();
+    sensorTimer = timer;
+  }
   //gpsData();
-
-  /*
-  // diagnostic update
-  dia_imu.values = imu_key;
-  dia_boxTemp.values = box_key;
-  
-  
-  // diagnostic publish
-  diaImuPub.publish(&dia_imu);
-  diaBoxTempPub.publish(&dia_boxTemp);
-  diaVoltConverterTempPub.publish(&dia_voltConverterTemp);
-  diaBatteryTempPub.publish(&dia_batteryTemp);
-  */
 
   nh.spinOnce(); 
 }
@@ -518,7 +506,6 @@ void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, fl
 }
 
 float boxTemperatureData() {
-  if ( (timer - boxTempTimer) > 20000 ) {
     currTemp = HTS.readTemperature() - 3.0; // -3 because of constant on-board temperature increase
 
     delay(100);  // Only works with delay greater than or equal to 40 ms
@@ -528,9 +515,6 @@ float boxTemperatureData() {
     boxTempPub.publish(&boxTemp);  
 
     temperatureDiagnostics(&dia_boxTemp, &diaBoxTempPub, &box_key, currTemp, 65, 55, 15, 5);
-  
-    boxTempTimer = timer;
-  }
 }
 
 void voltageSensorData() {
