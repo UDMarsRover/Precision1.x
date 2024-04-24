@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import rospy
-from std_msgs.msg import Int16
+from std_msgs.msg import Int8
 
 class CameraTester:
     def __init__(self):
         rospy.init_node("camera_servo_tester", anonymous=True)
-        self.pub = rospy.Publisher("/base/gui/out/camera_servo", Int16, queue_size=10)
+        self.pub = rospy.Publisher("/base/gui/out/camera_servo", Int8, queue_size=10)
         self.rate = rospy.Rate(1)
 
     def run(self):
