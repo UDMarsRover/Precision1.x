@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from std_msgs.msg import Int8
+from std_msgs.msg import Float32
 import time
 import RPi.GPIO as gpio
 
@@ -13,7 +13,7 @@ class CameraServoNode:
         self.p = gpio.PWM(self.servo_pin, 50)
         self.p.start(0) # duty cycle 2.5%
         rospy.init_node("camera_servo_node", anonymous=True)
-        self.sub = rospy.Subscriber("/base/gui/out/camera_servo", Int8, self.callback)
+        self.sub = rospy.Subscriber("/base/gui/out/camera_servo", Float32, self.callback)
         rospy.spin()
 
     def callback(self, msg):
