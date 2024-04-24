@@ -13,7 +13,7 @@ class CameraTester:
         while True:
             set_point = input("Enter motor setpoint as a value from 0 to 255: ")
             msg = Float32()
-            msg.data = int(set_point)
+            msg.data = float(set_point)
             self.pub.publish(msg)
         
 
