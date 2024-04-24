@@ -3,6 +3,7 @@
 import rospy
 from std_msgs.msg import Int8
 import time
+import RPi.GPIO
 
 class CameraServoNode:
     def __init__(self):
