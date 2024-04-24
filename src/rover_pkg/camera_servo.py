@@ -14,6 +14,7 @@ class CameraServoNode:
         self.p.start(0) # duty cycle 2.5%
         rospy.init_node("camera_servo_node", anonymous=True)
         self.sub = rospy.Subscriber("/base/gui/out/camera_servo", Int8, self.callback)
+        rospy.spin()
 
     def callback(self, msg):
         print("Duty Cycle:" + str(msg.data))
@@ -26,10 +27,6 @@ class CameraServoNode:
 
 def main(args=None):
         csn = CameraServoNode()
-        try:
-             rospy.spin()
-        except:
-             csn.stop()
 
 if __name__ == "__main__":
     main()
