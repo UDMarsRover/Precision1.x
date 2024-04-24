@@ -12,7 +12,7 @@ class CameraTester:
     def run(self):
         while True:
             set_point = input("Enter motor setpoint as a value from 0 to 255: ")
-            msg = Int16()
+            msg = Int8()
             msg.data = int(set_point)
             self.pub.publish(msg)
         
