@@ -11,7 +11,7 @@ class CameraServoNode:
         gpio.setmode(gpio.BOARD)
         gpio.setup(self.servo_pin, gpio.OUT)
         self.p = gpio.PWM(self.servo_pin, 50)
-        self.p.start(2.5) # duty cycle 2.5%
+        self.p.start(0) # duty cycle 2.5%
         rospy.init_node("camera_servo_node", anonymous=True)
         self.sub = rospy.Subscriber("/base/gui/out/camera_servo", Int8, self.callback)
 
