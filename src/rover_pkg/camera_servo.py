@@ -26,9 +26,6 @@ class CameraServoNode:
 
 def main(args=None):
     csn = CameraServoNode()
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        csn.stop()
+    rospy.spin()
 if __name__ == "__main__":
     main()
