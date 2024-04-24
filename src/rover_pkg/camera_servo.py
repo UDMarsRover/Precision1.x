@@ -16,6 +16,7 @@ class CameraServoNode:
         self.sub = rospy.Subscriber("/base/gui/out/camera_servo", Int8, self.callback)
 
     def callback(self, msg):
+        print("Duty Cycle:" + str(msg.data)
         self.p.ChangeDutyCycle(msg.data)
 
     def stop(self):
