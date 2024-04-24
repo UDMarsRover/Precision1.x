@@ -25,7 +25,11 @@ class CameraServoNode:
         
 
 def main(args=None):
-    csn = CameraServoNode()
-    rospy.spin()
+        csn = CameraServoNode()
+        try:
+             rospy.spin()
+        except:
+             csn.stop()
+
 if __name__ == "__main__":
     main()
