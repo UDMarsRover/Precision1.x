@@ -8,8 +8,8 @@ import RPi.GPIO as gpio
 class CameraServoNode:
     def __init__(self):
         self.servo_pin = 17
-        gpio.setmode(gpio.BCM)
         gpio.setup(self.servo_pin, gpio.OUT)
+        gpio.setmode(gpio.BCM)
         self.p = gpio.PWM(self.servo_pin, 50)
         self.p.start(2.5) # duty cycle 2.5%
         rospy.init_node("camera_servo_node", anonymous=True)
