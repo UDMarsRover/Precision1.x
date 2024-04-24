@@ -17,7 +17,7 @@ class CameraTester:
             self.pub.publish(msg)
             msg2 = Float32()
             msg2.data = 0.0
-            rospy.sleep(1)
+            rospy.sleep(0.01)
             self.pub.publish(msg2)
         
 
