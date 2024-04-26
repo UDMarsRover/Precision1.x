@@ -13,6 +13,7 @@
 #include <NewPing.h> // Ultrasonic
 #include <Arduino_HTS221.h> // On-board temperature
 #include <Arduino_LSM9DS1.h> // IMU
+#include "attitude.h" // GPS
 
 //GPS Include
 #include <TinyGPSPlus.h>
@@ -73,16 +74,10 @@ String curDistanceOutput[NUM_SONAR];
 float ultraArray[4]; // initialize array to assign to msg
 
 //IMU variables
-float RateRoll, RatePitch, RateYaw = 1; //If set to null, divide by zero in first iteration -> NaN output
-float RateCalibrationRoll, RateCalibrationPitch, RateCalibrationYaw;
-int RateCalibrationNumber;
-float AccX, AccY, AccZ = 1; //If set to null, divide by zero in first iteration -> NaN output
-float AccX_offset, Accy_offset, AccZ_offset;
-float AngleRoll, AnglePitch;
-uint32_t last_power_down;
-float KalmanAngleRoll = 0, KalmanUncertaintyAngleRoll = 2 * 2;
-float KalmanAnglePitch = 0, KalmanUncertaintyAnglePitch = 2 * 2;
-float Kalman1DOutput[] = { 0, 0 };
+Attitude attitude;
+float* ypr;           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+float* acc;           // [ax, ay, az]         Accelerometer data for x, y, and z
+
 // Timing variables for Loop
 uint32_t LoopTimer;
 int LastLoop;
@@ -170,7 +165,10 @@ std_msgs::Float32MultiArray ultraMsg;
 ros::Publisher ultraPub("emo/ultra", &ultraMsg);
 
 geometry_msgs::Vector3 angular_velocity;
-ros::Publisher imuPub("emo/imu",&angular_velocity);
+ros::Publisher imuPubGyro("emo/imu/gyro", &angular_velocity);
+
+geometry_msgs::Vector3 linear_acceleration;
+ros::Publisher imuPubAccel("emo/imu/accel", &linear_acceleration);
 
 sensor_msgs::Temperature boxTemp;
 ros::Publisher boxTempPub("emo/temp/box", &boxTemp);
@@ -246,13 +244,14 @@ void setup() {
 
   //Ros setup
   nh.initNode();
-  nh.advertise(ultraPub); // works
-  nh.advertise(imuPub); // works
-  nh.advertise(boxTempPub); // broken
-  nh.advertise(voltageSensorPub); // works
-  nh.advertise(voltageConverterTempPub); // works
-  nh.advertise(batteryTempPub); // works
-  nh.advertise(gpsPub); // works
+  nh.advertise(ultraPub); 
+  nh.advertise(imuPubGyro);
+  nh.advertise(imuPubAccel);
+  nh.advertise(boxTempPub);
+  nh.advertise(voltageSensorPub); 
+  nh.advertise(voltageConverterTempPub);
+  nh.advertise(batteryTempPub);
+  nh.advertise(gpsPub);
   
   nh.advertise(diaUltraPubNW);
   nh.advertise(diaUltraPubNE);
@@ -298,6 +297,8 @@ void setup() {
     while (1);
   }
 
+  attitude.initialize();
+
   if (!HTS.begin()) {
     dia_boxTemp.message = "Failed to intialize box temperature sensor";
     //dia_boxTemp.message = STALE;
@@ -315,18 +316,20 @@ void setup() {
 
 void loop() {
   
+  delay(10);
   timer = millis();
 
   ultrasonicData();
   gyroscopeData();
+  accelerometerData();
   if ( (timer - sensorTimer) > 20000 ) {
     boxTemperatureData();
     voltageConverterTempData();
     batteryTempData();
     voltageSensorData();
+    gpsData();
     sensorTimer = timer;
   }
-  //gpsData();
 
   nh.spinOnce(); 
 }
@@ -344,11 +347,7 @@ void ultrasonicData() {
     }
     else{
       curDistance[i] = expFilter(alphaUltra, prevDistance[i], curDistance[i]); // filter distance values
-    }  
-    /*  Could use this to create array of current errors, then publish all error statues in a diagnostic status array
-    if (curDistance[i] <= 5) {
-      error[i] = 1;
-    }*/
+    }
 
     ultraArray[i] = curDistance[i]; 
     prevDistance[i] = curDistance[i]; // set previous distance to current 
@@ -394,62 +393,24 @@ void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   publisher->publish(sensor);
 }
 
-//-------------------------------------------------------------------------------------------------------------------------------------
-//Get Gyroscope signals
-//inputs: AccX, AccY => For integrating
-//outputs: AngleRoll, AnglePitch => Integrated
-//-------------------------------------------------------------------------------------------------------------------------------------
-void gyroscopeData(void) {
-  //if (startup) {delay(10); startup = false;} //Fixed by setting initial RateR,P,Y and AccX,Y,Z to 1 instead of 0. Ensure functionality with EMo
-  if (micros() - LoopTimer > 4000) {
-    if (IMU.gyroscopeAvailable()) {
-      IMU.readGyroscope(RateRoll, RatePitch, RateYaw); //Provides angular velocity in degrees/sec
-      //RateRoll -> gyro x, RatePitch -> gyro y, RateYaw -> gyro z
-    }
+void gyroscopeData() {
 
-    if (IMU.accelerationAvailable()) {
-      IMU.readAcceleration(AccX, AccY, AccZ); //Provides angular velocity in degrees/sec
-    }
-
-    AngleRoll = atan(AccY / sqrt(AccX * AccX + AccZ * AccZ)) * 1 / (3.142 / 180);
-    AnglePitch = -atan(AccX / sqrt(AccY * AccY + AccZ * AccZ)) * 1 / (3.142 / 180);
-
-    calculate_orientation();
+  ypr = attitude.getYpr();
+  for (int i = 0; i < 3; i++) {ypr[i] = ypr[i] * (180/3.141592693);}
   
-    LoopTimer = micros();
-  }
-}
+  angular_velocity.x = ypr[1];
+  angular_velocity.y = ypr[2];
+  angular_velocity.z = ypr[0];
 
-void calculate_orientation() {
-  RateRoll -= RateCalibrationRoll;
-  RatePitch -= RateCalibrationPitch;
-  RateYaw -= RateCalibrationYaw;
+  imuPubGyro.publish(&angular_velocity);
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, ypr[1], ypr[2]);
 
-  kalman_1d(KalmanAngleRoll, KalmanUncertaintyAngleRoll, RateRoll, AngleRoll);
-  angular_velocity.x = KalmanAngleRoll = Kalman1DOutput[0];
-  KalmanUncertaintyAngleRoll = Kalman1DOutput[1];
-  debugln(KalmanAngleRoll);
-
-  kalman_1d(KalmanAnglePitch, KalmanUncertaintyAnglePitch, RatePitch, AnglePitch);
-  angular_velocity.y = KalmanAnglePitch = Kalman1DOutput[0];
-  KalmanUncertaintyAnglePitch = Kalman1DOutput[1];
-  debugln(KalmanAnglePitch);
-
-  
-  imuPub.publish(&angular_velocity);
-  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, KalmanAngleRoll, KalmanAnglePitch);
 }
 
 void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float roll, float pitch) {
   char ro[10], pit[10];
   dtostrf(roll, 5, 1, ro);
   dtostrf(pitch, 5, 1, pit);
-  /*  CAN USE TO CONVERT STRING TO CHAR ARRAY FOR KEY
-  char valWarn[20]; 
-  String(degree + " Warning").toCharArray(valWarn, 20);
-  char valErr[20];
-  String(degree + " Emergency").toCharArray(valErr, 20); */
-  
   if (abs(roll) >= 60) {
     key->key = "0";
     key->value = "Roll Emergency";
@@ -489,20 +450,16 @@ void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   publisher->publish(sensor);
 }
 
-//-------------------------------------------------------------------------------------------------------------------------------------
-//1D Kalman filter
-//inputs: KalmanState, KalmanUncertainty, KalmanInput, KalmanMeasurement => Kalman filter inputs
-//outputs: Kalman1DOutput => Gives Kalman filter outputs
-//-------------------------------------------------------------------------------------------------------------------------------------
-void kalman_1d(float KalmanState, float KalmanUncertainty, float KalmanInput, float KalmanMeasurement) {
-  //Don't forget that 0.004 is the time separation (4 ms)
-  KalmanState = KalmanState + 0.004 * KalmanInput;
-  KalmanUncertainty = KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
-  float KalmanGain = KalmanUncertainty * 1 / (1 * KalmanUncertainty + 2); //Edited from original document as Kalman Gain factor was too high for sensitivty of BLE 33 sense's IMU
-  KalmanState = KalmanState + KalmanGain * (KalmanMeasurement - KalmanState);
-  KalmanUncertainty = (1 - KalmanGain) * KalmanUncertainty;
-  Kalman1DOutput[0] = KalmanState;
-  Kalman1DOutput[1] = KalmanUncertainty;
+void accelerometerData() {
+
+  acc = attitude.getAcc();
+  
+  linear_acceleration.x = acc[0];
+  linear_acceleration.y = acc[1];
+  linear_acceleration.z = acc[2];
+
+  imuPubAccel.publish(&linear_acceleration);
+
 }
 
 float boxTemperatureData() {
