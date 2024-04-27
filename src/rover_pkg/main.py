@@ -61,6 +61,13 @@ def wifiCheck(ip:str = "192.168.8.1"):
 
 # The main Loop
 if __name__ == "__main__":
+    led_control(1,0,0)
+    time.sleep(2)
+    led_control(0,1,0)
+    time.sleep(2)
+    led_control(0,0,1)
+    time.sleep(2)
+    led_control(1,1,1)
 
     rospy.init_node("precision1")
     rate = rospy.Rate(10)  # Hz
