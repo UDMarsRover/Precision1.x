@@ -47,7 +47,7 @@ def shutdown(check: bool = True):
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
-            while not gpio.input: None
+            while not gpio.input(shutdownPin): None
             #gpio.output(relay,0)
             return True
         else: return False
