@@ -49,12 +49,15 @@ def shutdown(check: bool = True):
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
             time.sleep(0.5)
             #gpio.output(relay,0)
+            return True
+        else: return False
             
     else:
         led_control(1, 1, 0)
         rospy.signal_shutdown("Rover Shutdown Button Pressed")
         time.sleep(0.5)
         #gpio.output(relay,0)
+        return True
         
 def wifiCheck(ip:str = "192.168.8.1"):
     return os.system(f"ping -c 1 "+ip) == 0
@@ -81,7 +84,7 @@ if __name__ == "__main__":
 
     # While roscore is running
     print("Main Loop Check: ",gpio.input(shutdownPin))
-    while gpio.input(shutdownPin):
+    while not shutdown():
         print("Main Loop Check: ",gpio.input(shutdownPin))
         while not rospy.is_shutdown():
             if wifiCheck(): led_control(0, 1, 0)
