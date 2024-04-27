@@ -90,7 +90,9 @@ class Rover:
                 rospy.signal_shutdown("Rover Shutdown Button Pressed")
                 self.kill = True
                 return True
-            else: return False
+            else: 
+                self.kill = False
+                return False
                 
         else:
             self.led_control(1, 1, 0)
