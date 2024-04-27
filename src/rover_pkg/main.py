@@ -30,8 +30,8 @@ gpio.setwarnings(False)
 gpio.setup(indicatorLED["red"], gpio.OUT)
 gpio.setup(indicatorLED["green"], gpio.OUT)
 gpio.setup(indicatorLED["blue"], gpio.OUT)
-#gpio.setup(relay,gpio.OUT)
-#gpio.output(relay,1)
+gpio.setup(relay,gpio.OUT)
+gpio.output(relay,1)
 gpio.setup(shutdownPin, gpio.IN)
 
 
@@ -43,12 +43,11 @@ def led_control(r: int, g: int, b: int):
 
 def shutdown(check: bool = True):
     if check:
-        print("Shutdown Pin Check ", gpio.input(shutdownPin))
         if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
             while not gpio.input(shutdownPin): None
-            #gpio.output(relay,0)
+            gpio.output(relay,0)
             return True
         else: return False
             
@@ -56,11 +55,10 @@ def shutdown(check: bool = True):
         led_control(1, 1, 0)
         rospy.signal_shutdown("Rover Shutdown Button Pressed")
         time.sleep(0.5)
-        #gpio.output(relay,0)
+        gpio.output(relay,0)
         return True
         
 def wifiCheck(ip:str = "192.168.8.1"):
-    led_control(1,0,0)
     return os.system(f"ping -c 1 "+ip) == 0
 
 
@@ -75,7 +73,6 @@ if __name__ == "__main__":
     led_control(1,1,1)
     time.sleep(2)
 
-    led_control(0,0,1)
     rospy.init_node("precision1")
     rate = rospy.Rate(10)  # Hz
 
@@ -93,5 +90,6 @@ if __name__ == "__main__":
             rate.sleep
 
         led_control(0,0,1)
+
     
     print("DEAD")
