@@ -89,7 +89,7 @@ if __name__ == "__main__":
             shutdown()
             rate.sleep
 
-        led_control(0,0,1)
+        led_control(0,1,1)
 
     
     print("DEAD")
