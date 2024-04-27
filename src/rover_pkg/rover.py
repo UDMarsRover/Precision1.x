@@ -64,7 +64,7 @@ class Rover:
 
         if self.kill: 
             self.led_control(1,1,0)
-            rospy.loginfo("Kill Requested")
+            rospy.loginfo("Kill Registered")
         elif not self.wifiCheck(): 
             self.led_control(1,0,0)
             rospy.loginfo("Wifi Disconnected!")
@@ -80,11 +80,13 @@ class Rover:
         gpio.output(self.__indicatorLED__["blue"], b)
 
     def rollOverCheck(self, data:diag):
+        rospy.loginfo("Rollover Detected - Kill Requested")
         self.kill = (data.level == 2)   
 
     def shutdownCheck(self, force: bool = False):
         if not force:
             if not gpio.input(self.__shutdownPin__):
+                rospy.loginfo("Kill Requested via Button")
                 rospy.signal_shutdown("Rover Shutdown Button Pressed")
                 self.kill = True
                 return True
@@ -92,6 +94,7 @@ class Rover:
                 
         else:
             self.led_control(1, 1, 0)
+            rospy.loginfo("Kill Forced")
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
             time.sleep(0.5)
             self.shutdown()
