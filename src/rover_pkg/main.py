@@ -76,6 +76,7 @@ if __name__ == "__main__":
     rospy.init_node("precision1")
     rate = rospy.Rate(10)  # Hz
 
+    led_control(1, 0, 0)
     while not wifiCheck():
         led_control(1, 0, 0)
         shutdown()
