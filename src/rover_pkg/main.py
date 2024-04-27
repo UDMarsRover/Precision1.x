@@ -44,7 +44,7 @@ def led_control(r: int, g: int, b: int):
 def shutdown(check: bool = True):
     if check:
         print("Shutdown Pin Check ", gpio.input(shutdownPin))
-        if not gpio.input(shutdownPin):
+        if gpio.input(shutdownPin):
             led_control(1, 1, 0)
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
             time.sleep(0.5)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     # While roscore is running
     print("Main Loop Check: ",gpio.input(shutdownPin))
-    while not gpio.input(shutdownPin):
+    while gpio.input(shutdownPin):
         print("Main Loop Check: ",gpio.input(shutdownPin))
         while not rospy.is_shutdown():
             if wifiCheck(): led_control(0, 1, 0)
