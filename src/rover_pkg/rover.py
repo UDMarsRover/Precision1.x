@@ -4,70 +4,96 @@ Use Case:   To be used by the University of Dayton Mars Rover Team as a base cla
             and to interact with each of its parts. This code is approved for use only by UDMRT and its affiliates. 
 """
 
-
 import rospy
 import sys
+import time
+import os
 from std_msgs.msg import String
+import RPi.GPIO as gpio
+from diagnositc_msgs.msg import Diagnostic_Status as diag
 
-from UDMRTDataBuffer import UDMRTDataBuffer as DataBuf
 
 
 class Rover:
-    def __init__(self, refreshRate=10):
-        # Initialize the Rover data buffer
-        self.dataInBuf = DataBuf()
-        self.dataOutBuf = DataBuf()
+    def __init__(self, refreshRate:int=10, name:str="precision1"):
+        self.wifiConnected = False
+        self.rate = rospy.Rate(refreshRate)  # Hz
+        self.name = name
+        self.kill=False
+
+
+        self.__indicatorLED__ = {"red": 22, "green": 27, "blue": 17}
+        self.__shutdownPin__ = 13
+        self.__relay__ = 26
+        
+        gpio.setmode(gpio.BCM)
+        gpio.setwarnings(False)
+        gpio.setup(self.__indicatorLED__["red"], gpio.OUT)
+        gpio.setup(self.__indicatorLED__["green"], gpio.OUT)
+        gpio.setup(self.__indicatorLED__["blue"], gpio.OUT)
+        gpio.setup(self.__relay__,gpio.OUT)
+        gpio.output(self.__relay__,1)
+        gpio.setup(self.__shutdownPin__, gpio.IN)
+
+        self.led_control(1,0,0)
+        time.sleep(0.5)
+        self.led_control(0,1,0)
+        time.sleep(0.5)
+        self.led_control(0,0,1)
+        time.sleep(0.5)
+        self.led_control(1,1,1)
+        time.sleep(2)
 
         # Initialize the Rover ROS_MAIN node
-        rospy.init_node("rover_main", anonymous=True)
-        self.rate = rospy.Rate(refreshRate)  # Hz
+        rospy.init_node(name, anonymous=True)
+        self.rate = rospy.Rate(10)  # Hz
+        
 
-        # Initialize the Rover ROS Subscribers and tie them to the Data buffer
-        rospy.Subscriber("EmoToPi", String, self.dataOutBuf.setEmoData)
+        self.led_control(1, 0, 0)
+        while not self.wifiCheck():
+            self.led_control(1, 0, 0)
+            self.shutdownCheck()
+        
+        while rospy.is_shutdown():
+            self.led_control(0,1,1)
+        
+        rospy.Subscriber("",diag, self.rollOverCheck)
 
-        # Light on/off
-        rospy.Subscriber("DriveToPi", String, self.dataOutBuf.setDriveMotorData)
-        # Speed left drive and speed right drive
-        rospy.Subscriber("ArmToPi", String, self.dataOutBuf.setArmMotorData)
-        # 6 angles with ###.# presision
-        rospy.Subscriber("BaseToRover", String, self.ingestBaseCommands)
+    def spin(self):
+        if self.kill: self.led_control(1,1,0)
+        if rospy.is_shutdown(): self.kill=True
+        self.shutdownCheck()
+        if not self.wifiCheck(): self.led_control(1,0,0)
+        self.rate.sleep()
 
-        # Will be separate
-        # rospy.Subscriber('CameraToBase', String, self.cameraIngest)
+    def shutdown(self):
+        gpio.output(self.__relay__,0)
 
-    def publishDataToBase(self):
-        pub = rospy.Publisher("RoverToBase", String, queue_size=10)
-        command = self.dataOutBuf.composeMessageOut()
-        rospy.loginfo("Buffer to Base:" + command)
-        pub.publish(command)
+    def led_control(self, r: int, g: int, b: int):
+        gpio.output(self.__indicatorLED__["red"], r)
+        gpio.output(self.__indicatorLED__["green"], g)
+        gpio.output(self.__indicatorLED__["blue"], b)
 
-    def hasError(self):
-        return self.dataInBuf.checkForError()
+    def rollOverCheck(self, data:diag):
+        self.kill = (data.level == 2)   
 
-    def getError(self):
-        return self.dataInBuf.getErrorMessageData()
-
-    def ingestBaseCommands(self, dataIn):
-        # Take in data from base and do things
-        str = dataIn.data
-        str = str.upper()
-
-        # emoPub = rospy.Publisher('PiToEmo',String, queue_size = 10)
-        drivePub = rospy.Publisher("PiToDrive", String, queue_size=10)
-        armPub = rospy.Publisher("PiToArm", String, queue_size=10)
-
-        self.dataInBuf.__errorMessageData__ = str[0:1]
-        self.dataInBuf.setDriveMotorData(str[1:14])
-        self.dataInBuf.setArmMotorData(str[14:45])
-        self.dataInBuf.setEmoEmoData(str[45:86])
-
-        # emoPub.publish(self.dataInBuf.getEmoData())
-        drivePub.publish(self.dataInBuf.getDriveMotorData())
-        armPub.publish(self.dataInBuf.getArmMotorData())
-
-        # rospy.loginfo("Buffer to Emo:" + self.dataInBuf.getEmoData())
-        rospy.loginfo("Buffer to Drive:" + self.dataInBuf.getDriveMotorData())
-        rospy.loginfo("Buffer to Arm:" + self.dataInBuf.getArmMotorData())
+    def shutdownCheck(self, force: bool = False):
+        if not force:
+            if not gpio.input(self.__shutdownPin__):
+                rospy.signal_shutdown("Rover Shutdown Button Pressed")
+                self.kill = True
+                return True
+            else: return False
+                
+        else:
+            self.led_control(1, 1, 0)
+            rospy.signal_shutdown("Rover Shutdown Button Pressed")
+            time.sleep(0.5)
+            self.shutdown()
+            return True 
+    
+    def wifiCheck(self, ip:str = "192.168.8.1"):
+        return os.system(f"ping -c 1 "+ip) == 0
 
 
 # end
