@@ -64,10 +64,11 @@ class Rover:
 
         if self.kill: 
             self.led_control(1,1,0)
-            rospy.log("Kill Requested")
+            rospy.loginfo("Kill Requested")
         elif self.wifiCheck(): 
             self.led_control(1,0,0)
-            rospy.log("Wifi Disconnected!")
+            print("Wifi Dead")
+            rospy.loginfo("Wifi Disconnected!")
         else: self.led_control(0,1,0)
         self.rate.sleep()
 
