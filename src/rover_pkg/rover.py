@@ -24,6 +24,8 @@ class Rover:
         self.__indicatorLED__ = {"red": 22, "green": 27, "blue": 17}
         self.__shutdownPin__ = 13
         self.__relay__ = 26
+        self.__button_timer__ = 0
+        self.__kill_count__ = 0
         
         gpio.setmode(gpio.BCM)
         gpio.setwarnings(False)
@@ -90,12 +92,17 @@ class Rover:
     def shutdownCheck(self, force: bool = False):
         if not force:
             if not gpio.input(self.__shutdownPin__):
-                self.log("Kill Requested via Button")
-                rospy.signal_shutdown("Rover Shutdown Button Pressed")
-                self.kill = True
+                currTime = time.time()
+                self.led_control(1,1,0)
+                if currTime - self.__button_timer__ > 1: self.__kill_count__ += 1
+                if self.__kill_count__ > 5:
+                    self.log("Kill Requested via Button")
+                    rospy.signal_shutdown("Rover Shutdown Button Pressed")
+                    self.kill = True
                 return True
             else: 
                 self.kill = False
+                self.__kill_count__ = 0
                 return False
                 
         else:
