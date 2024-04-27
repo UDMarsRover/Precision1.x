@@ -17,7 +17,6 @@ from diagnostic_msgs.msg import DiagnosticStatus as diag
 class Rover:
     def __init__(self, refreshRate:int=10, name:str="precision1"):
         self.wifiConnected = False
-        self.rate = rospy.Rate(refreshRate)  # Hz
         self.name = name
         self.kill=False
 
@@ -46,7 +45,7 @@ class Rover:
 
         # Initialize the Rover ROS_MAIN node
         rospy.init_node(name, anonymous=True)
-        self.rate = rospy.Rate(10)  # Hz
+        self.rate = rospy.Rate(refreshRate)  # Hz
         
 
         self.led_control(1, 0, 0)
