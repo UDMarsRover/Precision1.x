@@ -80,6 +80,7 @@ if __name__ == "__main__":
 
 
     # While roscore is running
+    print("Main Loop Check: ",gpio.input(shutdownPin))
     while not gpio.input(shutdownPin):
         print("Main Loop Check: ",gpio.input(shutdownPin))
         while not rospy.is_shutdown():
