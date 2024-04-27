@@ -68,6 +68,10 @@ ros::Publisher DriveStatus("DriveStatus", &currentDriveStatus);
 void runTankDrive(const geometry_msgs::Twist& command){
 
 
+  digitalWrite(24, LOW);
+  digitalWrite(22, LOW);
+  digitalWrite(23, HIGH);
+
   float kmh_prec = command.linear.y;    // km/h in x
   float dps_prec = command.angular.z;   // km/h in y
   float reset = command.angular.x;      // Current indicator for motor reset
