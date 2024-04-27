@@ -66,7 +66,7 @@ class Rover:
         if rospy.is_shutdown(): self.kill=True
         self.shutdownCheck()
 
-        if self.kill: 
+        if self.__kill_count__ > 0: 
             self.led_control(1,1,0)
         elif not self.wifiCheck(): 
             self.led_control(1,0,0)
@@ -93,8 +93,9 @@ class Rover:
         if not force:
             if not gpio.input(self.__shutdownPin__):
                 currTime = time.time()
-                self.led_control(1,1,0)
-                if currTime - self.__button_timer__ > 1: self.__kill_count__ += 1
+                if ((currTime - self.__button_timer__ ) > 1): 
+                    self.__kill_count__ += 1
+                    self.__button_timer__ = currTime
                 if self.__kill_count__ > 5:
                     self.log("Kill Requested via Button")
                     rospy.signal_shutdown("Rover Shutdown Button Pressed")
