@@ -59,10 +59,12 @@ class Rover:
         rospy.Subscriber("/emo/status/imu",diag, self.rollOverCheck)
 
     def spin(self):
-        if self.kill: self.led_control(1,1,0)
         if rospy.is_shutdown(): self.kill=True
         self.shutdownCheck()
-        if not self.wifiCheck(): self.led_control(1,0,0)
+
+        if self.kill: self.led_control(1,1,0)
+        elif self.wifiCheck(): self.led_control(1,0,0)
+        else: self.led_control(0,1,0)
         self.rate.sleep()
 
     def shutdown(self):
