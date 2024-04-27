@@ -20,4 +20,4 @@ if __name__ == "__main__":
     p1.log("Rover Killed")
     p1.led_control(0,1,1)
     print("KILLED")
-    #p1.shutdown()
+    p1.shutdown()
