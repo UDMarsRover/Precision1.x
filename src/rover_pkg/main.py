@@ -15,6 +15,8 @@ if __name__ == "__main__":
         if p1.kill and (currTime - start > 1):
             killCount += 1
             start = currTime
+        
+        if not p1.kill: killCount = 0
     p1.log("Rover Killed")
     p1.led_control(0,1,1)
     print("KILLED")
