@@ -69,6 +69,7 @@ if __name__ == "__main__":
     led_control(0,0,1)
     time.sleep(2)
     led_control(1,1,1)
+    time.sleep(5)
 
     rospy.init_node("precision1")
     rate = rospy.Rate(10)  # Hz
