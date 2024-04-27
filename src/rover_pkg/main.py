@@ -44,7 +44,7 @@ def led_control(r: int, g: int, b: int):
 def shutdown(check: bool = True):
     if check:
         print("Shutdown Pin Check ", gpio.input(shutdownPin))
-        if gpio.input(shutdownPin):
+        if not gpio.input(shutdownPin):
             led_control(1, 1, 0)
             rospy.signal_shutdown("Rover Shutdown Button Pressed")
             time.sleep(0.5)
