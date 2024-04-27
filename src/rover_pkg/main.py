@@ -5,7 +5,7 @@ from rover import Rover
 # The main Loop
 if __name__ == "__main__":
     p1 = Rover()
-    # Run Forever
+    # Run when rover is not requested to die
     while not p1.kill:
         p1.spin()
     p1.led_control(0,1,1)

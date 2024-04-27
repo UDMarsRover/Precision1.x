@@ -10,7 +10,7 @@ import time
 import os
 from std_msgs.msg import String
 import RPi.GPIO as gpio
-from diagnositc_msgs.msg import Diagnostic_Status as diag
+from diagnostic_msgs.msg import DiagnosticStatus as diag
 
 
 
