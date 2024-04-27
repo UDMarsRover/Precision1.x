@@ -56,7 +56,7 @@ class Rover:
         while rospy.is_shutdown():
             self.led_control(0,1,1)
         
-        rospy.Subscriber("",diag, self.rollOverCheck)
+        rospy.Subscriber("/emo/status/imu",diag, self.rollOverCheck)
 
     def spin(self):
         if self.kill: self.led_control(1,1,0)
