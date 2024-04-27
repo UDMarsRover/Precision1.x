@@ -53,10 +53,16 @@ class Rover:
         self.led_control(1, 0, 0)
         while not self.wifiCheck():
             self.led_control(1, 0, 0)
+            self.log("Connecting to WiFi")
             self.shutdownCheck()
+
+        self.log("WiFi Connected")
         
         while rospy.is_shutdown():
             self.led_control(0,1,1)
+            self.log("Connecting to ROS")
+        
+        self.log("Connected to ROS")
         
         rospy.Subscriber("/emo/status/imu",diag, self.rollOverCheck)
 
@@ -65,10 +71,10 @@ class Rover:
     def spin(self):
         if rospy.is_shutdown(): self.kill=True
         self.shutdownCheck()
-
+        wifi = self.wifiCheck()
         if self.__kill_count__ > 0: 
             self.led_control(1,1,0)
-        elif not self.wifiCheck(): 
+        elif not wifi: 
             self.led_control(1,0,0)
             self.log("Wifi Disconnected!")
         else: self.led_control(0,1,0)
@@ -115,7 +121,8 @@ class Rover:
             return True 
     
     def wifiCheck(self, ip:str = "192.168.8.1"):
-        return os.system(f"ping -c 1 "+ip) == 0
+        self.wifiConnected = not (os.system(f"ping -c 1 "+ip) == 0)
+        return self.wifiConnected
 
 
 # end
