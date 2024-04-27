@@ -79,10 +79,11 @@ if __name__ == "__main__":
 
 
     # While roscore is running
-    while not rospy.is_shutdown():
-        if wifiCheck(): led_control(0, 1, 0)
-        else: led_control(1,0,0)
-        shutdown()
-        rate.sleep
+    while not gpio.input(shutdownPin):
+        while not rospy.is_shutdown():
+            if wifiCheck(): led_control(0, 1, 0)
+            else: led_control(1,0,0)
+            shutdown()
+            rate.sleep
 
-    led_control(0,0,1)
+        led_control(0,0,1)
