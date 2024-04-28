@@ -121,7 +121,9 @@ class Rover:
             return True 
     
     def wifiCheck(self, ip:str = "192.168.8.1"):
+        
         self.wifiConnected = not (os.system(f"ping -c 1 "+ip) == 0)
+        print(os.system(f"ping -c 1 "+ip))
         return self.wifiConnected
 
 
