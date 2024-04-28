@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from std_msgs.msg import String
-from geometry_msg.msg import Twist
+from geometry_msgs.msg import Twist
 from rover import Rover
 import time
 import rospy
