@@ -71,6 +71,7 @@ class Rover:
         if rospy.is_shutdown(): self.kill=True
         self.shutdownCheck()
         wifi = self.wifiCheck()
+        print(wifi)
         if self.__kill_count__ > 0: 
             self.led_control(1,1,0)
         elif not wifi: 
