@@ -16,11 +16,11 @@ if __name__ == "__main__":
     while not p1.kill:
         p1.spin()
     
-    if not p1.wifiConnected:
-        stop = Twist()
-        stop.linear.y = 0
-        stop.angular.z = 0
-        drive.publish(stop)
+        if not p1.wifiConnected:
+            stop = Twist()
+            stop.linear.y = 0
+            stop.angular.z = 0
+            drive.publish(stop)
         
     p1.log("Rover Killed")
     p1.led_control(0,1,1)
