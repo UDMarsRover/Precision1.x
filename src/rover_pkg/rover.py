@@ -54,7 +54,6 @@ class Rover:
         while not self.wifiCheck():
             self.led_control(1, 0, 0)
             self.log("Connecting to WiFi")
-            self.shutdownCheck(True)
 
         self.log("WiFi Connected")
         
