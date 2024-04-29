@@ -3,7 +3,6 @@
 import rospy
 from inputs import get_gamepad
 from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import Float32
 from trajectory_msgs.msg import JointTrajectoryPoint
 from std_msgs.msg import Bool
 
@@ -11,13 +10,15 @@ class ArmController():
 
     def __init__(self):    	
         rospy.init_node("arm_controller", anonymous=True)
-        self.pub = rospy.Publisher('control_command', Float32MultiArray, queue_size=10)
-        #self.pub_controller = rospy.Publisher('controller_state', Float32, queue_size=10)
-        self.grip_pub = rospy.Publisher('grip_state', Bool, queue_size=10)
-        self.reset_pub = rospy.Publisher('reset', Bool, queue_size=10)
+        # publishers
+        self.pub = rospy.Publisher('control_command', Float32MultiArray, queue_size=10) # publish jog pose command
+        self.grip_pub = rospy.Publisher('grip_state', Bool, queue_size=10) 
+        self.reset_pub = rospy.Publisher('reset', Bool, queue_size=10) # publish command to move to home pose
         
-        self.jog_pose_value = 0.02
-        self.jog_count = 0 # count to update jog pose value
+        self.reset_count = 0
+        # initialize publish values
+        self.jog_pose_value = 0.02 # meters
+        self.count = 0 # count to update jog pose value 
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
@@ -26,12 +27,16 @@ class ArmController():
         self.yaw = 0.0
         self.grip = False
         self.reset = False
+        self.joint_state = [0]
         self.current_command = Float32MultiArray()
-        self.current_command.data = [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
-        self.pub.publish(self.current_command)
-        self.joint_state = JointTrajectoryPoint
+        self.current_command.data = [self.x, self.y, self.z, self.roll, self.pitch, self.yaw] # command to update and publish
+
+        self.pub.publish(self.current_command) # publish first command (all zeros)
+
+        # subscriber to receive joint state
         self.joint_sub = rospy.Subscriber('joint_pub', JointTrajectoryPoint, self.callback_joint_state)
 
+        # inputs for controller
         self.buttonBuffer = {
         "left_joy_y": 0,
         "left_joy_x": 0,
@@ -51,30 +56,36 @@ class ArmController():
         "lt": 0,
         }
 	
-    def spin(self):
+    # call each function and publish
+    def spin(self): 
         self.__get_input__()   
         self.__update_command__()
 
-        #self.__update_grip__()
-        #self.grip_pub.publish(self.grip)
+        self.__update_grip__()
+        self.grip_pub.publish(self.grip)
         self.__update_reset_command__()
-        self.reset_pub.publish(self.reset)
+        if self.reset_count == 2: 
+            self.reset_pub.publish(True) # publish command to move to home pose
+            self.reset_count = 0
+        else: self.reset_pub.publish(False)
         self.pub.publish(self.current_command)
         
-     
+    # sets current joint state from message 
     def callback_joint_state(self, msg):
         self.joint_state = msg.positions
 
-
+    # get controller input
+    # registers 2 presses, only updates when input is changed (can't be held)
     def __get_input__(self):
 
         event = get_gamepad()[0]   
         if event.code == "BTN_THUMB":
             self.buttonBuffer["a"] = event.state
-        elif event.code == "BTN_THUMB2":
+        elif event.code == "BTN_THUMB2": 
             self.buttonBuffer["b"] = event.state
         elif event.code == "BTN_TRIGGER":
             self.buttonBuffer["x"] = event.state
+            self.count += 1 # update count 
         elif event.code == "BTN_TOP":
             self.buttonBuffer["y"] = event.state
         elif event.code == "ABS_Y":
@@ -99,6 +110,7 @@ class ArmController():
             self.buttonBuffer["start"] = event.state
         elif event.code == "BTN_BASE3":
             self.buttonBuffer["back"] = event.state
+            self.reset_count += 1
         elif event.code == "BTN_PINKIE":
             self.buttonBuffer["rb"] = event.state
         elif event.code == "BTN_BASE2":
@@ -107,7 +119,6 @@ class ArmController():
             self.buttonBuffer["lb"] = event.state
         elif event.code == "BTN_BASE":
             self.buttonBuffer["lt"] = event.state
-            self.count += 1 # update count
 
         return self.buttonBuffer
         
@@ -120,31 +131,44 @@ class ArmController():
         else:
             self.jog_pose_value = 0.02
             self.count = 0
-
-        '''if joint_state[0] >= #rightmost threshold of base joint:
-            self.x = jog_pose_value * float(self.buttonBuffer["dpad_x"])
-            self.y = jog_pose_value * float(self.buttonBuffer["dpad_y"])
-        elif joint_state[0] <= #leftmost threshold of base joint:
-            self.x = jog_pose_value * float(self.buttonBuffer["dpad_x"] * -1)
-            self.y = jog_pose_value * float(self.buttonBuffer["dpad_y"] * -1)
+        
+        
+        self.y = self.jog_pose_value * float(self.buttonBuffer["left_joy_x"]) * -1
+        
+        if self.joint_state[0] <= -0.9 and self.y < 0:
+            self.y = 0
+        if self.joint_state[0] >= 0.9 and self.y > 0:
+            self.y = 0
+        
+        '''if self.joint_state[0] >= 0.9: #rightmost threshold of base joint:
+            self.x = self.jog_pose_value * float(self.buttonBuffer["left_joy_x"]) * -1
+            self.y = self.jog_pose_value * float(self.buttonBuffer["left_joy_y"]) * -1
+        elif self.joint_state[0] >= 0.9: #leftmost threshold of base joint:
+            self.x = self.jog_pose_value * float(self.buttonBuffer["left_joy_x"])
+            self.y = self.jog_pose_value * float(self.buttonBuffer["left_joy_y"])
         else:
-            self.x = self.jog_pose_value * float(self.buttonBuffer["dpad_y"] * -1)  # x
-            self.y = self.jog_pose_value * float(self.buttonBuffer["dpad_x"] * -1) # y	'''        		
-        self.z = self.jog_pose_value * float(self.buttonBuffer["y"]) # positive z
-        self.z += self.jog_pose_value * float(self.buttonBuffer["a"] * -1) # negative z
+            self.x = self.jog_pose_value * float(self.buttonBuffer["left_joy_y"])
+            self.y = self.jog_pose_value * float(self.buttonBuffer["left_joy_x"]) * -1	'''
+            
+        self.x = self.jog_pose_value * float(self.buttonBuffer["left_joy_y"])
+        #self.y = self.jog_pose_value * float(self.buttonBuffer["left_joy_x"]) * -1		
+        self.z = self.jog_pose_value * float(self.buttonBuffer["right_joy_y"]) # z
         self.roll = self.jog_pose_value * float(self.buttonBuffer["rb"]) # roll
-        self.pitch = self.jog_pose_value * float(self.buttonBuffer["lb"]) # pitch
-        self.yaw = self.jog_pose_value * float(self.buttonBuffer["rt"]) # yaw
+        self.roll += self.jog_pose_value * float(self.buttonBuffer["lb"]) * -1 # negative roll
+        self.pitch = self.jog_pose_value * float(self.buttonBuffer["rt"]) # pitch
+        self.pitch += self.jog_pose_value * float(self.buttonBuffer["lt"]) * -1 # negative pitch
+        self.yaw = self.jog_pose_value * float(self.buttonBuffer["y"]) # yaw
+        self.yaw += self.jog_pose_value * float(self.buttonBuffer["a"]) * -1 # negative yaw
             
         self.current_command.data = [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
+
         
     def __update_grip__(self):
-        self.grip = float(buttonBuffer["b"]) == 1
+        self.grip = float(self.buttonBuffer["b"]) == 1
         
-    def __update_reset_command__(self):
-        self.reset = float(buttonBuffer["back"]) == 1
-    		 
+    #def __update_reset_command__(self):
+     #   self.reset = float(self.buttonBuffer["back"]) == 1
 
 controller = ArmController()
 while not rospy.is_shutdown():
-	controller.spin()
+	controller.spin() # continously run class functions
