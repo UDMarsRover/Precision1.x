@@ -3,8 +3,8 @@
 #include <avr/dtostrf.h>
 #include <std_msgs/Float32MultiArray.h> // Ultra
 #include <sensor_msgs/Imu.h>
-#include "C:\Users\Paul\MarsRoverWork\Precision1.x\ros_lib\sensor_msgs\BatteryState.h"
-//#include <sensor_msgs/BatteryState.h> // Does not work, see voltage_sensor.ino
+//#include "C:\Users\Paul\MarsRoverWork\Precision1.x\ros_lib\sensor_msgs\BatteryState.h"
+#include <sensor_msgs/BatteryState.h> // Does not work, see voltage_sensor.ino
 #include <sensor_msgs/Temperature.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/DiagnosticArray.h>
@@ -12,7 +12,7 @@
 
 #include <NewPing.h> // Ultrasonic
 #include <Arduino_HTS221.h> // On-board temperature
-#include <Arduino_LSM9DS1.h> // IMU
+//#include <Arduino_LSM9DS1.h> // IMU
 #include "attitude.h" // GPS
 
 //GPS Include
@@ -288,14 +288,6 @@ void setup() {
   ultraMsg.data_length = 4; // initialize length of ultrasonic msg array
 
   LoopTimer = 0; //Going to have to find a way to integrate loop into method, not high-level loop
-  if (!IMU.begin()) {
-    dia_imu.message = "Failed to initialize IMU";
-    dia_imu.level = STALE;
-    nh.spinOnce();;
-
-    debugln("Failed to initialize IMU!");
-    while (1);
-  }
 
   attitude.initialize();
 
