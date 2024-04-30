@@ -12,14 +12,12 @@
 
 #include <NewPing.h> // Ultrasonic
 #include <Arduino_HTS221.h> // On-board temperature
-<<<<<<< HEAD
 #include "attitude.h" // IMU
 #include <TinyGPSPlus.h> // GPS
 #include <float.h> // GPS
 #include <ros/time.h> // GPS
 #include <sensor_msgs/NavSatFix.h> // GPS
 #include <sensor_msgs/NavSatStatus.h> // GPS
-=======
 //#include <Arduino_LSM9DS1.h> // IMU
 #include "attitude.h" // GPS
 
@@ -29,220 +27,199 @@
 #include <ros/time.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/NavSatStatus.h>
->>>>>>> 1e9eebddc610a90a4152cf7b5be587e46e4a3d77
 
 // Debug settings for serial printing.
-#define DEBUG 0
-#if DEBUG == 1
-#define debug(x) Serial.print(x)
-#define debugln(x) Serial.println(x)
-#else
-#define debug(x)
-#define debugln(x)
-#endif
+#define DEBUG 0 
+  #if DEBUG == 1
+    #define debug(x) Serial.print(x)
+    #define debugln(x) Serial.println(x)
+  #else
+    #define debug(x)
+    #define debugln(x)
+  #endif
+//end debug estup
 
-//////////////////////////////////////////////////////////////////////////////////////
-//Object variables for ultrasonic, IMU, thermistors, boxTemp, voltageSense, and GPS
-//////////////////////////////////////////////////////////////////////////////////////
+/** @bug Not used???*/
+//double alphaTemp = 0.5;
 
-//Ultrasonic sensor variables
-
-#define NW 0
-#define TRIG1 2 // Northwest
-#define ECHO1 3
-
-#define NE 1
-#define TRIG2 4 // Northeast
-#define ECHO2 5
-
-#define SW 2
-#define TRIG3 6 // Southwest
-#define ECHO3 7
-
-#define SE 3
-#define TRIG4 8 // Southeast
-#define ECHO4 9
-
-#define MAX_DISTANCE 100 // maximum distance for sensors in cm
-#define NUM_SONAR 4 // number of ultrasonic sensors
-
-NewPing sonar[NUM_SONAR] = { // array of ultrasonic pings
-  NewPing(TRIG1, ECHO1, MAX_DISTANCE),
-  NewPing(TRIG2, ECHO2, MAX_DISTANCE),
-  NewPing(TRIG3, ECHO3, MAX_DISTANCE),
-  NewPing(TRIG4, ECHO4, MAX_DISTANCE)
-};
-
-double curDuration[NUM_SONAR]; // array for pings in microseconds
-double prevDistance[NUM_SONAR]; // arrays for pings
-double curDistance[NUM_SONAR];// in cm
-
-// arrays to store distance output as string
-String curDistanceCM[NUM_SONAR];
-String curDistanceOutput[NUM_SONAR];
-float ultraArray[4]; // initialize array to assign to msg
-
-//IMU variables
-Attitude attitude;
-float* qrt;           // [w, qx, qy, qz]         Quarternion data for w, x, y, and z
-float* ypr;           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
-float* acc;           // [ax, ay, az]         Accelerometer data for x, y, and z
-float* gyr;           // [gx, gy, gz]         Gyroscope data for x, y, and z
-Quaternion* quat;         // [w, x, y, z]         quaternion container
-
-// Timing variables for Loop
-uint32_t LoopTimer;
-int LastLoop;
-
-//Thermistor variables
-// which analog pin to connect
-#define VOLTAGETHERMISTORPIN A2  
-#define BATTERYTHERMISTORPIN A1      
-// resistance at 25 degrees C
-#define VOLTAGETHERMISTORNOMINAL 100000
-#define BATTERYTHERMISTORNOMINAL 2000      
-// temp. for nominal resistance (almost always 25 C)
-#define TEMPERATURENOMINAL 25   
-// how many samples to take and average, more takes longer
-// but is more 'smooth'
-#define NUMSAMPLES 5
-// The beta coefficient of the thermistor (usually 3000-4000)
-#define VOLTAGE_BCOEFFICIENT 4615
-#define BATTERY_BCOEFFICIENT 3965
-// the value of the 'other' resistor
-#define VOLTAGESERIESRESISTOR 100100
-#define BATTERYSERIESRESISTOR 2010 //1980 when mulitmeter directly on resistor, 2010 when measured relative to ground
-
-//Box temperature variables
-float currTemp;
-
-//Voltage sensor variables
-int voltagePin = A0;
-float sensorValue;
-float prevSensorValue;
-const float Vmax = 683.934; //This is real reading of voltage sensor at V = 57.500 V. Based on equation, reading would be 689.4547242 at 57.5V
-const float Vmin = 630.2345; //This is real reading of voltage sensor at V = 45.505 V. Based on equation, reading would be 629.7072093 at 45.5V
-//Above values were adjusted for accuracy between 45.5-50V, reading >50V results in an output about 0.5-1.0V less than actual
-float diff = Vmax - Vmin;
-float volt;
-
-//GPS variables
-// IMPORTANT: This code is written specifically for a GPS unit that receives signal at a frequency of 1Hz.
-// If a GPS with a higher refresh rate is used in the future, this code will need to be reworked. -Kaiden
-TinyGPSPlus gps; //Boolean that keeps track of whether the previous reading was zero (prevents duplicate error messages)
-bool gpsError = false;
-int lastSecond = -1;
-
-// Declare alpha for each sensor as necessary
-double alphaTemp = 0.5;
-double alphaUltra = 0.5;
-double alphaVoltSense = 0.1;
-
-//Counter variables
+//Counter variables used for limiting the frequency of some publishes
 float timer;
 float sensorTimer;
 
-int queue_size;
-
-//////////////////////////////////////////////////////////////////////////////
-//Define ROS nodes, publishers, and subscribers
-//////////////////////////////////////////////////////////////////////////////
-
-#define OK diagnostic_msgs::DiagnosticStatus::OK;
-#define WARN diagnostic_msgs::DiagnosticStatus::WARN;
-#define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
-#define STALE diagnostic_msgs::DiagnosticStatus::STALE;
-
-#define DIAGNOSTIC_STATUS_LENGTH 1
-
-#define red 22
-#define green 23
-#define blue 24
-
-/* Example for red light
-
-  digitalWrite(red,LOW);
-  digitalWrite(green,HIGH);
-  digitalWrite(blue,HIGH);
-
+/** @bug REMOVE
+  //#define RED 22
+  //#define GREEN 23
+  //#define BLUE 24
+  Example for red light
+    Use the rgbControl(r,g,b) function
 */
 
-ros::NodeHandle nh;
+//////////////////////////////////////////////////////////////////////////////////////
+//Object Definitions
+//////////////////////////////////////////////////////////////////////////////////////
 
-// data messages setup
+  /** NOTE:
+    For the diagnostic message, level will be the priority of the error:
+      OK
+      WARN
+      ERROR (ERROR can be marked a critical error by the Pi and shutoff)
+    name will be the component name,
+    message will be the numerical value of error if we want to report it(eg. Underheat warning), and the key:
+       key will be used to return the error code as we denote
+       value will be the meaning of that error code (eg. key = 15, value = all good)
+  */
 
-std_msgs::Float32MultiArray ultraMsg;
-ros::Publisher ultraPub("emo/ultra", &ultraMsg);
+  ros::NodeHandle nh;
 
-sensor_msgs::Imu imuMsg;
-ros::Publisher imuPub("emo/imu", &imuMsg);
+  #define DIAGNOSTIC_STATUS_LENGTH 1
+  #define OK diagnostic_msgs::DiagnosticStatus::OK;
+  #define WARN diagnostic_msgs::DiagnosticStatus::WARN;
+  #define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
+  #define STALE diagnostic_msgs::DiagnosticStatus::STALE;
+  
+  /* Ultrasonic Variables */
+    #define NW 0
+    #define TRIG1 2 // Northwest
+    #define ECHO1 3
 
-//geometry_msgs::Vector3 angular_velocity;
-//ros::Publisher imuPubGyro("emo/imu/gyro", &angular_velocity);
+    #define NE 1
+    #define TRIG2 4 // Northeast
+    #define ECHO2 5
 
-//geometry_msgs::Vector3 linear_acceleration;
-//ros::Publisher imuPubAccel("emo/imu/accel", &linear_acceleration);
+    #define SW 2
+    #define TRIG3 6 // Southwest
+    #define ECHO3 7
 
-sensor_msgs::Temperature boxTemp;
-ros::Publisher boxTempPub("emo/temp/box", &boxTemp);
+    #define SE 3
+    #define TRIG4 8 // Southeast
+    #define ECHO4 9
 
-sensor_msgs::BatteryState voltageSensorMsg;
-ros::Publisher voltageSensorPub("emo/voltage", &voltageSensorMsg);
+    #define MAX_DISTANCE 100 // maximum distance for sensors in cm
+    #define NUM_SONAR 4 // number of ultrasonic sensors
+    #define NUMSAMPLES 5
+    NewPing sonar[NUM_SONAR] = { // array of ultrasonic pings
+      NewPing(TRIG1, ECHO1, MAX_DISTANCE),
+      NewPing(TRIG2, ECHO2, MAX_DISTANCE),
+      NewPing(TRIG3, ECHO3, MAX_DISTANCE),
+      NewPing(TRIG4, ECHO4, MAX_DISTANCE)
+    };
 
-sensor_msgs::Temperature voltageConverterTempMsg;
-ros::Publisher voltageConverterTempPub("emo/temp/voltage", &voltageConverterTempMsg);
+    double curDuration[NUM_SONAR]; // array for pings in microseconds
+    double prevDistance[NUM_SONAR]; // arrays for pings
+    double curDistance[NUM_SONAR];// in cm
 
-sensor_msgs::Temperature batteryTempMsg;
-ros::Publisher batteryTempPub("emo/temp/battery", &batteryTempMsg);
+    // arrays to store distance output as string
+    //String curDistanceCM[NUM_SONAR];
+    //String curDistanceOutput[NUM_SONAR];
+    float ultraArray[4]; // initialize array to assign to msg
+    double alphaUltra = 0.5;
 
-sensor_msgs::NavSatFix gpsMsg;
-ros::Publisher gpsPub("emo/gps", &gpsMsg);
+    std_msgs::Float32MultiArray ultraMsg;
+    ros::Publisher ultraPub("emo/ultra", &ultraMsg);
 
-// diagnostic messages setup
+    //ultrasonic diag publishers
+    diagnostic_msgs::DiagnosticStatus dia_ultraNW;
+    ros::Publisher diaUltraPubNW("emo/status/ultraNW", &dia_ultraNW);
+    diagnostic_msgs::DiagnosticStatus dia_ultraNE;
+    ros::Publisher diaUltraPubNE("emo/status/ultraNE", &dia_ultraNE);
+    diagnostic_msgs::DiagnosticStatus dia_ultraSW;
+    ros::Publisher diaUltraPubSW("emo/status/ultraSW", &dia_ultraSW);
+    diagnostic_msgs::DiagnosticStatus dia_ultraSE;
+    ros::Publisher diaUltraPubSE("emo/status/ultraSE", &dia_ultraSE);
 
-// For the diagnostic message, 
-//  level will be the priority of the error, OK, WARN, or ERROR (ERROR can be marked a critical error by the Pi and shutoff)
-//  name will be the component name
-//  message will be the numerical value of error if we want to report it(eg. Underheat warning), 
-//  and the key:
-//     key will be used to return the error code as we denote
-//     value will be the meaning of that error code (eg. key = 15, value = all good)
+    diagnostic_msgs::KeyValue ultra_key;
 
-diagnostic_msgs::DiagnosticStatus dia_ultraNW;
-ros::Publisher diaUltraPubNW("emo/status/ultraNW", &dia_ultraNW);
-diagnostic_msgs::DiagnosticStatus dia_ultraNE;
-ros::Publisher diaUltraPubNE("emo/status/ultraNE", &dia_ultraNE);
-diagnostic_msgs::DiagnosticStatus dia_ultraSW;
-ros::Publisher diaUltraPubSW("emo/status/ultraSW", &dia_ultraSW);
-diagnostic_msgs::DiagnosticStatus dia_ultraSE;
-ros::Publisher diaUltraPubSE("emo/status/ultraSE", &dia_ultraSE);
+  //end ultrasonic
 
-diagnostic_msgs::DiagnosticStatus dia_imu;
-ros::Publisher diaImuPub("emo/status/imu", &dia_imu);
+  /* IMU Variables */
+    sensor_msgs::Imu imuMsg;
+    ros::Publisher imuPub("emo/imu", &imuMsg);
+    Attitude attitude;
+    /** @bug REMOVE
+    float* qrt;           // [w, qx, qy, qz]         Quarternion data for w, x, y, and z
+    float* ypr;           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+    float* acc;           // [ax, ay, az]         Accelerometer data for x, y, and z
+    float* gyr;           // [gx, gy, gz]         Gyroscope data for x, y, and z
+    Quaternion* quat;         // [w, x, y, z]         quaternion container
+    */
+    diagnostic_msgs::DiagnosticStatus dia_imu;
+    ros::Publisher diaImuPub("emo/status/imu", &dia_imu);
+    diagnostic_msgs::KeyValue imu_key;
+  //end imu
 
-diagnostic_msgs::DiagnosticStatus dia_boxTemp;
-ros::Publisher diaBoxTempPub("emo/status/temp/box", &dia_boxTemp);
+  /* Box Temperature Variables */
+    #define TEMPERATURENOMINAL 25
+    sensor_msgs::Temperature boxTemp;
+    ros::Publisher boxTempPub("emo/temp/box", &boxTemp);
+    float currTemp;
+    diagnostic_msgs::DiagnosticStatus dia_boxTemp;
+    ros::Publisher diaBoxTempPub("emo/status/temp/box", &dia_boxTemp);
+    diagnostic_msgs::KeyValue box_key;
+  //end box temp
 
-diagnostic_msgs::DiagnosticStatus dia_voltageSensor;
-ros::Publisher diaVoltageSensorPub("emo/status/voltage", &dia_voltageSensor);
+  /* Voltage Sensor Variables */
+    #define voltagePin A0
+    #define VOLTAGESERIESRESISTOR 100100
+    #define VOLTAGE_BCOEFFICIENT 4615
+    sensor_msgs::BatteryState voltageSensorMsg;
+    ros::Publisher voltageSensorPub("emo/voltage", &voltageSensorMsg);
+    double alphaVoltSense = 0.1;
+    float sensorValue;
+    float prevSensorValue;
+    const float Vmax = 683.934; //This is real reading of voltage sensor at V = 57.500 V. Based on equation, reading would be 689.4547242 at 57.5V
+    const float Vmin = 630.2345; //This is real reading of voltage sensor at V = 45.505 V. Based on equation, reading would be 629.7072093 at 45.5V
+    //Above Variables were adjusted for accuracy between 45.5-50V, reading >50V results in an output about 0.5-1.0V less than actual
+    float diff = Vmax - Vmin;
+    float volt;
 
-diagnostic_msgs::DiagnosticStatus dia_voltageConverterTemp;
-ros::Publisher diaVoltageConverterTempPub("emo/status/temp/voltage",&dia_voltageConverterTemp);
+    diagnostic_msgs::DiagnosticStatus dia_voltageSensor;
+    ros::Publisher diaVoltageSensorPub("emo/status/voltage", &dia_voltageSensor);
+    diagnostic_msgs::KeyValue sensor_key;
+  //end voltage sensor
 
-diagnostic_msgs::DiagnosticStatus dia_batteryTemp;
-ros::Publisher diaBatteryTempPub("emo/status/temp/battery",&dia_batteryTemp);
+  /* Voltage Converter Temp Variables */
+    #define VOLTAGETHERMISTORPIN A2
+    #define VOLTAGETHERMISTORNOMINAL 100000
+    sensor_msgs::Temperature voltageConverterTempMsg;
+    ros::Publisher voltageConverterTempPub("emo/temp/voltage", &voltageConverterTempMsg);
 
-diagnostic_msgs::DiagnosticStatus dia_gps;
-ros::Publisher diaGpsPub("emo/status/gps", &dia_gps);
+    diagnostic_msgs::DiagnosticStatus dia_voltageConverterTemp;
+    ros::Publisher diaVoltageConverterTempPub("emo/status/temp/voltage",&dia_voltageConverterTemp);
+    diagnostic_msgs::KeyValue converter_key;
+  //end voltage converter
 
-diagnostic_msgs::KeyValue ultra_key;
-diagnostic_msgs::KeyValue imu_key;
-diagnostic_msgs::KeyValue box_key;
-diagnostic_msgs::KeyValue sensor_key;
-diagnostic_msgs::KeyValue converter_key;
-diagnostic_msgs::KeyValue battery_key;
-diagnostic_msgs::KeyValue gps_key;
+  /* Battery Temperature Variables */
+    sensor_msgs::Temperature batteryTempMsg;
+    ros::Publisher batteryTempPub("emo/temp/battery", &batteryTempMsg);
+    #define BATTERYSERIESRESISTOR 2010 //1980 when mulitmeter directly on resistor, 2010 when measured relative to ground
+    #define BATTERY_BCOEFFICIENT 3965
+    #define BATTERYTHERMISTORPIN A1 
+    #define BATTERYTHERMISTORNOMINAL 2000
 
+    diagnostic_msgs::DiagnosticStatus dia_batteryTemp;
+    ros::Publisher diaBatteryTempPub("emo/status/temp/battery",&dia_batteryTemp);
+    diagnostic_msgs::KeyValue battery_key;
+  //end battery temperature
+
+  /* GPS Variables */
+    /** IMPORTANT: This code is written specifically for a GPS unit that receives signal at a frequency of 1Hz. 
+    If a GPS with a higher refresh rate is used in the future, this code will need to be reworked. -Kaiden
+    */
+    sensor_msgs::NavSatFix gpsMsg;
+    ros::Publisher gpsPub("emo/gps", &gpsMsg);
+    TinyGPSPlus gps; //Boolean that keeps track of whether the previous reading was zero (prevents duplicate error messages)
+    bool gpsError = false;
+    int lastSecond = -1;
+
+    diagnostic_msgs::DiagnosticStatus dia_gps;
+    ros::Publisher diaGpsPub("emo/status/gps", &dia_gps);
+    diagnostic_msgs::KeyValue gps_key;
+  //end gps
+
+//end object variable setup
+
+
+/** @bug REMOVE */
 //diagnostic_msgs::KeyValue battery_key;
 //ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
 
@@ -251,16 +228,30 @@ diagnostic_msgs::KeyValue gps_key;
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
+  //Inital Startup indicator
+
+  pinMode(22, OUTPUT);
+  pinMode(23, OUTPUT);
+  pinMode(24, OUTPUT);
+
+  rgbControl(1,0,0);
+  delay(500);
+  rgbControl(0,1,0);
+  delay(500);
+  rgbControl(0,0,1);
+  delay(500);
+
+  
   // setup
+  rgbControl(1,0,0);
   Serial1.begin(9600);
 
+  attitude.initialize();
 
   //Ros setup
   nh.initNode();
   nh.advertise(ultraPub); 
-  //nh.advertise(imuPub);
-  //nh.advertise(imuPubGyro);
-  //nh.advertise(imuPubAccel);
+  nh.advertise(imuPub);
   nh.advertise(boxTempPub);
   nh.advertise(voltageSensorPub); 
   nh.advertise(voltageConverterTempPub);
@@ -301,9 +292,6 @@ void setup() {
   //Method setup
   ultraMsg.data_length = 4; // initialize length of ultrasonic msg array
 
-  LoopTimer = 0; //Going to have to find a way to integrate loop into method, not high-level loop
-
-  attitude.initialize();
 
   if (!HTS.begin()) {
     dia_boxTemp.message = "Failed to intialize box temperature sensor";
@@ -317,41 +305,79 @@ void setup() {
   pinMode(voltagePin, INPUT); // Voltage sensor setup
   //pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
   //pinMode(batteryTemp, INPUT); // Battery temp setup
-  //digitalWrite(red,LOW);
-  //digitalWrite(green,HIGH);
-  //digitalWrite(blue,HIGH);
+  
+  rgbControl(1,1,1);
+
 }
 
 void loop() {
   
   delay(10);
+  
   timer = millis();
 
   ultrasonicData();
-  imuData();
-  digitalWrite(red,HIGH);
-  digitalWrite(green,HIGH);
-  digitalWrite(blue,LOW);
-  //accelerometerData();
-  //if ( (timer - sensorTimer) > 20000 ) { // If using timer, ensure no filter is being used. This will decrease resolution SIGNIFICANTLY. (20 sec/update lol)
-    boxTemperatureData();
-    digitalWrite(red,HIGH);
-    digitalWrite(green,LOW);
-    digitalWrite(blue,HIGH);
-    voltageConverterTempData();
-    batteryTempData();
-    
-   //sensorTimer = timer;
-//}
+  getImuData(&imuMsg);
+  boxTemperatureData();
+  voltageConverterTempData();
+  batteryTempData();
   voltageSensorData();
   gpsData();
 
+  rgbControl(0,0,1);
+  if ((timer-sensorTimer)>20000){
+    
+    boxTempPub.publish(&boxTemp); 
+    voltageConverterTempPub.publish(&voltageConverterTempMsg);
+    batteryTempPub.publish(&batteryTempMsg);
+    
+    sensorTimer = timer;
+  }
+  
+
+
+  imuPub.publish(&imuMsg);
+  gpsPub.publish(&gpsMsg);
+  voltageSensorPub.publish(&voltageSensorMsg);
+  ultraPub.publish(&ultraMsg);
+
+
+
+  ultrasonicDiagnostic(&dia_ultraNW, &diaUltraPubNW, &ultra_key, ultraArray[NW]);
+  ultrasonicDiagnostic(&dia_ultraNE, &diaUltraPubNE, &ultra_key, ultraArray[NE]);
+  ultrasonicDiagnostic(&dia_ultraSW, &diaUltraPubSW, &ultra_key, ultraArray[SW]);
+  ultrasonicDiagnostic(&dia_ultraSE, &diaUltraPubSE, &ultra_key, ultraArray[SE]);
+  temperatureDiagnostics(&dia_boxTemp, &diaBoxTempPub, &box_key, currTemp, 65, 55, 15, 5);
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, attitude.yawPitchRoll.y, attitude.yawPitchRoll.z); //y is pitch, but we use it as roll because of the orientation of the chip (it is rotated 90 degrees), and the same is done for z
+  voltageDiagnostics(&dia_voltageSensor, &diaVoltageSensorPub, &sensor_key, volt);
+  temperatureDiagnostics(&dia_voltageConverterTemp, &diaVoltageConverterTempPub, &converter_key, voltageConverterTempMsg.temperature, 70, 65, 5, 0);
+  temperatureDiagnostics(&dia_batteryTemp, &diaBatteryTempPub, &battery_key, batteryTempMsg.temperature, 80, 60, 30, 0);
+
+  
+
   nh.spinOnce(); 
   
-  digitalWrite(red,LOW);
-  digitalWrite(green,HIGH);
-  digitalWrite(blue,HIGH);
+  rgbControl(1,0,0);
+  
 }
+
+void rgbControl(float red, float green, float blue){
+  /** @brief This function controls the onboard LEDs
+    This function control the onboard LED of the adruino and allows for analog control
+
+    @param red: 1-0 value for red intencity
+    @param green: 1-0 value for green intencity
+    @param blue: 1-0 value for blue intencity
+
+    @return None
+  */
+  analogWrite(22,(1023 - (1023 * red)));
+  analogWrite(23,(1023 - (1023 * green)));
+  analogWrite(24,(1023 - (1023 * blue)));
+
+}
+
+
 
 void ultrasonicData() {
   for (int i = 0; i < NUM_SONAR; i++) {
@@ -373,13 +399,6 @@ void ultrasonicData() {
   }
   
   ultraMsg.data = ultraArray; // update msg with curent array of values
-  ultraPub.publish(&ultraMsg);
-
-  ultrasonicDiagnostic(&dia_ultraNW, &diaUltraPubNW, &ultra_key, ultraArray[NW]);
-  ultrasonicDiagnostic(&dia_ultraNE, &diaUltraPubNE, &ultra_key, ultraArray[NE]);
-  ultrasonicDiagnostic(&dia_ultraSW, &diaUltraPubSW, &ultra_key, ultraArray[SW]);
-  ultrasonicDiagnostic(&dia_ultraSE, &diaUltraPubSE, &ultra_key, ultraArray[SE]);
-
 }
 
 void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float distance) {
@@ -412,47 +431,29 @@ void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   publisher->publish(sensor);
 }
 
-void imuData() {
+void getImuData(sensor_msgs::Imu* msg) {
+  /** @brief This function is used to querry the IMU and update the corrisponding message
 
-  digitalWrite(red,LOW);
-  digitalWrite(green,LOW);
-  digitalWrite(blue,LOW);
-  delay(1000);
+    @param msg: This is the ROS IMU message that is to be updated
+    @return None
+  */
 
-  quat = attitude.getQrt();
-  ypr = attitude.getYpr();
-  acc = attitude.getAcc();
-  gyr = attitude.getGyr();
+  attitude.spin();
 
-  digitalWrite(red,LOW);
-  digitalWrite(green,HIGH);
-  digitalWrite(blue,LOW);
-  delay(1000);
+  msg->orientation.w = attitude.quaternion.w;
+  msg->orientation.x = attitude.quaternion.x;
+  msg->orientation.y = attitude.quaternion.y;
+  msg->orientation.z = attitude.quaternion.z;
 
-  imuMsg.orientation.w = quat->w;
-  imuMsg.orientation.x = quat->x;
-  imuMsg.orientation.y = quat->y;
-  imuMsg.orientation.z = quat->z;
-
-  digitalWrite(red,LOW);
-  digitalWrite(green,LOW);
-  digitalWrite(blue,HIGH);
-  delay(1000);
-
-  imuMsg.angular_velocity.x = gyr[0];
-  imuMsg.angular_velocity.y = gyr[1];
-  imuMsg.angular_velocity.z = gyr[2];
-
-  imuMsg.linear_acceleration.x = acc[0];
-  imuMsg.linear_acceleration.y = acc[1];
-  imuMsg.linear_acceleration.z = acc[2];
-
-  //imuPub.publish(&imuMsg);
-  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, ypr[1], ypr[2]); //ypr[1] is pitch, but we use it as roll because of the orientation of the chip (it is rotated 90 degrees), and the same is done for ypr[2]
-
-
-
+  msg->angular_velocity.x = attitude.angular_vel.x;
+  msg->angular_velocity.y = attitude.angular_vel.y;
+  msg->angular_velocity.z = attitude.angular_vel.z;
+  
+  msg->linear_acceleration.x = attitude.linear_acc.x;
+  msg->linear_acceleration.y = attitude.linear_acc.y;
+  msg->linear_acceleration.z = attitude.linear_acc.z;
 }
+
 
 void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float roll, float pitch) {
   char ro[10], pit[10];
@@ -497,28 +498,14 @@ void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   publisher->publish(sensor);
 }
 
-/*void accelerometerData() {
-
-  acc = attitude.getAcc();
-  
-  linear_acceleration.x = acc[0];
-  linear_acceleration.y = acc[1];
-  linear_acceleration.z = acc[2];
-
-  imuPubAccel.publish(&linear_acceleration);
-
-}*/
-
 float boxTemperatureData() {
     currTemp = HTS.readTemperature() - 3.0; // -3 because of constant on-board temperature increase
 
+    /** @bug Why does this only work with a delay?????
+    */
     delay(100);  // Only works with delay greater than or equal to 40 ms
 
     boxTemp.temperature = currTemp;
-
-    boxTempPub.publish(&boxTemp);  
-
-    temperatureDiagnostics(&dia_boxTemp, &diaBoxTempPub, &box_key, currTemp, 65, 55, 15, 5);
 }
 
 void voltageSensorData() {
@@ -533,9 +520,7 @@ void voltageSensorData() {
   voltageSensorMsg.voltage = volt;
   voltageSensorMsg.percentage = voltPercent;
 
-  voltageSensorPub.publish(&voltageSensorMsg);
 
-  voltageDiagnostics(&dia_voltageSensor, &diaVoltageSensorPub, &sensor_key, volt);
 }
 
 void voltageDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float volt) {
@@ -596,9 +581,7 @@ void voltageConverterTempData() {
 
   voltageConverterTempMsg.temperature = steinhart;
 
-  voltageConverterTempPub.publish(&voltageConverterTempMsg);
 
-  temperatureDiagnostics(&dia_voltageConverterTemp, &diaVoltageConverterTempPub, &converter_key, steinhart, 70, 65, 5, 0);
 }
 
 void batteryTempData() {
@@ -625,9 +608,7 @@ void batteryTempData() {
 
   batteryTempMsg.temperature = steinhart;
 
-  batteryTempPub.publish(&batteryTempMsg);
 
-  temperatureDiagnostics(&dia_batteryTemp, &diaBatteryTempPub, &battery_key, steinhart, 80, 60, 30, 0);
 }
 
 void temperatureDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float temp, float upperEmer, float upperWarn, float lowEmer, float lowWarn) {
@@ -718,10 +699,11 @@ void gpsData() {
     //while(true);
   }
 
-  gpsPub.publish(&gpsMsg);
+  
 }
 
 double expFilter(double alpha, double prevReading, double curReading){ 
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
+
 
