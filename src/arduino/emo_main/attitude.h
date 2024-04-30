@@ -15,11 +15,14 @@
 class Attitude {
   public:
     Attitude();
-    void initialize();
-    float * getYpr();
-    float * getAcc();
-    float * getGyr();
-    Quaternion * getQrt();
+    //void initialize(); REMOVE
+    Quaternion quaternion;          // [w, x, y, z]         quaternion value
+    VectorFloat yawPitchRoll;       // [x,y,z]
+    VectorFloat linear_acc;         // [x,y,z]
+    VectorFloat angular_vel;        // [x,y,z]
+
+    void spin();
+
   private:
     // MPU control/status vars
     bool dmpReady = false;  // set true if DMP init was successful
@@ -30,17 +33,17 @@ class Attitude {
     uint8_t fifoBuffer[64]; // FIFO storage buffer
 
     // orientation/motion vars
-    Quaternion q;           // [w, x, y, z]         quaternion container
+
     VectorInt16 aa;         // [x, y, z]            accel sensor measurements
     VectorInt16 gg;         // [x, y, z]            gyro sensor measurements
     VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
     VectorInt16 ggWorld;    // [x, y, z]            world-frame accel sensor measurements
     VectorFloat gravity;    // [x, y, z]            gravity vector
-    float euler[3];         // [psi, theta, phi]    Euler angle container
-    float qrt[4];           // [w, qx, qy, qz]         Quarternion data for w, x, y, and z
+    Quaternion q;          // [w, x, y, z]         quaternion value
     float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
     float acc[3];           // [ax, ay, az]         Accelerometer data for x, y, and z
     float gyr[3];           // [gx, gy, gz]         Gyroscope data for x, y, and z
+
     MPU6050 mpu;
 };
 
