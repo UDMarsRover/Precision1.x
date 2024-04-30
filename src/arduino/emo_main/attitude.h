@@ -15,7 +15,7 @@
 class Attitude {
   public:
     Attitude();
-    //void initialize(); REMOVE
+    void initialize();
     Quaternion quaternion;          // [w, x, y, z]         quaternion value
     VectorFloat yawPitchRoll;       // [x,y,z]
     VectorFloat linear_acc;         // [x,y,z]

@@ -2,27 +2,31 @@
 #include "attitude.h"
 
 Attitude::Attitude() {
-    #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+
+}
+
+void Attitude::initialize(){
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
     Wire.begin();
     Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
   #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
     Fastwire::setup(400, true);
   #endif
 
-  mpu.initialize();
-  devStatus = mpu.dmpInitialize();
+  Attitude::mpu.initialize();
+  Attitude::devStatus = Attitude::mpu.dmpInitialize();
 
-  if (devStatus == 0) {
+  if (Attitude::devStatus == 0) {
 
-    mpu.CalibrateAccel(7);
-    mpu.CalibrateGyro(7);
-    mpu.PrintActiveOffsets();
-    mpu.setDMPEnabled(true);
+    Attitude::mpu.CalibrateAccel(7);
+    Attitude::mpu.CalibrateGyro(7);
+    Attitude::mpu.PrintActiveOffsets();
+    Attitude::mpu.setDMPEnabled(true);
 
-    mpuIntStatus = mpu.getIntStatus();
+    Attitude::mpuIntStatus = Attitude::mpu.getIntStatus();
 
-    dmpReady = true;
-    packetSize = mpu.dmpGetFIFOPacketSize();
+    Attitude::dmpReady = true;
+    Attitude::packetSize = Attitude::mpu.dmpGetFIFOPacketSize();
   }
 }
 

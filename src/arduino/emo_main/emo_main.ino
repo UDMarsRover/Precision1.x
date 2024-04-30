@@ -77,7 +77,6 @@ float sensorTimer;
   #define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
   #define STALE diagnostic_msgs::DiagnosticStatus::STALE;
   
-
   /* Ultrasonic Variables */
     #define NW 0
     #define TRIG1 2 // Northwest
@@ -219,6 +218,7 @@ float sensorTimer;
 
 //end object variable setup
 
+
 /** @bug REMOVE */
 //diagnostic_msgs::KeyValue battery_key;
 //ros::Publisher batteryStatusPub("batteryStatus_pub", &batteryKey);
@@ -246,6 +246,7 @@ void setup() {
   rgbControl(1,0,0);
   Serial1.begin(9600);
 
+  attitude.initialize();
 
   //Ros setup
   nh.initNode();
@@ -312,6 +313,7 @@ void setup() {
 void loop() {
   
   delay(10);
+  
   timer = millis();
 
   ultrasonicData();
@@ -356,6 +358,7 @@ void loop() {
   nh.spinOnce(); 
   
   rgbControl(1,0,0);
+  
 }
 
 void rgbControl(float red, float green, float blue){
@@ -373,6 +376,8 @@ void rgbControl(float red, float green, float blue){
   analogWrite(24,(1023 - (1023 * blue)));
 
 }
+
+
 
 void ultrasonicData() {
   for (int i = 0; i < NUM_SONAR; i++) {
@@ -448,6 +453,7 @@ void getImuData(sensor_msgs::Imu* msg) {
   msg->linear_acceleration.y = attitude.linear_acc.y;
   msg->linear_acceleration.z = attitude.linear_acc.z;
 }
+
 
 void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publisher* publisher, diagnostic_msgs::KeyValue* key, float roll, float pitch) {
   char ro[10], pit[10];
@@ -699,4 +705,5 @@ void gpsData() {
 double expFilter(double alpha, double prevReading, double curReading){ 
   return (alpha * curReading) + ((1 - alpha) * prevReading);
 }
+
 
