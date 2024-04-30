@@ -3,8 +3,8 @@
 #include <avr/dtostrf.h>
 #include <std_msgs/Float32MultiArray.h> // Ultra
 #include <sensor_msgs/Imu.h>
-#include "C:\Users\Paul\MarsRoverWork\Precision1.x\ros_lib\sensor_msgs\BatteryState.h"
-//#include <sensor_msgs/BatteryState.h> // Does not work, see voltage_sensor.ino
+//#include "C:\Users\Paul\MarsRoverWork\Precision1.x\ros_lib\sensor_msgs\BatteryState.h"
+#include <sensor_msgs/BatteryState.h> // Does not work, see voltage_sensor.ino
 #include <sensor_msgs/Temperature.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/DiagnosticArray.h>
@@ -12,12 +12,24 @@
 
 #include <NewPing.h> // Ultrasonic
 #include <Arduino_HTS221.h> // On-board temperature
+<<<<<<< HEAD
 #include "attitude.h" // IMU
 #include <TinyGPSPlus.h> // GPS
 #include <float.h> // GPS
 #include <ros/time.h> // GPS
 #include <sensor_msgs/NavSatFix.h> // GPS
 #include <sensor_msgs/NavSatStatus.h> // GPS
+=======
+//#include <Arduino_LSM9DS1.h> // IMU
+#include "attitude.h" // GPS
+
+//GPS Include
+#include <TinyGPSPlus.h>
+#include <float.h>
+#include <ros/time.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/NavSatStatus.h>
+>>>>>>> 1e9eebddc610a90a4152cf7b5be587e46e4a3d77
 
 // Debug settings for serial printing.
 #define DEBUG 0
