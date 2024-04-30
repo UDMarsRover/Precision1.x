@@ -240,7 +240,6 @@ void setup() {
   delay(500);
   rgbControl(0,0,1);
   delay(500);
-
   
   // setup
   rgbControl(1,0,0);
