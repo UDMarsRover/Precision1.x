@@ -12,15 +12,12 @@
 
 #include <NewPing.h> // Ultrasonic
 #include <Arduino_HTS221.h> // On-board temperature
-#include <Arduino_LSM9DS1.h> // IMU
-#include "attitude.h" // GPS
-
-//GPS Include
-#include <TinyGPSPlus.h>
-#include <float.h>
-#include <ros/time.h>
-#include <sensor_msgs/NavSatFix.h>
-#include <sensor_msgs/NavSatStatus.h>
+#include "attitude.h" // IMU
+#include <TinyGPSPlus.h> // GPS
+#include <float.h> // GPS
+#include <ros/time.h> // GPS
+#include <sensor_msgs/NavSatFix.h> // GPS
+#include <sensor_msgs/NavSatStatus.h> // GPS
 
 // Debug settings for serial printing.
 #define DEBUG 0
@@ -75,8 +72,11 @@ float ultraArray[4]; // initialize array to assign to msg
 
 //IMU variables
 Attitude attitude;
+float* qrt;           // [w, qx, qy, qz]         Quarternion data for w, x, y, and z
 float* ypr;           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 float* acc;           // [ax, ay, az]         Accelerometer data for x, y, and z
+float* gyr;           // [gx, gy, gz]         Gyroscope data for x, y, and z
+Quaternion* quat;         // [w, x, y, z]         quaternion container
 
 // Timing variables for Loop
 uint32_t LoopTimer;
@@ -101,7 +101,6 @@ int LastLoop;
 #define VOLTAGESERIESRESISTOR 100100
 #define BATTERYSERIESRESISTOR 2010 //1980 when mulitmeter directly on resistor, 2010 when measured relative to ground
 
-
 //Box temperature variables
 float currTemp;
 
@@ -125,7 +124,6 @@ int lastSecond = -1;
 // Declare alpha for each sensor as necessary
 double alphaTemp = 0.5;
 double alphaUltra = 0.5;
-double alphaGyro = 0.3;
 double alphaVoltSense = 0.1;
 
 //Counter variables
@@ -164,11 +162,14 @@ ros::NodeHandle nh;
 std_msgs::Float32MultiArray ultraMsg;
 ros::Publisher ultraPub("emo/ultra", &ultraMsg);
 
-geometry_msgs::Vector3 angular_velocity;
-ros::Publisher imuPubGyro("emo/imu/gyro", &angular_velocity);
+sensor_msgs::Imu imuMsg;
+ros::Publisher imuPub("emo/imu", &imuMsg);
 
-geometry_msgs::Vector3 linear_acceleration;
-ros::Publisher imuPubAccel("emo/imu/accel", &linear_acceleration);
+//geometry_msgs::Vector3 angular_velocity;
+//ros::Publisher imuPubGyro("emo/imu/gyro", &angular_velocity);
+
+//geometry_msgs::Vector3 linear_acceleration;
+//ros::Publisher imuPubAccel("emo/imu/accel", &linear_acceleration);
 
 sensor_msgs::Temperature boxTemp;
 ros::Publisher boxTempPub("emo/temp/box", &boxTemp);
@@ -245,8 +246,9 @@ void setup() {
   //Ros setup
   nh.initNode();
   nh.advertise(ultraPub); 
-  nh.advertise(imuPubGyro);
-  nh.advertise(imuPubAccel);
+  //nh.advertise(imuPub);
+  //nh.advertise(imuPubGyro);
+  //nh.advertise(imuPubAccel);
   nh.advertise(boxTempPub);
   nh.advertise(voltageSensorPub); 
   nh.advertise(voltageConverterTempPub);
@@ -288,14 +290,6 @@ void setup() {
   ultraMsg.data_length = 4; // initialize length of ultrasonic msg array
 
   LoopTimer = 0; //Going to have to find a way to integrate loop into method, not high-level loop
-  if (!IMU.begin()) {
-    dia_imu.message = "Failed to initialize IMU";
-    dia_imu.level = STALE;
-    nh.spinOnce();;
-
-    debugln("Failed to initialize IMU!");
-    while (1);
-  }
 
   attitude.initialize();
 
@@ -311,7 +305,9 @@ void setup() {
   pinMode(voltagePin, INPUT); // Voltage sensor setup
   //pinMode(voltageConverterTemp, INPUT); // Voltage converter temp setup
   //pinMode(batteryTemp, INPUT); // Battery temp setup
-
+  //digitalWrite(red,LOW);
+  //digitalWrite(green,HIGH);
+  //digitalWrite(blue,HIGH);
 }
 
 void loop() {
@@ -320,18 +316,29 @@ void loop() {
   timer = millis();
 
   ultrasonicData();
-  gyroscopeData();
-  accelerometerData();
-  if ( (timer - sensorTimer) > 20000 ) {
+  imuData();
+  digitalWrite(red,HIGH);
+  digitalWrite(green,HIGH);
+  digitalWrite(blue,LOW);
+  //accelerometerData();
+  //if ( (timer - sensorTimer) > 20000 ) { // If using timer, ensure no filter is being used. This will decrease resolution SIGNIFICANTLY. (20 sec/update lol)
     boxTemperatureData();
+    digitalWrite(red,HIGH);
+    digitalWrite(green,LOW);
+    digitalWrite(blue,HIGH);
     voltageConverterTempData();
     batteryTempData();
-    voltageSensorData();
-    gpsData();
-    sensorTimer = timer;
-  }
+    
+   //sensorTimer = timer;
+//}
+  voltageSensorData();
+  gpsData();
 
   nh.spinOnce(); 
+  
+  digitalWrite(red,LOW);
+  digitalWrite(green,HIGH);
+  digitalWrite(blue,HIGH);
 }
 
 void ultrasonicData() {
@@ -393,17 +400,45 @@ void ultrasonicDiagnostic(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   publisher->publish(sensor);
 }
 
-void gyroscopeData() {
+void imuData() {
 
+  digitalWrite(red,LOW);
+  digitalWrite(green,LOW);
+  digitalWrite(blue,LOW);
+  delay(1000);
+
+  quat = attitude.getQrt();
   ypr = attitude.getYpr();
-  for (int i = 0; i < 3; i++) {ypr[i] = ypr[i] * (180/3.141592693);}
-  
-  angular_velocity.x = ypr[1];
-  angular_velocity.y = ypr[2];
-  angular_velocity.z = ypr[0];
+  acc = attitude.getAcc();
+  gyr = attitude.getGyr();
 
-  imuPubGyro.publish(&angular_velocity);
-  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, ypr[1], ypr[2]);
+  digitalWrite(red,LOW);
+  digitalWrite(green,HIGH);
+  digitalWrite(blue,LOW);
+  delay(1000);
+
+  imuMsg.orientation.w = quat->w;
+  imuMsg.orientation.x = quat->x;
+  imuMsg.orientation.y = quat->y;
+  imuMsg.orientation.z = quat->z;
+
+  digitalWrite(red,LOW);
+  digitalWrite(green,LOW);
+  digitalWrite(blue,HIGH);
+  delay(1000);
+
+  imuMsg.angular_velocity.x = gyr[0];
+  imuMsg.angular_velocity.y = gyr[1];
+  imuMsg.angular_velocity.z = gyr[2];
+
+  imuMsg.linear_acceleration.x = acc[0];
+  imuMsg.linear_acceleration.y = acc[1];
+  imuMsg.linear_acceleration.z = acc[2];
+
+  //imuPub.publish(&imuMsg);
+  gyroscopeDiagnostics(&dia_imu, &diaImuPub, &imu_key, ypr[1], ypr[2]); //ypr[1] is pitch, but we use it as roll because of the orientation of the chip (it is rotated 90 degrees), and the same is done for ypr[2]
+
+
 
 }
 
@@ -450,7 +485,7 @@ void gyroscopeDiagnostics(diagnostic_msgs::DiagnosticStatus* sensor, ros::Publis
   publisher->publish(sensor);
 }
 
-void accelerometerData() {
+/*void accelerometerData() {
 
   acc = attitude.getAcc();
   
@@ -460,7 +495,7 @@ void accelerometerData() {
 
   imuPubAccel.publish(&linear_acceleration);
 
-}
+}*/
 
 float boxTemperatureData() {
     currTemp = HTS.readTemperature() - 3.0; // -3 because of constant on-board temperature increase
