@@ -310,9 +310,7 @@ void setup() {
 }
 
 void loop() {
-  
   delay(10);
-  
   timer = millis();
 
   ultrasonicData();
@@ -323,7 +321,6 @@ void loop() {
   voltageSensorData();
   gpsData();
 
-  rgbControl(0,0,1);
   if ((timer-sensorTimer)>20000){
     
     boxTempPub.publish(&boxTemp); 
@@ -356,7 +353,6 @@ void loop() {
 
   nh.spinOnce(); 
   
-  rgbControl(1,0,0);
   
 }
 

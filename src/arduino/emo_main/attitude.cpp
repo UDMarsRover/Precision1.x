@@ -25,20 +25,20 @@ void Attitude::initialize(){
 
     Attitude::mpuIntStatus = Attitude::mpu.getIntStatus();
 
-    Attitude::dmpReady = true;
     Attitude::packetSize = Attitude::mpu.dmpGetFIFOPacketSize();
   }
 }
 
-/** @brief This function is sued to update the values of this class
 
-  The goal of the spin function is to update all of the values for the specific vector. 
-  This is doen by getting a reading from the gyroscope and accelerometer and saving it to 
-  a class variable. This function is meant to be used for every timestep.
-
-  @return None, this function updates class variables
-*/
 void Attitude::spin(){
+  /** @brief This function is used to update the values of this class
+
+    The goal of the spin function is to update all of the values for the specific vector. 
+    This is doen by getting a reading from the gyroscope and accelerometer and saving it to 
+    a class variable. This function is meant to be used for every timestep.
+
+    @return None, this function updates class variables
+  */
   if (mpu.dmpGetCurrentFIFOPacket(Attitude::fifoBuffer)) {
     Attitude::mpu.dmpGetQuaternion(&(Attitude::q), Attitude::fifoBuffer);    //Update Q Value
     Attitude::mpu.dmpGetGravity(&(Attitude::gravity), &(Attitude::q));          //Update gravity
