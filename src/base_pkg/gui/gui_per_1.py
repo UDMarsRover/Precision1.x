@@ -5,8 +5,8 @@ import threading
 #from sensor_msgs.msg import NavSatFix, BatteryState
 import time
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QGridLayout
 from PyQt5.QtGui import QPalette, QColor, QPixmap, QTransform, QPainter, QBrush
 from multiprocessing import Process
 
@@ -65,33 +65,50 @@ class RollBox(QVBoxLayout):
     def __init__(self):
         super(RollBox, self).__init__()
 
-        layout = QVBoxLayout()
+        #self.layout = QGridLayout()
+        #self.setLayout(self.layout)
+        #win = QWidget()
+       # self.setAutoFillBackground(True)
+        self.label = QtWidgets.QLabel("Roll:\n%.2f" % roll)
+        self.label.setText("Roll:\n%.2f" % roll)
+        self.label.setStyleSheet("background-color: red; color: green; font-size: 24pt; font-family: Segoe UI; font-weight: 600;")
+      #  self.createWindowContainer
+        #self.label.show()
+        #win.setGeometry(100,100,200,100)
+        
+
+
+       # layout = QVBoxLayout()
+        #layout = QWidget()
     
-        tempLabel = QLabel("Roll:\n%.2f" % roll)
-        layout.addWidget(tempLabel)
-        tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+    
+        
+        #self.addWidget(tempLabel)
+        #tempLabel.setAlignment(QtCore.Qt.AlignCenter)
+        #self.label.setStyleSheet("font-size: " + size + "; font-weight: 600;")
 
-        #layout.setSpacing(100)
-        layout.addSpacing(spacing)
-        self.addLayout(layout)
+        #self.setSpacing(100)
+        #self.addSpacing(spacing)
+        #self.addLayout(tempLabel)
 
+        #self.addWidget(self.label, 0, 0)
+        #self.layout.show()
 
 class PitchBox(QVBoxLayout):
 
     def __init__(self):
         super(PitchBox, self).__init__()
 
-        layout = QVBoxLayout()
+        #layout = QVBoxLayout()
     
         tempLabel = QLabel("Pitch:\n%.2f" % pitch)
-        layout.addWidget(tempLabel)
+       # layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600; background-color: red;")
 
-        layout.addSpacing(spacing)
+       # layout.addSpacing(spacing)
         #layout.setSpacing(0)
-        self.addLayout(layout)
+        #self.addLayout(layout)
 
 
 class TempBox(QVBoxLayout):

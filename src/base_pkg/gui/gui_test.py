@@ -24,22 +24,19 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.setStyleSheet("background-color: black; color: white; font-size: 24pt; font-family: Segoe UI; font-weight: 600;")
-        self.setWindowTitle("Status Box")
-        self.setGeometry(0, 0, 1000, 400)
-        layout = pers()
+
+        self.setWindowTitle("My App")
+
+        layout = QGridLayout()
+
+        layout.addWidget(per1.Color('red'), 0, 0)
+        layout.addWidget(per2.Color('green'), 1, 0)
+        layout.addWidget(per2.Color('blue'), 1, 1)
+        layout.addWidget(per2.Color('purple'), 2, 1)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-        
-
-class pers(QVBoxLayout):
-
-    def __init__(self):
-        super(pers, self).__init__()
-        self.addLayout(per1.gui_rover_status())
-        self.addLayout(per2.gui_rover_status())
 
 
 
