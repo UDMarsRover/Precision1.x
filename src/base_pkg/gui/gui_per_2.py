@@ -25,6 +25,12 @@ spacing = 5
 
 size = "20pt"
 
+#Set Color
+emoColor = "green";
+driveColor = "green";
+armColor = "green";
+cameraColor = "green";
+
 
 def callbackGPS(NavSatFix):
     global lat, lng
@@ -69,7 +75,7 @@ class EmoBox(QVBoxLayout):
         tempLabel = QLabel("Emo Error:\n" + emoErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + emoColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         #layout.setSpacing(100)
         layout.addSpacing(spacing)
@@ -86,7 +92,7 @@ class DriveBox(QVBoxLayout):
         tempLabel = QLabel("Drive Error:\n" + driveErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + driveColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
@@ -103,7 +109,7 @@ class ArmBox(QVBoxLayout):
         tempLabel = QLabel("Arm Error:\n" + armErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + armColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
@@ -120,7 +126,7 @@ class CameraBox(QVBoxLayout):
         tempLabel = QLabel("Camera Error:\n" + cameraErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + cameraColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)

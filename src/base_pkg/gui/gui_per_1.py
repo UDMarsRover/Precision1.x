@@ -26,6 +26,14 @@ spacing = 10
 
 size = "20pt"
 
+#Set color
+rollColor = "yellow";
+pitchColor = "green";
+tempColor = "green";
+radioColor = "green";
+piErrColor = "red";
+
+
 
 def callbackGPS(NavSatFix):
     global lat, lng
@@ -64,51 +72,35 @@ class RollBox(QVBoxLayout):
 
     def __init__(self):
         super(RollBox, self).__init__()
+        layout = QVBoxLayout()
+       
+        tempLabel = QLabel("Roll:\n%.2f" % roll)
+        layout.addWidget(tempLabel)
+        tempLabel.setAlignment(QtCore.Qt.AlignCenter)
+        tempLabel.setStyleSheet("background-color: " + rollColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
+      
 
-        #self.layout = QGridLayout()
-        #self.setLayout(self.layout)
-        #win = QWidget()
-       # self.setAutoFillBackground(True)
-        self.label = QtWidgets.QLabel("Roll:\n%.2f" % roll)
-        self.label.setText("Roll:\n%.2f" % roll)
-        self.label.setStyleSheet("background-color: red; color: green; font-size: 24pt; font-family: Segoe UI; font-weight: 600;")
-      #  self.createWindowContainer
-        #self.label.show()
-        #win.setGeometry(100,100,200,100)
-        
+        layout.addSpacing(spacing)
+        #layout.setSpacing(0)
+        self.addLayout(layout)
 
-
-       # layout = QVBoxLayout()
-        #layout = QWidget()
-    
-    
-        
-        #self.addWidget(tempLabel)
-        #tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        #self.label.setStyleSheet("font-size: " + size + "; font-weight: 600;")
-
-        #self.setSpacing(100)
-        #self.addSpacing(spacing)
-        #self.addLayout(tempLabel)
-
-        #self.addWidget(self.label, 0, 0)
-        #self.layout.show()
+      
 
 class PitchBox(QVBoxLayout):
 
     def __init__(self):
         super(PitchBox, self).__init__()
 
-        #layout = QVBoxLayout()
+        layout = QVBoxLayout()
     
         tempLabel = QLabel("Pitch:\n%.2f" % pitch)
-       # layout.addWidget(tempLabel)
+        layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600; background-color: red;")
+        tempLabel.setStyleSheet("background-color: " + pitchColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
-       # layout.addSpacing(spacing)
+        layout.addSpacing(spacing)
         #layout.setSpacing(0)
-        #self.addLayout(layout)
+        self.addLayout(layout)
 
 
 class TempBox(QVBoxLayout):
@@ -121,7 +113,7 @@ class TempBox(QVBoxLayout):
         tempLabel = QLabel("Temperature:\n%.2fF" % temp)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + tempColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
@@ -138,7 +130,7 @@ class RadioBox(QVBoxLayout):
         tempLabel = QLabel("Radio Strength:\n%.2fdB" % radio)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + radioColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
@@ -154,7 +146,7 @@ class PiErrBox(QVBoxLayout):
         tempLabel = QLabel("Pi Error:\n" + error)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("font-size: " + size + "; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + piErrColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
