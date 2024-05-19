@@ -31,6 +31,10 @@ driveColor = "green";
 armColor = "green";
 cameraColor = "green";
 
+#Box Size
+width = 250
+height = 100
+
 
 def callbackGPS(NavSatFix):
     global lat, lng
@@ -70,12 +74,14 @@ class EmoBox(QVBoxLayout):
     def __init__(self):
         super(EmoBox, self).__init__()
 
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
     
         tempLabel = QLabel("Emo Error:\n" + emoErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("background-color: " + emoColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + emoColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600; border-radius: 7px")
+        
+        tempLabel.setFixedSize(width, height)
 
         #layout.setSpacing(100)
         layout.addSpacing(spacing)
@@ -92,7 +98,9 @@ class DriveBox(QVBoxLayout):
         tempLabel = QLabel("Drive Error:\n" + driveErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("background-color: " + driveColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + driveColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600; border-radius: 7px")
+        
+        tempLabel.setFixedSize(width, height)
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
@@ -104,12 +112,14 @@ class ArmBox(QVBoxLayout):
     def __init__(self):
         super(ArmBox, self).__init__()
 
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
     
         tempLabel = QLabel("Arm Error:\n" + armErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("background-color: " + armColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + armColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600; border-radius: 7px")
+        
+        tempLabel.setFixedSize(width, height)
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
@@ -121,12 +131,14 @@ class CameraBox(QVBoxLayout):
     def __init__(self):
         super(CameraBox, self).__init__()
 
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
     
         tempLabel = QLabel("Camera Error:\n" + cameraErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("background-color: " + cameraColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600;")
+        tempLabel.setStyleSheet("background-color: " + cameraColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600; border-radius: 7px")
+        
+        tempLabel.setFixedSize(width, height)
 
         layout.addSpacing(spacing)
         #layout.setSpacing(0)
