@@ -136,7 +136,7 @@ class CameraBox(QVBoxLayout):
         tempLabel = QLabel("Camera Error:\n" + cameraErr)
         layout.addWidget(tempLabel)
         tempLabel.setAlignment(QtCore.Qt.AlignCenter)
-        tempLabel.setStyleSheet("background-color: " + cameraColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600; border-radius: 7px")
+        tempLabel.setStyleSheet("background-color: " + cameraColor + "; color: white; font-size: " + size + "; font-family: Segoe UI; font-weight: 600; border-radius: 7px;")
         
         tempLabel.setFixedSize(width, height)
 
