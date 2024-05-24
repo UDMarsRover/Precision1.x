@@ -186,7 +186,7 @@ class gui_rover_status(QVBoxLayout):
         self.addLayout(PitchBox())
         self.addLayout(TempBox())
         self.addLayout(RadioBox())
-        self.addLayout(PiErrBox())
+        #self.addLayout(PiErrBox())
 
     def show(self):
         return self

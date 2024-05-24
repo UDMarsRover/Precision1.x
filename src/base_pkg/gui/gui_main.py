@@ -1,5 +1,7 @@
 import gui_per_1 as per1
 import gui_per_2 as per2
+#import main_gui_window as lidar
+import lidar.lidar_widget as lidar
 
 import sys
 import threading
@@ -39,6 +41,8 @@ class MainWindow(QMainWindow):
         layout.addLayout(per2.DriveBox(),4,2)
         layout.addLayout(per2.ArmBox(),4,3)
         layout.addLayout(per2.CameraBox(),4,4)
+
+        layout.addLayout(lidar.LidarWidget(6.0),1,2)
         
 
         widget = QWidget()

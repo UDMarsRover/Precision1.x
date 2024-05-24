@@ -7,20 +7,23 @@ from PyQt5.QtGui import QPainter, QBrush, QColor, QImage
 import numpy as np
 import math
 import threading
-import rospy
-from sensor_msgs.msg import LaserScan 
+#import rospy
+#from sensor_msgs.msg import LaserScan 
 import random
 
 
 class LidarWidget(QtWidgets.QWidget):
     def __init__(self, dist):
+    #def __init__(self):
         """
         Initializes the 
         """
         super().__init__()
-        self.radius = dist# in m, the tangential distance to the edges of the square.
+        #self.radius = dist# in m, the tangential distance to the edges of the square.
         # Set the pixel dimensions of the widget
-        self.area_width = 700
+        self.radius = dist
+        #self.area_width = 700
+        self.area_width = 300
         self.area_height = self.area_width
         self.setMinimumSize(self.area_width, self.area_height)
         self.setWindowTitle("Lidar Window")

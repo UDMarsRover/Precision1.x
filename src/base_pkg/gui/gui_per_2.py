@@ -158,11 +158,15 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-class gui_rover_status(QHBoxLayout):
+class gui_rover_status1(QHBoxLayout):
     def __init__(self):
-        super(gui_rover_status, self).__init__()
+        super(gui_rover_status1, self).__init__()
         self.addLayout(EmoBox())
         self.addLayout(DriveBox())
+
+class gui_rover_status2(QHBoxLayout):
+    def __init__(self):
+        super(gui_rover_status2, self).__init__()
         self.addLayout(ArmBox())
         self.addLayout(CameraBox())
 
