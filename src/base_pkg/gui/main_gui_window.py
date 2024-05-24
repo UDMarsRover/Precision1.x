@@ -7,6 +7,8 @@ import threading
 #from sensor_msgs.msg import LaserScan
 import gui_per_1 as per1
 import gui_per_2 as per2
+import date_time as dt
+import rover_status as rstat
 
 
 class udmrt_gui(QtWidgets.QWidget):
@@ -23,14 +25,20 @@ class udmrt_gui(QtWidgets.QWidget):
         self.layout.addLayout(per1.gui_rover_status(),0,0)
         #self.layout.addLayout(per1.PitchBox(),1,0)
         #self.layout.addLayout(per1.TempBox(),2,0)
-        #self.layout.addLayout(per1.RadioBox(),3,0)
-        self.layout.addLayout(per1.PiErrBox(),2,0)
+        self.layout.addLayout(per1.RadioBox(),1,0)
+        self.layout.addLayout(per1.PiErrBox(),3,0)
 
-        self.layout.addLayout(per2.gui_rover_status1(),2,1)
-        self.layout.addLayout(per2.gui_rover_status2(),2,2)
+        self.layout.addLayout(per2.gui_rover_status1(),3,1)
+        self.layout.addLayout(per2.gui_rover_status2(),3,2)
         #self.layout.addLayout(per2.DriveBox(),4,2)
-        #self.layout.addLayout(per2.ArmBox(),4,3)
-        #self.layout.addLayout(per2.CameraBox(),4,4)
+        
+        
+
+        self.layout.addLayout(rstat.gui_rover_status1(),1,1)
+        self.layout.addLayout(rstat.gui_rover_status2(),1,2)
+
+
+        #self.layout.addLayout(dt.TimeDateBox(),3,3)
 
 
     #def start_ros_thread(self):

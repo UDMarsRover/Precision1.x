@@ -34,8 +34,8 @@ radioColor = "green";
 piErrColor = "red";
 
 #Box Size
-width = 250
-height = 100
+width = 240
+height = 90
 
 
 
@@ -185,7 +185,7 @@ class gui_rover_status(QVBoxLayout):
         self.addLayout(RollBox())
         self.addLayout(PitchBox())
         self.addLayout(TempBox())
-        self.addLayout(RadioBox())
+        #self.addLayout(RadioBox())
         #self.addLayout(PiErrBox())
 
     def show(self):

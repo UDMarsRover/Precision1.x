@@ -32,8 +32,8 @@ armColor = "green";
 cameraColor = "green";
 
 #Box Size
-width = 250
-height = 100
+width = 240
+height = 90
 
 
 def callbackGPS(NavSatFix):
