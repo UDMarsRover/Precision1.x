@@ -23,7 +23,7 @@ class LidarWidget(QtWidgets.QWidget):
         # Set the pixel dimensions of the widget
         self.radius = dist
         #self.area_width = 700
-        self.area_width = 300
+        self.area_width = 500
         self.area_height = self.area_width
         self.setMinimumSize(self.area_width, self.area_height)
         self.setWindowTitle("Lidar Window")
