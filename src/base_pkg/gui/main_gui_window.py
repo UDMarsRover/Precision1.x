@@ -14,6 +14,7 @@ import rover_status as rstat
 class udmrt_gui(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("UD Mars Rover Team GUI")
         self.layout = QGridLayout(self)
         # Initialize widgets here.
         self.lidar_widget = LidarWidget(6.0) # Your widget
