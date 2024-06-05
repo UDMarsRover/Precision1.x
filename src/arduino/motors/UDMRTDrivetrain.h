@@ -15,7 +15,7 @@
  class UDMRTDrivetrain{
 
   public:
-    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<MoogMotor> rightMotors,float roverWidth=1.2, float tireDiameter=0.254, float max_lin_vel=7, float max_ang_vel=1);
+    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<MoogMotor> rightMotors,float roverWidth=1.2, float tireDiameter=0.254, float max_lin_vel=5, float max_ang_vel=1);
     UDMRTDrivetrain();
     void ESTOP();
     void stop();
