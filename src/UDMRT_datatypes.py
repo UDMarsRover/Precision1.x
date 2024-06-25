@@ -1,5 +1,73 @@
 # Composes and decomposes the messageOuts sent between rover and base
+from inputs import get_gamepad
 
+class LogitechF310:
+    
+    def __init__(self):
+        self.lef_joy_x = 0.0
+        self.left_joy_y = 0.0
+        self.right_joy_x = 0.0
+        self.right_joy_y = 0.0
+        self.dpad_x = 0.0
+        self.dpad_y = 0.0
+        self.back = 0
+        self.start = 0
+        self.a = 0
+        self.b = 0
+        self.x = 0
+        self.y = 0
+        self.rb = 0
+        self.lb = 0
+        self.rt = 0
+        self.lt = 0
+
+    def update(self):
+        event = get_gamepad()[0]
+        if event.code == "BTN_THUMB":
+            self.a = event.state
+        elif event.code == "BTN_THUMB2":
+            self.b = event.state
+        elif event.code == "BTN_TRIGGER":
+            self.x = event.state
+        elif event.code == "BTN_TOP":
+            self.y = event.state
+        elif event.code == "ABS_Y":
+            self.left_joy_y = round((int(event.state) - 128)/-128,1)
+        elif event.code == "ABS_X":
+            self.left_joy_x = round((int(event.state) - 128)/128,1)
+        elif event.code == "ABS_RZ":
+            self.right_joy_y = round((int(event.state) - 128)/-128,1)
+        elif event.code == "ABS_Z":
+            self.right_joy_x = round((int(event.state) - 128)/128,1)
+        elif event.code == "ABS_HAT0X":
+            self.dpad_x = event.state
+        elif event.code == "ABS_HAT0Y":
+            self.dpad_y = int(event.state) * -1
+        elif event.code == "BTN_BASE4":
+            self.start = event.state
+        elif event.code == "BTN_BASE3":
+            self.back = event.state
+        elif event.code == "BTN_PINKIE":
+            self.rb = event.state
+        elif event.code == "BTN_BASE2":
+            self.rt = event.state
+        elif event.code == "BTN_TOP2":
+            self.lb = event.state
+        elif event.code == "BTN_BASE":
+            self.lt = event.state
+
+class Arm_Position:
+    def __init__(self):
+        self.x = 0.0
+        self.y = 0.0
+        self.z = 0.0
+        self.roll = 0.0
+        self.pitch = 0.0
+        self.yaw = 0.0
+        self.grip = False
+
+    def getArmCommand(self):
+        return [self.x,self.y,self.z,self.roll,self.pitch,self.yaw]
 
 class UDMRTDataBuffer:
     def __init__(self):

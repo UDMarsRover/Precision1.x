@@ -1,15 +1,27 @@
 import rospy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Bool
 import time
 import numpy as np
 from inputs import get_gamepad
+from UDMRT_datatypes import Arm_Position as arm_pos
 
 
-class udmrtMotorController:
+class udmrtController:
     def __init__(self):
         rospy.init_node("Controller_teleop", anonymous=True)
-        self.pub = rospy.Publisher("DriveVelocity", Twist, queue_size=2)
+        self.drivePub = rospy.Publisher("DriveVelocity", Twist, queue_size=1)
+        self.armPosPub = rospy.Publisher("arm/cmd/position", Float32MultiArray, queue_size=1)
+        self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
         self.rate = rospy.Rate(2)
+
+        self.jog_pose_value = 0.02 # meters
+        self.arm_cmd =arm_pos()
+        self.current_arm_command = Float32MultiArray()
+        self.current_arm_command.data = self.arm_cmd.getArmCommand() # command to update and publish
+
+
         self.linVelY = 0
         self.angVelZ = 0
         self.sec = time.time()
@@ -17,7 +29,7 @@ class udmrtMotorController:
         self.velOut.linear.y = 0
         self.velOut.angular.z = 0
         self.velOut.angular.x = 0
-        self.pub.publish(self.velOut)
+        self.drivePub.publish(self.velOut)
         self.current_start_state = 0
 
         self.buttonBuffer = {
@@ -41,9 +53,15 @@ class udmrtMotorController:
 
     def spin(self):
         self.__getInput__()
-        self.__motor_command_check__()
+        motorRunning = self.__motor_command_check__()
 
     def __motor_command_check__(self):
+        """
+        This function checks to see if the controller is trying to send a command to the motors. If a command is trying to be sent, this function packages and sends the command over ROS. 
+
+        :return: An indication if the motors have been commanded to run or not
+        :rtype: bool
+        """
         self.current_start_state = (
             self.buttonBuffer["start"]
             if self.buttonBuffer["start"] != self.current_start_state
@@ -61,13 +79,36 @@ class udmrtMotorController:
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
 
-        print(valueCheck)
+        #print(valueCheck)
 
         if valueCheck:
             self.velOut.linear.y = self.linVelY
             self.velOut.angular.z = self.angVelZ
             self.velOut.angular.x = float(self.current_start_state)
-            self.pub.publish(self.velOut)
+            self.drivePub.publish(self.velOut)
+        
+        return (self.velOut.linear.y != 0) and (self.velOut.angular.z != 0)
+
+    def __arm_command_check__(self):
+
+        if self.count == 2: # 1 lt press gets registered as 2 
+            self.jog_pose_value = 0.01
+        elif self.count == 4:
+            self.jog_pose_value = 0.005
+        else:
+            self.jog_pose_value = 0.02
+            self.count = 0
+
+        self.arm_cmd.x = self.jog_pose_value * float(self.buttonBuffer["left_joy_y"])	
+        self.arm_cmd.z = self.jog_pose_value * float(self.buttonBuffer["right_joy_y"]) # z
+        self.arm_cmd.roll = self.jog_pose_value * float(self.buttonBuffer["rb"]) # roll
+        self.arm_cmd.roll += self.jog_pose_value * float(self.buttonBuffer["lb"]) * -1 # negative roll
+        self.arm_cmd.pitch = self.jog_pose_value * float(self.buttonBuffer["rt"]) # pitch
+        self.arm_cmd.pitch += self.jog_pose_value * float(self.buttonBuffer["lt"]) * -1 # negative pitch
+        self.arm_cmd.yaw = self.jog_pose_value * float(self.buttonBuffer["y"]) # yaw
+        self.arm_cmd.yaw += self.jog_pose_value * float(self.buttonBuffer["a"]) * -1 # negative yaw
+            
+        self.current_arm_command.data = [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
 
     def __getInput__(self):
         """
@@ -122,7 +163,7 @@ class udmrtMotorController:
         return self.buttonBuffer
 
 
-controller = udmrtMotorController()
+controller = udmrtController()
 
 while not rospy.is_shutdown():
     controller.spin()
