@@ -7,7 +7,7 @@ class ServoController:
         self.servo_pin = 17
         gpio.setmode(gpio.BOARD)
         gpio.setup(self.servo_pin, gpio.OUT)
-        self.p = gpio.PWM(self.servo_pin, 50)
+        self.p = gpio.PWM(self.servo_pin, 250)
         self.p.start(0) # duty cycle 2.5%
 
     def set_angle(self, angle):
