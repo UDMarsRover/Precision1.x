@@ -5,8 +5,9 @@ import RPi.GPIO as GPIO
 class ServoController:
     def __init__(self, pin):
         self.pin = pin
-        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.setmode(GPIO.BCM)
+        
         self.pwm = GPIO.PWM(self.pin, 50)
         self.pwm.start(0)
 
