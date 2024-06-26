@@ -80,6 +80,7 @@ class Arm:
     def spin(self):
         rospy.spin()
         arm.rate.sleep()
+        print("spinning")
 
 
 arm = Arm()
