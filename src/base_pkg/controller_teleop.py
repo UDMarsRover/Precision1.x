@@ -49,7 +49,7 @@ class udmrtController:
         print("Controller TeleOp Started Successfully!")
 
     def spin(self):
-        motorRunning = self.__motor_command_check__()
+        #motorRunning = self.__motor_command_check__()
         self.__arm_command_check__()
         self.rate.sleep()
 

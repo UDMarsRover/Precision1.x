@@ -68,14 +68,10 @@ class Arm:
         robot_ip_address = "192.168.2.114"
         self.robot = NiryoRobot(robot_ip_address)
 
-        time.sleep(5)  # maybe helps more consistently start up
         self.robot.arm.set_jog_control(True)
         self.robot.arm.calibrate_auto()  # calibrate motors
         self.robot.tool.update_tool()
 
-        print("wait")
-        time.sleep(1)
-        print("done")
         self.robot.arm.move_to_home_pose()
 
     # def callback_pose(self):
@@ -83,6 +79,9 @@ class Arm:
 
 
 arm = Arm()
+
+print("Done Setting Up Arm")
+
 while not rospy.is_shutdown():
     while arm.robot.client.is_connected:
         #arm.publish()  # continuously publish messages
