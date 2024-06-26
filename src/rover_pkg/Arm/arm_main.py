@@ -45,9 +45,9 @@ class Arm:
 
     # recieve command and move arm by specified value
     def callback_arm_command(self, msg):
-        print("Published ", msg.data)
+        #print("Published ", msg.data)
         self.robot.arm.jog_pose(msg.data)
-        print("Ran")
+        #print("Ran")
 
     def callback_grip_command(self, msg):
         if msg.data:
