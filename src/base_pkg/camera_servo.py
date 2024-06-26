@@ -21,7 +21,7 @@ class ServoController:
         GPIO.cleanup()
 
 if __name__ == "__main__":
-    servo = ServoController(18)
+    servo = ServoController(17)
 
     try:
         while True:
