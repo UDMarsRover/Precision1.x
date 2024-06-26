@@ -6,6 +6,6 @@ pyyaml
 rospkg
 pyserial
 attrs
-pyans1
+pyasn1
 autobahn
 pyniryo2
