@@ -83,6 +83,7 @@ arm = Arm()
 print("Done Setting Up Arm")
 
 while not rospy.is_shutdown():
+    print("ROS Not Shutdown")
     while arm.robot.client.is_connected:
         #arm.publish()  # continuously publish messages
         arm.rate.sleep()
