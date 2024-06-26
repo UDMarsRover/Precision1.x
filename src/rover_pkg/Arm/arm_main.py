@@ -69,7 +69,7 @@ class Arm:
         self.robot = NiryoRobot(robot_ip_address)
 
         time.sleep(5)  # maybe helps more consistently start up
-        self.robot.set_jog_control(True)
+        self.robot.arm.set_jog_control(True)
         self.robot.arm.calibrate_auto()  # calibrate motors
         self.robot.tool.update_tool()
 
