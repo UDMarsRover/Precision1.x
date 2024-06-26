@@ -5,7 +5,7 @@ import RPi.GPIO as gpio
 class ServoController:
     def __init__(self, pin):
         self.servo_pin = 17
-        gpio.setmode(gpio.BOARD)
+        gpio.setmode(gpio.BCM)
         gpio.setup(self.servo_pin, gpio.OUT)
         self.p = gpio.PWM(self.servo_pin, 50)
         self.p.start(0) # duty cycle 2.5%
