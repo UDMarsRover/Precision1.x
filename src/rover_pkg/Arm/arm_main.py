@@ -84,7 +84,7 @@ arm = Arm()
 while not rospy.is_shutdown():
     while arm.robot.client.is_connected:
         #arm.publish()  # continuously publish messages
-        #arm.rate.sleep()
+        arm.rate.sleep()
         rospy.spin()
     print("AHH CONNECTING")
 
