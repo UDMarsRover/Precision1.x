@@ -48,7 +48,9 @@ class Arm:
         print("Published ", msg.data)
         jog_values = msg.data
         self.rate.sleep()
+        self.robot.arm.set_jog_control(True)
         self.robot.arm.jog_pose(msg.data)
+        self.robot.arm.set_jog_control(False)
         #print("Ran")
 
     def callback_grip_command(self, msg):
@@ -73,7 +75,7 @@ class Arm:
         self.robot.tool.update_tool()
         
         self.robot.arm.move_to_home_pose()
-        self.robot.arm.set_jog_control(True)
+        
 
     # def callback_pose(self):
     # print("current pose:",self.robot.arm.get_pose())
