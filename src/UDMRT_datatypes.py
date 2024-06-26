@@ -24,7 +24,9 @@ class LogitechF310:
         self.lt = 0
 
         try:
+            print("Starting Controller Interface Thread...")
             _thread.start_new_thread(self.update,("Hi", ))
+            print("Controller Interface Thread Started!")
         except Exception as e:
             print("ERROR - Unable to start controller thread")
             print(e)

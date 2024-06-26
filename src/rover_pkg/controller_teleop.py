@@ -19,7 +19,7 @@ class udmrtController:
             "arm/cmd/position", Float32MultiArray, queue_size=1
         )
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
-        self.rate = rospy.Rate(2)
+        self.rate = rospy.Rate(60)
 
         self.jog_pose_value = 0.02  # meters
         self.arm_jog_count = 0
@@ -46,9 +46,12 @@ class udmrtController:
 
         self.controller = LogitechF310()
 
+        print("Controller TeleOp Started Successfully!")
+
     def spin(self):
         motorRunning = self.__motor_command_check__()
         self.__arm_command_check__()
+        self.rate.sleep()
 
     def __motor_command_check__(self):
         """
@@ -112,8 +115,6 @@ class udmrtController:
 
         self.grip_command = self.controller.b
         self.current_arm_command.data = self.arm_cmd.getArmCommand()
-
-        print(self.current_arm_command.data)
 
         self.armPosPub.publish(self.current_arm_command)
         self.armGripPub.publish(self.grip_command)

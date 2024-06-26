@@ -62,7 +62,7 @@ class Arm:
 
     def reset(self):
         # connect to arm
-        robot_ip_address = "10.10.10.10"
+        robot_ip_address = "192.168.2.114"
         self.robot = NiryoRobot(robot_ip_address)
 
         time.sleep(5)  # maybe helps more consistently start up

@@ -5,4 +5,7 @@ catkin_pkg
 pyyaml
 rospkg
 pyserial
-pygame==2.0.0.dev12
+attrs
+pyans1
+autobahn
+pyniryo2
