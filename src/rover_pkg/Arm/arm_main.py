@@ -46,6 +46,8 @@ class Arm:
     # recieve command and move arm by specified value
     def callback_arm_command(self, msg):
         #print("Published ", msg.data)
+        jog_values = msg.data
+
         self.robot.arm.jog_pose(msg.data)
         #print("Ran")
 
@@ -86,6 +88,7 @@ while not rospy.is_shutdown():
         #arm.publish()  # continuously publish messages
         arm.rate.sleep()
         rospy.spin()
+        print("Spinning")
     print("AHH CONNECTING")
 
 
