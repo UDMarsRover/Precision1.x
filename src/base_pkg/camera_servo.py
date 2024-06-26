@@ -1,30 +1,19 @@
-import time
+# Set up libraries and overall settings
+import RPi.GPIO as GPIO  # Imports the standard Raspberry Pi GPIO library
+from time import sleep   # Imports sleep (aka wait or pause) into the program
+GPIO.setmode(GPIO.BOARD) # Sets the pin numbering system to use the physical layout
 
-import RPi.GPIO as gpio
+# Set up pin 11 for PWM
+GPIO.setup(11,GPIO.OUT)  # Sets up pin 11 to an output (instead of an input)
+p = GPIO.PWM(11, 50)     # Sets up pin 11 as a PWM pin
+p.start(0)               # Starts running PWM on the pin and sets it to 0
 
-class ServoController:
-    def __init__(self, pin):
-        self.servo_pin = 17
-        gpio.setmode(gpio.BCM)
-        gpio.setup(self.servo_pin, gpio.OUT)
-        self.p = gpio.PWM(self.servo_pin, 50)
-        self.p.start(0) # duty cycle 2.5%
+# Move the servo back and forth
+p.ChangeDutyCycle(3)     # Changes the pulse width to 3 (so moves the servo)
+sleep(1)                 # Wait 1 second
+p.ChangeDutyCycle(12)    # Changes the pulse width to 12 (so moves the servo)
+sleep(1)
 
-    def set_angle(self, angle):
-        duty_cycle = angle / 18 + 2
-        self.p.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.5)
-
-    def cleanup(self):
-        self.pwm.stop()
-        gpio.cleanup()
-
-if __name__ == "__main__":
-    servo = ServoController(17)
-
-    try:
-        while True:
-            angle = float(input("Enter angle (0-360): "))
-            servo.set_angle(angle)
-    except KeyboardInterrupt:
-        servo.cleanup()
+# Clean up everything
+p.stop()                 # At the end of the program, stop the PWM
+GPIO.cleanup()           # Resets the GPIO pins back to defaults
