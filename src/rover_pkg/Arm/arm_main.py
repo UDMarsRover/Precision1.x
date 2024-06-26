@@ -47,7 +47,7 @@ class Arm:
     def callback_arm_command(self, msg):
         print("Published ", msg.data)
         jog_values = msg.data
-
+        self.rate.sleep()
         self.robot.arm.jog_pose(msg.data)
         #print("Ran")
 
@@ -77,6 +77,10 @@ class Arm:
     # def callback_pose(self):
     # print("current pose:",self.robot.arm.get_pose())
 
+    def spin(self):
+        rospy.spin()
+        arm.rate.sleep()
+
 
 arm = Arm()
 
@@ -84,11 +88,7 @@ print("Done Setting Up Arm")
 
 while not rospy.is_shutdown():
     print("ROS Not Shutdown")
-    while arm.robot.client.is_connected:
-        #arm.publish()  # continuously publish messages
-        arm.rate.sleep()
-        rospy.spin()
-        print("Spinning")
+
     print("AHH CONNECTING")
 
 
