@@ -87,9 +87,7 @@ arm = Arm()
 print("Done Setting Up Arm")
 
 while not rospy.is_shutdown():
-    print("ROS Not Shutdown")
-
-    print("AHH CONNECTING")
+    arm.spin()
 
 
 print("super done")
