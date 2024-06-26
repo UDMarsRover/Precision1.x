@@ -12,6 +12,7 @@ class Arm:
     def __init__(self):
         rospy.init_node("arm", anonymous=True)
         self.reset()
+        self.rate = rospy.Rate(60)
 
         # self.robot.arm.move_pose([0.2, 0.1, 0.3, 0.0, 0.0, 0.0], callback=self.callback_pose())
 
@@ -83,6 +84,7 @@ arm = Arm()
 while not rospy.is_shutdown():
     while arm.robot.client.is_connected:
         arm.publish()  # continuously publish messages
+        arm.rate.sleep()
     print("AHH CONNECTING")
 
 
