@@ -68,11 +68,12 @@ class Arm:
         robot_ip_address = "192.168.2.114"
         self.robot = NiryoRobot(robot_ip_address)
 
-        self.robot.arm.set_jog_control(True)
+        
         self.robot.arm.calibrate_auto()  # calibrate motors
         self.robot.tool.update_tool()
-
+        
         self.robot.arm.move_to_home_pose()
+        self.robot.arm.set_jog_control(True)
 
     # def callback_pose(self):
     # print("current pose:",self.robot.arm.get_pose())
