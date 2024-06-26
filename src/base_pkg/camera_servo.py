@@ -1,24 +1,23 @@
 import time
 
-import RPi.GPIO as GPIO
+import RPi.GPIO as gpio
 
 class ServoController:
     def __init__(self, pin):
-        self.pin = pin
-        GPIO.setup(self.pin, GPIO.OUT)
-        GPIO.setmode(GPIO.BCM)
-        
-        self.pwm = GPIO.PWM(self.pin, 50)
-        self.pwm.start(0)
+        self.servo_pin = 17
+        gpio.setmode(gpio.BOARD)
+        gpio.setup(self.servo_pin, gpio.OUT)
+        self.p = gpio.PWM(self.servo_pin, 50)
+        self.p.start(0) # duty cycle 2.5%
 
     def set_angle(self, angle):
         duty_cycle = angle / 18 + 2
-        self.pwm.ChangeDutyCycle(duty_cycle)
+        self.p.ChangeDutyCycle(duty_cycle)
         time.sleep(0.5)
 
     def cleanup(self):
         self.pwm.stop()
-        GPIO.cleanup()
+        gpio.cleanup()
 
 if __name__ == "__main__":
     servo = ServoController(17)
