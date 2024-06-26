@@ -23,7 +23,7 @@ class Arm:
 
         # subscribers
         self.arm_sub = rospy.Subscriber(
-            "command", Float32MultiArray, self.callback_arm_command
+            "arm/cmd/position", Float32MultiArray, self.callback_arm_command
         )
 
         self.grip_sub = rospy.Subscriber("grip_state", Bool, self.callback_grip_command)
