@@ -45,7 +45,7 @@ class Arm:
 
     # recieve command and move arm by specified value
     def callback_arm_command(self, msg):
-        #print("Published ", msg.data)
+        print("Published ", msg.data)
         jog_values = msg.data
 
         self.robot.arm.jog_pose(msg.data)
