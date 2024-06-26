@@ -7,7 +7,7 @@ import RPi.GPIO as gpio
 
 class CameraServoNode:
     def __init__(self):
-        self.servo_pin = 11
+        self.servo_pin = 17
         gpio.setmode(gpio.BOARD)
         gpio.setup(self.servo_pin, gpio.OUT)
         self.p = gpio.PWM(self.servo_pin, 50)
