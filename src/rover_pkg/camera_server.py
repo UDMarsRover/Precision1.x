@@ -15,7 +15,7 @@ def webcam_feed():
         # frame = np.where(frame > 1, frame - 1, frame)
 
         # Compress the frame for low latency
-        _, compressed_frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 10])
+        _, compressed_frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 20])
         frame_bytes = compressed_frame.tobytes()
 
         yield (b'--frame\r\n'
