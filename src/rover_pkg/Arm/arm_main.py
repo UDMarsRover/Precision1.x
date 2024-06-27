@@ -74,7 +74,7 @@ class Arm:
         self.robot.arm.calibrate_auto()  # calibrate motors
         self.robot.tool.update_tool()
         
-        self.robot.arm.move_to_home_pose()
+        self.robot.arm.move_to_home_pose(callback=self.temp_callback)
         
 
     # def callback_pose(self):
