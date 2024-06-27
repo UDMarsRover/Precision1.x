@@ -11,8 +11,8 @@ def webcam_feed():
         ret, frame = cap.read()
 
         # Apply color correction for weird windows blue shift
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = np.where(frame > 1, frame - 1, frame)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # frame = np.where(frame > 1, frame - 1, frame)
 
         # Compress the frame for low latency
         _, compressed_frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 10])
