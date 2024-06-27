@@ -7,7 +7,7 @@ from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
 from trajectory_msgs.msg import JointTrajectoryPoint
 
-from src.UDMRT_datatypes import Arm_Position
+from UDMRT_datatypes import Arm_Position
 
 
 class Arm:
