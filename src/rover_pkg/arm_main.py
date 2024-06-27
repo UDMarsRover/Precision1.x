@@ -81,7 +81,7 @@ class Arm:
         robot_ip_address = "192.168.2.114"
         self.robot = NiryoRobot(robot_ip_address)
 
-        while not arm.robot.client.is_connected:
+        while not self.robot.client.is_connected:
             print("Trying to connect...")
             self.robot.wait(5)
         
