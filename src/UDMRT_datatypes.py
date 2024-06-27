@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 # Composes and decomposes the messageOuts sent between rover and base
-from inputs import get_gamepad
-import _thread
+
 
 class LogitechF310:
+    from inputs import get_gamepad
+    import _thread
     def __init__(self):
         self.left_joy_x = 0.0
         self.left_joy_y = 0.0
