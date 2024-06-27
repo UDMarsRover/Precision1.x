@@ -97,6 +97,8 @@ class Arm:
         
         self.robot.arm.set_learning_mode(False)
 
+        self.robot.wait(10)
+
         self.robot.arm.set_jog_control(True)
 
         
