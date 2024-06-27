@@ -101,6 +101,10 @@ class Arm_Position:
         self.pitch = state[4]
         self.yaw = state[5]
 
+    def updateState(self,state:list):
+        self.setState(state + self.getState())
+        return self.getState()
+
 
 class UDMRTDataBuffer:
     def __init__(self):

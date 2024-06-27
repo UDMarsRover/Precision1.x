@@ -54,6 +54,8 @@ class Arm:
         
         jog_values = msg.data
 
+        
+
         if jog_values != 0:
             print("Published ", msg.data)
             self.robot.arm.set_jog_control(True)
