@@ -54,13 +54,11 @@ class Arm:
         
         jog_values = msg.data
 
-        print(self.currentPosition.updateState(jog_values))
+        self.currentPosition.updateState(jog_values)
 
         if jog_values != 0:
-            print("Published ", msg.data)
-            self.robot.arm.set_jog_control(True)
-            self.robot.arm.jog_pose(msg.data,callback=self.temp_callback)
-            self.robot.arm.set_jog_control(False)
+            print("Published ", self.currentPosition.getState())
+            self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
         #print("Ran")
 
     def callback_grip_command(self, msg):
