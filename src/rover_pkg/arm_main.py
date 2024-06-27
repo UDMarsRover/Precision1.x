@@ -54,7 +54,7 @@ class Arm:
         
         jog_values = msg.data
 
-        
+        print(self.currentPosition.updateState(jog_values))
 
         if jog_values != 0:
             print("Published ", msg.data)
