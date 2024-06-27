@@ -84,7 +84,7 @@ class Arm:
 
     def spin(self):
         rospy.spin()
-        arm.rate.sleep()
+        #arm.rate.sleep()
         print("spinning")
 
     def temp_callback(self):
