@@ -83,9 +83,15 @@ class Arm:
 
         
         self.robot.arm.calibrate_auto()  # calibrate motors
+
+        print("Calibrating Motors...")
+
+        self.robot.arm.wait_calibration_end()
         self.robot.tool.update_tool()
         
         self.robot.arm.move_to_home_pose()
+
+        print("Homing")
 
         self.robot.arm.set_learning_mode(False)
 
