@@ -102,7 +102,7 @@ class Arm_Position:
         self.yaw = state[5]
 
     def updateState(self,state:list):
-        self.setState(sum(i) for i in zip(state, self.getState()))
+        self.setState(list(sum(i) for i in zip(state, self.getState())))
         return self.getState()
 
 
