@@ -84,6 +84,14 @@ class Arm_Position:
 
     def getArmCommand(self):
         return [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
+    
+    def nonZeros(self):
+        return ((self.x != 0.0) &
+                (self.y != 0.0) &
+                (self.z != 0.0) &
+                (self.roll != 0.0) &
+                (self.pitch != 0.0) &
+                (self.yaw != 0.0))
 
 
 class UDMRTDataBuffer:

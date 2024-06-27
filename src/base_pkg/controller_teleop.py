@@ -116,8 +116,9 @@ class udmrtController:
         self.grip_command = self.controller.b
         self.current_arm_command.data = self.arm_cmd.getArmCommand()
 
-        self.armPosPub.publish(self.current_arm_command)
-        self.armGripPub.publish(self.grip_command)
+        if self.arm_cmd.nonZeros():
+            self.armPosPub.publish(self.current_arm_command)
+            self.armGripPub.publish(self.grip_command)
 
 
 controller = udmrtController()
