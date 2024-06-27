@@ -95,9 +95,7 @@ class Arm:
     # print("current pose:",self.robot.arm.get_pose())
 
     def spin(self):
-        rospy.spin()
-        #arm.rate.sleep()
-        print("spinning")
+        arm.publish()
 
     def temp_callback(self,_):
         print("We ran this bitch")
