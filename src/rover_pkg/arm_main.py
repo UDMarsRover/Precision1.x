@@ -104,6 +104,7 @@ class Arm:
 
     def spin(self):
         arm.publish()
+        arm.rate.sleep()
 
     def temp_callback(self,_):
         print("We ran this bitch")
