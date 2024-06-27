@@ -14,6 +14,7 @@ from src.UDMRT_datatypes import Arm_Position
 class Arm:
     def __init__(self):
         rospy.init_node("arm", anonymous=True)
+        self.homed = False
         self.reset()
         self.rate = rospy.Rate(10)
 
@@ -91,15 +92,12 @@ class Arm:
        
 
         self.robot.tool.update_tool()
-        print("Homing")
-        self.robot.arm.move_to_home_pose()
+        print("Starting homing")
+        self.robot.arm.move_to_home_pose(callback=self.homing_callback)
 
-        
-        self.robot.arm.set_learning_mode(False)
-
-        self.robot.wait(10)
-
-        self.robot.arm.set_jog_control(True)
+        while not self.homed:
+            self.robot.wait(5)
+            print("Homing...")
 
         
 
@@ -111,6 +109,12 @@ class Arm:
 
     def temp_callback(self,_):
         print("We ran this bitch")
+
+    def homing_callback(self,_):
+        print("Homing Complete")
+        self.robot.arm.set_learning_mode(False)
+        self.robot.arm.set_jog_control(True)
+        self.homed = True
 
 arm = Arm()
 
