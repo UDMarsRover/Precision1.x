@@ -87,7 +87,7 @@ class Arm:
         #arm.rate.sleep()
         print("spinning")
 
-    def temp_callback(self):
+    def temp_callback(self,_):
         print("We ran this bitch")
 
 arm = Arm()
