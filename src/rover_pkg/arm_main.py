@@ -87,6 +87,8 @@ class Arm:
         
         self.robot.arm.move_to_home_pose()
 
+        self.robot.arm.set_learning_mode(False)
+
         self.robot.arm.set_jog_control(True)
 
         
