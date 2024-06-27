@@ -3,7 +3,7 @@ import rospy
 import sys
 from std_msgs.msg import String
 
-from src.base_pkg.UDMRT_datatypes import UDMRTDataBuffer as DataBuf
+from src.UDMRT_datatypes import UDMRTDataBuffer as DataBuf
 
 
 class Base:

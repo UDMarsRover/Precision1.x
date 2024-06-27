@@ -7,12 +7,17 @@ from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
 from trajectory_msgs.msg import JointTrajectoryPoint
 
+from src.UDMRT_datatypes import Arm_Position
+
 
 class Arm:
     def __init__(self):
         rospy.init_node("arm", anonymous=True)
         self.reset()
         self.rate = rospy.Rate(10)
+
+        self.currentPosition = Arm_Position()
+        self.currentPosition.setState(self.robot.arm.get_pose())
 
         # self.robot.arm.move_pose([0.2, 0.1, 0.3, 0.0, 0.0, 0.0], callback=self.callback_pose())
 

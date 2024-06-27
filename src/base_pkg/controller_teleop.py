@@ -8,7 +8,7 @@ import time
 import numpy as np
 import sys
 sys.path.append("..")
-from UDMRT_datatypes import Arm_Position, LogitechF310
+from src.UDMRT_datatypes import Arm_Position, LogitechF310
 
 
 class udmrtController:
@@ -27,7 +27,7 @@ class udmrtController:
         self.arm_cmd = Arm_Position()
         self.current_arm_command = Float32MultiArray()
         self.current_arm_command.data = (
-            self.arm_cmd.getArmCommand()
+            self.arm_cmd.getState()
         )  # command to update and publish
         self.grip_command = False
         self.armPosPub.publish(self.current_arm_command)
@@ -114,11 +114,9 @@ class udmrtController:
         self.arm_cmd.yaw += self.jog_pose_value * self.controller.a * -1  # negative yaw
 
         self.grip_command = self.controller.b
-        self.current_arm_command.data = self.arm_cmd.getArmCommand()
+        self.current_arm_command.data = self.arm_cmd.getState()
 
-        print(self.arm_cmd.nonZeros(), self.arm_cmd.getArmCommand())
         if self.arm_cmd.nonZeros():
-            print("sending arm command")
             self.armPosPub.publish(self.current_arm_command)
             self.armGripPub.publish(self.grip_command)
 

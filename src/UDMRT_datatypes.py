@@ -82,7 +82,7 @@ class Arm_Position:
         self.yaw = 0.0
         self.grip = False
 
-    def getArmCommand(self):
+    def getState(self):
         return [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
     
     def nonZeros(self):
@@ -92,6 +92,14 @@ class Arm_Position:
                 (self.roll != 0.0) or
                 (self.pitch != 0.0) or
                 (self.yaw != 0.0))
+    
+    def setState(self,state:list):
+        self.x = state[0]
+        self.y = state[1]
+        self.z = state[2]
+        self.roll = state[3]
+        self.pitch = state[4]
+        self.yaw = state[5]
 
 
 class UDMRTDataBuffer:
