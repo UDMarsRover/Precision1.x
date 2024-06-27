@@ -49,7 +49,7 @@ class Arm:
         jog_values = msg.data
         self.rate.sleep()
         self.robot.arm.set_jog_control(True)
-        self.robot.arm.jog_pose(msg.data)
+        self.robot.arm.jog_pose(msg.data,callback=self.temp_callback)
         self.robot.arm.set_jog_control(False)
         #print("Ran")
 
@@ -85,6 +85,8 @@ class Arm:
         #arm.rate.sleep()
         print("spinning")
 
+    def temp_callback(self):
+        print("We ran this bitch")
 
 arm = Arm()
 
