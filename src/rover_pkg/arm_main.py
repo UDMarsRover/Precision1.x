@@ -8,7 +8,7 @@ from std_msgs.msg import Bool
 from trajectory_msgs.msg import JointTrajectoryPoint
 import sys
 sys.path.append("..")
-from UDMRT_datatypes import Arm_Position
+from src.UDMRT_datatypes import Arm_Position
 
 
 class Arm:
