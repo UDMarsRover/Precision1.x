@@ -18,7 +18,7 @@ class Arm:
         self.rate = rospy.Rate(10)
 
         self.currentPosition = Arm_Position()
-        self.currentPosition.setState(self.robot.arm.get_pose())
+        self.currentPosition.setState(self.robot.arm.get_pose)
 
         # self.robot.arm.move_pose([0.2, 0.1, 0.3, 0.0, 0.0, 0.0], callback=self.callback_pose())
 
