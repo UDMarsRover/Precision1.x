@@ -60,7 +60,8 @@ class Arm:
             #print("Published ", self.currentPosition.getState())
             #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
             print("Published ", jog_values)
-            self.robot.arm.move_joints(jog_values,callback=self.temp_callback)
+    
+            self.robot.arm.jog_joints(jog_values,callback=self.temp_callback)
         #print("Ran")
 
     def callback_grip_command(self, msg):
@@ -84,7 +85,10 @@ class Arm:
         self.robot.arm.calibrate_auto()  # calibrate motors
         self.robot.tool.update_tool()
         
-        self.robot.arm.move_to_home_pose(callback=self.temp_callback)
+        self.robot.arm.move_to_home_pose()
+
+        self.robot.arm.set_jog_control(True)
+
         
 
     # def callback_pose(self):
