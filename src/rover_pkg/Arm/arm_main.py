@@ -81,7 +81,7 @@ class Arm:
     # print("current pose:",self.robot.arm.get_pose())
 
     def spin(self):
-        #rospy.spin()
+        rospy.spin()
         arm.rate.sleep()
         print("spinning")
 
