@@ -20,7 +20,7 @@ class udmrtController:
         )
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
         self.rate = rospy.Rate(60)
-        self.armRate = rospy.Rate(2)
+        self.armRate = rospy.Rate(5)
         self.jog_pose_value = 0.02  # meters
         self.arm_jog_count = 0
         self.arm_reset_count = 0

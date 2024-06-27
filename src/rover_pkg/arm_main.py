@@ -16,7 +16,7 @@ class Arm:
         rospy.init_node("arm", anonymous=True)
         self.homed = False
         self.reset()
-        self.rate = rospy.Rate(2)
+        self.rate = rospy.Rate(10)
 
         self.currentPosition = Arm_Position()
         self.currentPosition.setState(self.robot.arm.get_pose().to_list())
