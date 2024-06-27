@@ -86,11 +86,11 @@ class Arm_Position:
         return [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
     
     def nonZeros(self):
-        return ((self.x != 0.0) &
-                (self.y != 0.0) &
-                (self.z != 0.0) &
-                (self.roll != 0.0) &
-                (self.pitch != 0.0) &
+        return ((self.x != 0.0) or
+                (self.y != 0.0) or
+                (self.z != 0.0) or
+                (self.roll != 0.0) or
+                (self.pitch != 0.0) or
                 (self.yaw != 0.0))
 
 

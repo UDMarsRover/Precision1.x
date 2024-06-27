@@ -116,6 +116,7 @@ class udmrtController:
         self.grip_command = self.controller.b
         self.current_arm_command.data = self.arm_cmd.getArmCommand()
 
+        print(self.arm_cmd.nonZeros(), self.arm_cmd.getArmCommand())
         if self.arm_cmd.nonZeros():
             print("sending arm command")
             self.armPosPub.publish(self.current_arm_command)
