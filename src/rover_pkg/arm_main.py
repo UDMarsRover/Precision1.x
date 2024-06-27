@@ -95,9 +95,7 @@ class Arm:
         print("Starting homing")
         self.robot.arm.move_to_home_pose(callback=self.homing_callback)
 
-        while not self.homed:
-            self.robot.wait(5)
-            print("Homing...")
+
 
         
 
