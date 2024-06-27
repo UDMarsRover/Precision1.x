@@ -81,17 +81,20 @@ class Arm:
         robot_ip_address = "192.168.2.114"
         self.robot = NiryoRobot(robot_ip_address)
 
+        while not arm.robot.client.is_connected:
+            print("Trying to connect...")
+            self.robot.wait(5)
         
+        print("Calibrating Motors...")
         self.robot.arm.calibrate_auto()  # calibrate motors
 
-        print("Calibrating Motors...")
+       
 
         self.robot.tool.update_tool()
-        
+        print("Homing")
         self.robot.arm.move_to_home_pose()
 
-        print("Homing")
-        self.robot.wait(60)
+        
         self.robot.arm.set_learning_mode(False)
 
         self.robot.arm.set_jog_control(True)
