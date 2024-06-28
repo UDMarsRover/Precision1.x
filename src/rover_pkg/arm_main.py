@@ -63,7 +63,7 @@ class Arm:
             print("Published ", jog_values)
     
             #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
-            self.robot.arm.jog_joints([jog_values[0],0,0,0,0,0],callback=self.temp_callback)
+            self.robot.arm.jog_joints([jog_values[1],0,0,0,0,0],callback=self.temp_callback)
         #print("Ran")
 
     def callback_grip_command(self, msg):
