@@ -63,6 +63,7 @@ class Arm:
             print("Published ", jog_values)
     
             self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
+            self.robot.arm.move_joints([jog_values[0],0,0,0,0,0],callback=self.temp_callback)
         #print("Ran")
 
     def callback_grip_command(self, msg):
@@ -107,7 +108,7 @@ class Arm:
         arm.rate.sleep()
 
     def temp_callback(self,_):
-        print("We ran this bitch")
+        print("Running a function")
 
     def homing_callback(self,_):
         print("Homing Complete")
