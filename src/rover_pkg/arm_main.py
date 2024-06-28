@@ -60,10 +60,10 @@ class Arm:
         if jog_values != 0:
             #print("Published ", self.currentPosition.getState())
             #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
-            print("Published ", jog_values)
+            print("Published ", [0,0,jog_values[0],0,0,0])
     
             #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
-            self.robot.arm.jog_joints([0,0,jog_values[1],0,0,0],callback=self.temp_callback)
+            self.robot.arm.jog_joints([0,0,jog_values[0],0,0,0],callback=self.temp_callback)
         #print("Ran")
 
     def callback_grip_command(self, msg):
