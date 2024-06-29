@@ -97,8 +97,12 @@ class Arm:
         self.robot.arm.move_to_home_pose(callback=self.homing_callback)
 
         while not self.homed: 
-            self.robot.wait(1)
-            print("Homing...")
+            if not rospy.is_shutdown():
+                self.robot.wait(1)
+                print("Homing...")
+            else: 
+                print(" Canceling...")
+                exit(1)
 
         self.robot.arm.set_jog_control(True)
         print("Homing Complete")
