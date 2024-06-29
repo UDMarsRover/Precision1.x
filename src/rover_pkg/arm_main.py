@@ -126,4 +126,5 @@ while not rospy.is_shutdown():
 
 
 print("super done")
+arm.robot.arm.set_jog_control(True)
 arm.robot.end()  # disconnect from arm and ros
