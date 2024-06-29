@@ -8,17 +8,17 @@ import time
 import numpy as np
 import sys
 sys.path.append("..")
-from src.UDMRT_datatypes import Arm_Position, LogitechF310
+from src.UDMRT_datatypes import Arm_Position, LogitechF310, Arm_Motors
 
 
 class udmrtController:
     def __init__(self):
         rospy.init_node("Controller_teleop", anonymous=True)
         self.drivePub = rospy.Publisher("DriveVelocity", Twist, queue_size=1)
-        self.armPosPub = rospy.Publisher(
-            "arm/cmd/position", Float32MultiArray, queue_size=1
-        )
+        self.armPosPub = rospy.Publisher("arm/cmd/position", Float32MultiArray, queue_size=1)
+        self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
+
         self.rate = rospy.Rate(60)
         self.armRate = rospy.Rate(5)
         self.jog_pose_value = 0.02  # meters
@@ -29,6 +29,13 @@ class udmrtController:
         self.current_arm_command.data = (
             self.arm_cmd.getState()
         )  # command to update and publish
+
+        self.arm_motor_cmd = Arm_Motors()
+        self.current_arm_motor_command = Float32MultiArray()
+        self.current_arm_motor_command.data = (
+            self.arm_motor_cmd.getState()
+        )  # command to update and publish
+
         self.grip_command = False
         self.armPosPub.publish(self.current_arm_command)
         self.armGripPub.publish(self.grip_command)
@@ -106,20 +113,25 @@ class udmrtController:
         self.arm_cmd.roll += (
             self.jog_pose_value * self.controller.lb * -1
         )  # negative roll
-        self.arm_cmd.pitch = self.jog_pose_value * self.controller.rt  # pitch
-        self.arm_cmd.pitch += (
-            self.jog_pose_value * self.controller.lt * -1
-        )  # negative pitch
+        #self.arm_cmd.pitch = self.jog_pose_value * self.controller.rt  # pitch
+        #self.arm_cmd.pitch += (self.jog_pose_value * self.controller.lt * -1)  # negative pitch
         self.arm_cmd.yaw = self.jog_pose_value * self.controller.y  # yaw
         self.arm_cmd.yaw += self.jog_pose_value * self.controller.a * -1  # negative yaw
 
+        self.arm_motor_cmd.m0 = self.jog_pose_value
+        self.arm_motor_cmd.m0 = -1 * self.jog_pose_value
+
         self.grip_command = self.controller.b
         self.current_arm_command.data = self.arm_cmd.getState()
+        self.current_arm_motor_command.data = self.arm_motor_cmd.getState()
 
         if self.arm_cmd.nonZeros():
             self.armPosPub.publish(self.current_arm_command)
-            self.armGripPub.publish(self.grip_command)
-            self.armRate.sleep()
+        elif self.arm_motor_cmd.nonZeros():
+            self.armMotorPub.publish(self.current_arm_motor_command)
+        
+        self.armGripPub.publish(self.grip_command)
+        self.armRate.sleep()
 
 
 controller = udmrtController()

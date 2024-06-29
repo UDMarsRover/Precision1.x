@@ -105,6 +105,15 @@ class Arm_Position:
         self.setState(list(sum(i) for i in zip(state, self.getState())))
         return self.getState()
 
+class Arm_Motors(Arm_Position):
+    def __init__(self):
+        super().__init__()
+        self.m0 = super().x
+        self.m1 = super().y
+        self.m2 = super().z
+        self.m3 = super().roll
+        self.m4 = super().pitch
+        self.m5 = super().yaw
 
 class UDMRTDataBuffer:
     def __init__(self):
