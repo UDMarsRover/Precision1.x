@@ -30,8 +30,11 @@ class Arm:
         self.pose_pub = rospy.Publisher("pose_pub", JointTrajectoryPoint, queue_size=10)
 
         # subscribers
-        self.arm_sub = rospy.Subscriber(
+        self.arm_pos_sub = rospy.Subscriber(
             "arm/cmd/position", Float32MultiArray, self.callback_arm_command
+        )
+        self.arm_motor_sub = rospy.Subscriber(
+            "arm/cmd/motors", Float32MultiArray, self.callback_arm_motors_command
         )
 
         self.grip_sub = rospy.Subscriber("grip_state", Bool, self.callback_grip_command)
@@ -64,7 +67,25 @@ class Arm:
     
             #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
             self.robot.arm.jog_joints([0,0,0,0,0,jog_values[0]],callback=self.temp_callback)
+
+       
         #print("Ran")
+
+    def callback_arm_motors_command(self, msg):
+        
+        jog_values = msg.data
+
+        #self.currentPosition.updateState(jog_values)
+        if jog_values != 0:
+            #print("Published ", self.currentPosition.getState())
+            #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
+            print("Published Motors", jog_values)
+    
+            #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
+            self.robot.arm.jog_joints(jog_values,callback=self.temp_callback)
+      
+        #print("Ran")
+
 
     def callback_grip_command(self, msg):
         if msg.data:
