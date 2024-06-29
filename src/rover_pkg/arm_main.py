@@ -115,6 +115,7 @@ class Arm:
     # print("current pose:",self.robot.arm.get_pose())
 
     def spin(self):
+        #arm.robot.client.is_connected:
         arm.publish()
         arm.rate.sleep()
 
@@ -136,5 +137,5 @@ while not rospy.is_shutdown():
 
 
 print("super done")
-arm.robot.arm.set_jog_control(True)
+arm.robot.arm.set_jog_control(False)
 arm.robot.end()  # disconnect from arm and ros
