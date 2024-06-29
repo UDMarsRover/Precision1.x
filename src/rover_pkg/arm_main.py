@@ -96,6 +96,13 @@ class Arm:
         print("Starting homing")
         self.robot.arm.move_to_home_pose(callback=self.homing_callback)
 
+        while not self.homed: 
+            self.robot.wait(1)
+            print("Homing...")
+
+        self.robot.arm.set_jog_control(True)
+        print("Homing Complete")
+
 
 
         
@@ -113,8 +120,7 @@ class Arm:
     def homing_callback(self,_):
        
         #self.robot.arm.set_learning_mode(False)
-        self.robot.arm.set_jog_control(True)
-        print("Homing Complete")
+        
         self.homed = True
 
 arm = Arm()
