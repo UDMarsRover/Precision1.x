@@ -63,7 +63,7 @@ class Arm:
             print("Published ", [0,0,0,jog_values[0],0,0])
     
             #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
-            self.robot.arm.jog_joints([0,0,0,jog_values[0],0,0],callback=self.temp_callback)
+            self.robot.arm.jog_joints([0,0,0,jog_values[0],0,0])#,callback=self.temp_callback)
         #print("Ran")
 
     def callback_grip_command(self, msg):
@@ -111,9 +111,10 @@ class Arm:
         print("Running a function")
 
     def homing_callback(self,_):
-        print("Homing Complete")
+       
         #self.robot.arm.set_learning_mode(False)
         self.robot.arm.set_jog_control(True)
+        print("Homing Complete")
         self.homed = True
 
 arm = Arm()
