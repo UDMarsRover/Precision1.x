@@ -74,6 +74,8 @@ class LogitechF310:
 
 class Arm_Position:
     def __init__(self):
+
+        # Gripper Orentation in [meter,meter,meter,rad,rad,rad]
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
@@ -82,10 +84,83 @@ class Arm_Position:
         self.yaw = 0.0
         self.grip = False
 
-    def getState(self):
+        # motor position in radiants
+        self.m0 = 0.0
+        self.m1 = 0.0
+        self.m2 = 0.0
+        self.m3 = 0.0
+        self.m4 = 0.0
+        self.m5 = 0.0
+
+    
+
+    def getMotors(self):
+        """
+        This function returns a list of the saved motor position values
+        :return: A list of the last recorded motor values for this object
+        :rtype: (flaot)list[6]
+        """
+        return [self.m0,self.m1,self.m2,self.m3,self.m4,self.m5]
+    
+    def setMotors(self,state:list):
+        """
+        This function sets the motor position values
+
+        This function takes in a list of 6 elements where each element corresponds to the position of each motor in radiants. Motor 0 is the first element and Motor 5 is the last element. 
+
+        :param state: This is the state of the motors to be saved
+        :type state: (float)list[6]
+        :rtype: None
+        """
+        self.m0 = state[0]
+        self.m1 = state[1]
+        self.m2 = state[2]
+        self.m3 = state[3]
+        self.m4 = state[4]
+        self.m5 = state[5]
+    
+    def nonZeroMotors(self):
+        """
+        This function checks to see if the values of the motor buffer are zero or not. This function is intended to be used with the jog functionality of the arm.
+
+        :return: A bool value indicating if all the motor values are zero or not
+        :rtype: Bool
+        """
+        return ((self.m0 != 0.0) or
+                (self.m1 != 0.0) or
+                (self.m2 != 0.0) or
+                (self.m3 != 0.0) or
+                (self.m4 != 0.0) or
+                (self.m5 != 0.0))
+    
+    def updateMotors(self,state:list):
+        """
+        This function updates the motor values by adding to the prior value. This function is meant to be used with the jog functionality of the arm.
+
+        :param state: The values to be added to the motor buffer
+        :type state: (float)list[6]
+        :return: Returns a list of the updated motor values
+        :rtype: (float)list[6]
+        """
+        self.setMotors(list(sum(i) for i in zip(state, self.getMotors())))
+        return self.getMotors()
+
+    def getPosition(self):
+        """
+        This function returns the saved position values for the end effector
+
+        :return: The current orientation of the end effector in meters and rads [x,y,z,roll,pitch,yaw]
+        :rtype: (float)list[6]
+        """
         return [self.x, self.y, self.z, self.roll, self.pitch, self.yaw]
     
-    def nonZeros(self):
+    def nonZeroPosition(self):
+        """
+        This function checks to see if all of the orientation values are 0
+
+        :returns: A bool indicating if all the orientation values are zero
+        :rtype: Bool
+        """
         return ((self.x != 0.0) or
                 (self.y != 0.0) or
                 (self.z != 0.0) or
@@ -93,7 +168,13 @@ class Arm_Position:
                 (self.pitch != 0.0) or
                 (self.yaw != 0.0))
     
-    def setState(self,state:list):
+    def setPosition(self,state:list):
+        """
+        This function sets the orientation of the end effector based in the input values
+
+        :param state: The new values to set
+        :type state: (float)list[6]
+        """
         self.x = state[0]
         self.y = state[1]
         self.z = state[2]
@@ -101,19 +182,18 @@ class Arm_Position:
         self.pitch = state[4]
         self.yaw = state[5]
 
-    def updateState(self,state:list):
-        self.setState(list(sum(i) for i in zip(state, self.getState())))
-        return self.getState()
+    def updatePosition(self,state:list):
+        """
+        This function updates the orientation values by adding the input values to the saved values
 
-class Arm_Motors(Arm_Position):
-    def __init__(self):
-        super().__init__()
-        self.m0 = super().x
-        self.m1 = super().y
-        self.m2 = super().z
-        self.m3 = super().roll
-        self.m4 = super().pitch
-        self.m5 = super().yaw
+        :param state: A list of the 6 orientation values that are to be added to the current values saved in the buffer
+        :type state: (float)list[6]
+        :return: The updated orientation values
+        :rtype: (float)list[6]
+        """
+        self.setPosition(list(sum(i) for i in zip(state, self.getPosition())))
+        return self.getPosition()
+
 
 class UDMRTDataBuffer:
     def __init__(self):

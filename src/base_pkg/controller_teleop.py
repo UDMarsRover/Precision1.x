@@ -8,7 +8,7 @@ import time
 import numpy as np
 import sys
 sys.path.append("..")
-from src.UDMRT_datatypes import Arm_Position, LogitechF310, Arm_Motors
+from src.UDMRT_datatypes import Arm_Position, LogitechF310
 
 
 class udmrtController:
@@ -27,18 +27,16 @@ class udmrtController:
         self.arm_cmd = Arm_Position()
         self.current_arm_command = Float32MultiArray()
         self.current_arm_command.data = (
-            self.arm_cmd.getState()
+            self.arm_cmd.getPosition()
         )  # command to update and publish
-
-        self.arm_motor_cmd = Arm_Motors()
         self.current_arm_motor_command = Float32MultiArray()
         self.current_arm_motor_command.data = (
-            self.arm_motor_cmd.getState()
+            self.arm_cmd.getMotors()
         )  # command to update and publish
 
         self.grip_command = False
-        self.armPosPub.publish(self.current_arm_command)
-        self.armGripPub.publish(self.grip_command)
+        #self.armPosPub.publish(self.current_arm_command)
+        #self.armGripPub.publish(self.grip_command)
         
 
         self.linVelY = 0
@@ -79,12 +77,12 @@ class udmrtController:
         angVelZ_temp = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
 
         valueCheck = bool(
-            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ)
+            (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ) or (self.current_start_state)
         )
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
 
-        # print(valueCheck)
+        print(valueCheck)
 
         if valueCheck:
             self.velOut.linear.y = self.linVelY
@@ -109,25 +107,30 @@ class udmrtController:
         self.arm_cmd.x = self.jog_pose_value * self.controller.left_joy_y
         self.arm_cmd.y = self.jog_pose_value * self.controller.left_joy_x
         self.arm_cmd.z = self.jog_pose_value * self.controller.right_joy_y  # z
-        self.arm_cmd.roll = self.jog_pose_value * self.controller.rb  # roll
-        self.arm_cmd.roll += (
-            self.jog_pose_value * self.controller.lb * -1
-        )  # negative roll
+        #self.arm_cmd.roll = self.jog_pose_value * self.controller.rb  # roll
+        #self.arm_cmd.roll += (
+        #    self.jog_pose_value * self.controller.lb * -1
+        #)  # negative roll
+
         #self.arm_cmd.pitch = self.jog_pose_value * self.controller.rt  # pitch
         #self.arm_cmd.pitch += (self.jog_pose_value * self.controller.lt * -1)  # negative pitch
         self.arm_cmd.yaw = self.jog_pose_value * self.controller.y  # yaw
         self.arm_cmd.yaw += self.jog_pose_value * self.controller.a * -1  # negative yaw
 
-        self.arm_motor_cmd.m0 = self.jog_pose_value
-        self.arm_motor_cmd.m0 = -1 * self.jog_pose_value
+        if self.controller.rb and not self.controller.lb: self.arm_cmd.m0 = 1
+        elif self.controller.lb and not self.controller.rb: self.arm_cmd.m0 = -1
+        else: self.arm_cmd.m0 = 0
+
 
         self.grip_command = self.controller.b
-        self.current_arm_command.data = self.arm_cmd.getState()
-        self.current_arm_motor_command.data = self.arm_motor_cmd.getState()
+        self.current_arm_command.data = self.arm_cmd.getPosition()
+        self.current_arm_motor_command.data = self.arm_cmd.getMotors()
 
-        if self.arm_cmd.nonZeros():
+        if self.arm_cmd.nonZeroPosition():
+            print("Publishing to Position:",self.current_arm_command)
             self.armPosPub.publish(self.current_arm_command)
-        elif self.arm_motor_cmd.nonZeros():
+        elif self.arm_cmd.nonZeroMotors():
+            print("Publishing to Motors:",self.current_arm_motor_command)
             self.armMotorPub.publish(self.current_arm_motor_command)
         
         self.armGripPub.publish(self.grip_command)
