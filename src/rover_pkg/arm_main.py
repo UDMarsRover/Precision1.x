@@ -74,15 +74,17 @@ class Arm:
     def callback_arm_motors_command(self, msg):
         
         jog_values = msg.data
+        self.currentPosition.setMotors(self.robot.arm.get_joints().to_list())
+        self.currentPosition.updateMotors(jog_values)
 
         #self.currentPosition.updateState(jog_values)
         if jog_values != 0:
             #print("Published ", self.currentPosition.getState())
             #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
-            print("Published Motors", jog_values)
+            print("Published Motors", self.currentPosition.getMotors())
     
             #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
-            self.robot.arm.jog_joints(jog_values,callback=self.temp_callback)
+            self.robot.arm.move_joints(self.currentPosition.getMotors(),callback=self.temp_callback)
       
         #print("Ran")
 
@@ -137,8 +139,10 @@ class Arm:
 
     def spin(self):
         #arm.robot.client.is_connected:
-        arm.publish()
-        arm.rate.sleep()
+        self.publish()
+        self.currentPosition.setPosition(self.robot.arm.get_pose().to_list())
+        self.currentPosition.setMotors(self.robot.arm.get_joints().to_list())
+        self.rate.sleep()
 
     def temp_callback(self,_):
         print("Running a function")
