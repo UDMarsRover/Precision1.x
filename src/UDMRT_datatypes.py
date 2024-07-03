@@ -186,9 +186,10 @@ class Arm_Position:
         self.roll = state[3]
         self.pitch = state[4]
         self.yaw = state[5]
+
     
-        self.theta_xy = np.atan2(self.y,self.x) if self.x is not 0 or self.y is not 0 else 0
-        self.theta_xz = np.atan2(self.z,self.x) if self.x is not 0 or self.z is not 0 else 0
+        self.theta_xy = np.arctan2(self.y,self.x) if self.x is not 0 or self.y is not 0 else 0
+        self.theta_xz = np.arctan2(self.z,self.x) if self.x is not 0 or self.z is not 0 else 0
         self.vector_mag_xy = np.sqrt((self.x ** 2) + (self.y ** 2))
         self.vector_mag_xy = np.sqrt((self.x ** 2) + (self.z ** 2))
 
