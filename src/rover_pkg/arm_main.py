@@ -65,8 +65,8 @@ class Arm:
             #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
             print("Published ", jog_values)
     
-            #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
-            self.robot.arm.jog_joints(jog_values,callback=self.temp_callback)
+            self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
+            #self.robot.arm.jog_joints(jog_values,callback=self.temp_callback)
 
        
         #print("Ran")
