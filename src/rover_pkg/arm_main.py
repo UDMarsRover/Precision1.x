@@ -17,6 +17,7 @@ class Arm:
         self.homed = False
         self.reset()
         self.rate = rospy.Rate(10)
+        self.motor_run_complete = True
 
         self.currentPosition = Arm_Position()
         self.currentPosition.setPosition(self.robot.arm.get_pose().to_list())
@@ -74,19 +75,24 @@ class Arm:
     def callback_arm_motors_command(self, msg):
         
         jog_values = msg.data
-        self.currentPosition.setMotors(self.robot.arm.get_joints())
-        self.currentPosition.updateMotors(jog_values)
+        
 
         #self.currentPosition.updateState(jog_values)
-        if jog_values != 0:
+        if (jog_values != 0) and self.motor_run_complete:
+            self.motor_run_complete = False
+            self.currentPosition.setMotors(self.robot.arm.get_joints())
+            self.currentPosition.updateMotors(jog_values)
             #print("Published ", self.currentPosition.getState())
             #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
             print("Published Motors", self.currentPosition.getMotors())
     
             #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
-            self.robot.arm.move_joints(self.currentPosition.getMotors(),callback=self.temp_callback)
+            self.robot.arm.move_joints(self.currentPosition.getMotors(),callback=self.motor_command_callback)
       
         #print("Ran")
+
+    def motor_command_callback(self,_):
+        self.motor_run_complete = True
 
 
     def callback_grip_command(self, msg):
