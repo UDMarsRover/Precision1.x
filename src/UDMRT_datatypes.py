@@ -3,6 +3,7 @@
 # Composes and decomposes the messageOuts sent between rover and base
 from inputs import get_gamepad
 import _thread
+import numpy as np
 
 class LogitechF310:
     def __init__(self):
@@ -75,7 +76,7 @@ class LogitechF310:
 class Arm_Position:
     def __init__(self):
 
-        # Gripper Orentation in [meter,meter,meter,rad,rad,rad]
+        # Gripper Orientation in [meter,meter,meter,rad,rad,rad]
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
@@ -83,6 +84,10 @@ class Arm_Position:
         self.pitch = 0.0
         self.yaw = 0.0
         self.grip = False
+        self.theta_xy = 0.0 # in rad
+        self.theta_xz = 0.0 # in rad
+        self.vector_mag_xy = 0.0
+        self.vector_mag_xz = 0.0
 
         # motor position in radiants
         self.m0 = 0.0
@@ -181,6 +186,11 @@ class Arm_Position:
         self.roll = state[3]
         self.pitch = state[4]
         self.yaw = state[5]
+    
+        self.theta_xy = np.atan2(self.y,self.x) if self.x is not 0 or self.y is not 0 else 0
+        self.theta_xz = np.atan2(self.z,self.x) if self.x is not 0 or self.z is not 0 else 0
+        self.vector_mag_xy = np.sqrt((self.x ** 2) + (self.y ** 2))
+        self.vector_mag_xy = np.sqrt((self.x ** 2) + (self.z ** 2))
 
     def updatePosition(self,state:list):
         """
@@ -191,8 +201,37 @@ class Arm_Position:
         :return: The updated orientation values
         :rtype: (float)list[6]
         """
-        self.setPosition(list(sum(i) for i in zip(state, self.getPosition())))
+        x = state[0]
+        y = state[1]
+        z = state[2]
+        roll = state[3]
+        pitch = state[4]
+        yaw = state[5]
+
+
+        if np.abs(x) > 0 or np.abs(y) > 0:
+            new_mag_xy = self.vector_mag_xy + np.sqrt((x**2)+(y**2))
+            x = np.cos(self.theta_xy) * new_mag_xy
+            y = np.sin(self.theta_xy) * new_mag_xy
+        elif z > 0:
+            z += self.z
+
+        roll += self.roll
+        pitch += self.pitch
+        yaw += self.yaw
+
+
+
+        self.setPosition([x,y,z,roll,pitch,yaw])
         return self.getPosition()
+
+
+
+
+
+
+
+
 
 
 class UDMRTDataBuffer:
