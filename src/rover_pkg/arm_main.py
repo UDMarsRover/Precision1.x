@@ -74,7 +74,7 @@ class Arm:
     def callback_arm_motors_command(self, msg):
         
         jog_values = msg.data
-        self.currentPosition.setMotors(self.robot.arm.get_joints().to_list())
+        self.currentPosition.setMotors(self.robot.arm.get_joints())
         self.currentPosition.updateMotors(jog_values)
 
         #self.currentPosition.updateState(jog_values)
@@ -141,7 +141,7 @@ class Arm:
         #arm.robot.client.is_connected:
         self.publish()
         self.currentPosition.setPosition(self.robot.arm.get_pose().to_list())
-        self.currentPosition.setMotors(self.robot.arm.get_joints().to_list())
+        self.currentPosition.setMotors(self.robot.arm.get_joints())
         self.rate.sleep()
 
     def temp_callback(self,_):
