@@ -93,7 +93,7 @@ float sensorTimer;
     #define SE 3
     #define TRIG4 8 // Southeast
     #define ECHO4 9
-
+    
     #define MAX_DISTANCE 100 // maximum distance for sensors in cm
     #define NUM_SONAR 4 // number of ultrasonic sensors
     #define NUMSAMPLES 5
