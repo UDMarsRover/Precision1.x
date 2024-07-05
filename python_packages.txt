@@ -4,5 +4,8 @@ empy
 catkin_pkg
 pyyaml
 rospkg
-serial
 pyserial
+attrs
+pyasn1
+autobahn
+pyniryo2

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 sudo apt-get update -y 
 
 sudo apt-get upgrade -y
@@ -15,8 +14,8 @@ sudo apt update -y
 sudo apt install -y ros-noetic-desktop-full
 
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+echo "source /opt/ros/noetic/setup.bash" >> /home/udmrt/.bashrc
+source /home/udmrt/.bashrc
 
 sudo apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo apt install -y python3-rosdep
@@ -26,17 +25,44 @@ rosdep update
 
 sudo apt-get install -y ros-noetic-rosserial ros-noetic-rosserial-arduino
 
-sudo apt-get install python3-pip python3-venv -y
-python3 -m venv ~/p1x
-
-source ~/p1x/bin/activate
+sudo apt-get install python3-pip python3-venv -ys
+ls .. | echo
+source /home/udmrt/p1x/bin/activate
 pip install --upgrade pip
 pip install -r packages.txt
 
-echo "source ~/p1x/bin/activate" >> ~/.bashrc
+
+# Check to make sure we did not already write to these files
+if [ "$UDMRT_SETUP" != 1 ]
+then
+echo "Setting up .bashrc ..."
+echo "source /home/udmrt/p1x/bin/activate" >> ~/.bashrc
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-echo "cd /mnt/hgfs/Precision1.x" >> ~/.bashrc
 
-# Install xbox controller drivers
+    if ["$HOSTNAME" != "precision1"]
+    then
+    echo "cd /mnt/hgfs/Precision1.x" >> ~/.bashrc
+    else
+    # Setup sudoers config file to allow a shutdown from the udmrt account without a password
+    echo "Setting up sudoers ..."
+    sudo cp ~/Precision1.x/.setup_utils/udmrt.cfg /etc/sudoers.d/udmrt.cfg
+    sudo chmod 0440 /etc/sudoers.d/udmrt.cfg
 
+    # Setup GPIO control for startup
+    echo "Setting up startup led ..."
+    sudo cp ~/Precision1.x/.setup_utils/usercfg.txt /boot/firmware/usercfg.txt
+
+    # Setup Autostart Service
+    sudo cp ~/Precision1.x/.setup_utils/udmrt.service /lib/systemd/system/udmrt.service
+    sudo systemctl enable udmrt.service
+
+    # Setup ROS IPs
+    echo "Setting up ROS IP commands ..." 
+    sudo echo "export ROS_MASTER_URI=http://192.168.8.100:11311" >> ~/.bashrc
+    sudo echo "export ROS_IP=192.168.8.223" >> ~/.bashrc
+    fi
+# Set flag to ensure no issues if this script is run twice
+sudo echo "export UDMRT_SETUP=1" >> ~/.bashrc
+source ~/.bashrc
+fi
 

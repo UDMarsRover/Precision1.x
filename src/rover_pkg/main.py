@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
+from std_msgs.msg import String
+from geometry_msgs.msg import Twist
+from rover import Rover
 import time
 import rospy
-import sys
-from std_msgs.msg import String
-from rover import Rover as Presision1
 
-# Create a rover instance
-rate = 10  # Hz
-p1 = Presision1(rate)
+drive = rospy.Publisher("DriveVelocity", Twist, queue_size=1)
 
 # The main Loop
 if __name__ == "__main__":
-    # While roscore is running
-    while not rospy.is_shutdown():
-        if p1.hasError():
-            print(" i seem to has an ewwow :( plz hewp me :,(...." + p1.getError())
-        else:
-            p1.publishDataToBase()
+    p1 = Rover()
+    # Run when rover is not requested to die
+    start = time.time()
+    killCount = 0
+    while not p1.kill:
+        p1.spin()
 
-        # Sleep for a set amount of time to keep our rate
-        p1.rate.sleep()
+        if not p1.wifiConnected:
+            stop = Twist()
+            stop.linear.y = 0
+            stop.angular.z = 0
+            drive.publish(stop)
 
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
-    print("!!!!!.....ROS IS SHUTDOWN.....!!!!!")
+    p1.log("Rover Killed")
+    p1.led_control(0, 1, 1)
+    print("KILLED")
+    p1.shutdown()

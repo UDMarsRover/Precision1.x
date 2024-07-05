@@ -12,7 +12,7 @@ struct errorCode {
   String name;
   int code;
 };
-
+/*
 //=================================================//
 //          Define Status Word 0 Values            //
 //=================================================//
@@ -140,7 +140,7 @@ errorCode MTBact      = {"MTB Active",              0b0000100000000000}; //0x080
 errorCode invd        = {"Inverted",                0b0000010000000000}; //0x0400
 errorCode enTOB       = {"TOB enabled",             0b0000001000000000}; //0x0200
 errorCode angleMatch  = {"Angle Match",             0b0000000100000000}; //0x0100
-errorCode driveEnFault= {"Drive Enable Fault"       0b0000000010000000}; //0x0080
+errorCode driveEnFault= {"Drive Enable Fault",      0b0000000010000000}; //0x0080
 errorCode MDHmodeAct  = {"MDH Mode Active",         0b0000000001000000}; //0x0040
 errorCode fdbckFault  = {"Velocity Direction",      0b0000000000100000}; //0x0020
 errorCode reserved4   = {"Reserved 4",              0b0000000000010000}; //0x0010
@@ -182,7 +182,7 @@ errorCode ipUserBit3  = {"IP User Bit 3",           0b0000100000000000}; //0x080
 errorCode ipUserBit2  = {"IP User Bit 2",           0b0000010000000000}; //0x0400
 errorCode ipUserBit1  = {"IP User Bit 1",           0b0000001000000000}; //0x0200
 errorCode ipUserBit0  = {"IP User Bit 0",           0b0000000100000000}; //0x0100
-errorCode camMode1    = {"Cam Mode 1"               0b0000000010000000}; //0x0080
+errorCode camMode1    = {"Cam Mode 1",              0b0000000010000000}; //0x0080
 errorCode camMode0    = {"Cam Mode 0",              0b0000000001000000}; //0x0040
 errorCode camUserBit5 = {"Cam User Bit 5",          0b0000000000100000}; //0x0020
 errorCode camUserBit4 = {"Cam User Bit 4",          0b0000000000010000}; //0x0010
@@ -203,3 +203,5 @@ errorCode RxPDO3ari   = {"RxPDO 3 arrived",          0b0000000000001000}; //0x00
 errorCode RxPDO2ari   = {"RxPDO 2 arrived",          0b0000000000000100}; //0x0004
 errorCode RxPDO1ari   = {"RxPDO 1 arrived",          0b0000000000000010}; //0x0002
 errorCode MasterEnb   = {"Master Enabled",           0b0000000000000001}; //0x0001
+*/
+#endif
