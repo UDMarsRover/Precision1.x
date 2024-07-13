@@ -55,28 +55,4 @@ void UDMRT_IMU::updateData(){
     else okState();
 }
 
-void UDMRT_IMU::errorState(float sensorValue, int errorKey, char* errorMessage){
-    char value[10];
-    dtostrf(sensorValue, 5, 1, value);
-    diag_msg.level = ERROR; 
-    diag_msg.message = value;
-    errorCode.key = "0";
-    errorCode.value = errorMessage;
-}
-
-void UDMRT_IMU::warningState(float sensorValue, int warningKey,  char* warningMessage){
-    char value[10];
-    dtostrf(sensorValue, 5, 1, value);
-    diag_msg.level = WARN;
-    diag_msg.message = value;
-    errorCode.key = "0";
-    errorCode.value = warningMessage;
-}
-
-void UDMRT_IMU::okState(){
-    diag_msg.level=OK;
-    diag_msg.message="";
-    errorCode.key="0";
-    errorCode.value="LEVEL";
-}
 #endif

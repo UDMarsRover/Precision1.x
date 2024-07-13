@@ -53,23 +53,6 @@ class UDMRT_IMU: public UDMRT_Sensor<sensor_msgs::Imu>{
         int pitchWarning;
         int pitchError;
 
-        /**
-         * @brief This function updates the diagnostic values to inicate an error
-         * 
-         */
-        void errorState(float sensorValue, int errorKey, char* errorMessage);
-
-        /**
-         * @brief This function updates the diagnostic values to indicate a warning
-         * 
-         */
-        void warningState(float sensorValue, int warningKey,  char* warningMessage);
-
-        /**
-         * @brief This function updates the diagnotic values to indicate all OK
-         * 
-         */
-        void okState();
 };
 
 

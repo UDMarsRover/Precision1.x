@@ -97,9 +97,43 @@ template <typename ros_data_type> class UDMRT_Sensor{
 
         bool setUp = false;
 
-        void okState();
-        void warningState();
-        void errorState();
+
+        /**
+         * @brief This function updates the diagnostic values to inicate an error
+         * 
+         */
+        void errorState(float sensorValue, char* errorKey, char* errorMessage){
+            char value[10];
+            dtostrf(sensorValue, 5, 1, value);
+            diag_msg.level = ERROR; 
+            diag_msg.message = value;
+            errorCode.key = errorKey;
+            errorCode.value = errorMessage;
+        }
+
+        /**
+         * @brief This function updates the diagnostic values to indicate a warning
+         * 
+         */
+        void warningState(float sensorValue, char* warningKey,  char* warningMessage){
+            char value[10];
+            dtostrf(sensorValue, 5, 1, value);
+            diag_msg.level = WARN;
+            diag_msg.message = value;
+            errorCode.key = warningKey;
+            errorCode.value = warningMessage;
+        }
+
+        /**
+         * @brief This function updates the diagnotic values to indicate all OK
+         * 
+         */
+        void okState(){
+            diag_msg.level=OK;
+            diag_msg.message="";
+            errorCode.key="0";
+            errorCode.value="All Good";
+        }
 
         double expFilter(double alpha, double prevReading, double curReading){ 
             return (alpha * curReading) + ((1 - alpha) * prevReading);
