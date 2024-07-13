@@ -3,16 +3,23 @@
 #include <ros.h>
 
 #include <Arduino.h>
-#include "src/udmrt_sensor.cpp"
+#include "udmrt_gps.h"
 #include <sensor_msgs/NavSatFix.h>
 
 ros::NodeHandle node;
 sensor_msgs::NavSatFix test;
-UDMRT_Sensor <sensor_msgs::NavSatFix> hi("gps","emo/gps","emo/status/gps");
+
+diagnostic_msgs::DiagnosticStatus diag_msg;
+
+UDMRT_GPS hi("gps",&node);
+ros::Publisher dataPub("/emo/gps", &(hi.data_msg));
+ros::Publisher diagPub("/emo/status/gps", &(hi.diag_msg));
+
+
 
 void setup(){
   node.initNode();
-  hi.init(&node);
+  hi.init(&dataPub,&diagPub);
 
   pinMode(22, OUTPUT);
   pinMode(23, OUTPUT);
@@ -32,9 +39,14 @@ void setup(){
 void loop(){
   rgbControl(0,1,0);
   node.spinOnce();
+  //diag_msg_buf.message = "Unable to start serial connection with GPS sensor!!";
+  //diag_msg_buf.level = ERROR;
   delay(500);
-  rgbControl(0,0,1);
+  hi.spin();
+  rgbControl(1,0,1);
   delay(500);
+  //hi.diag_msg.message = "Connected to onbard sensor over serial";
+  //hi.diag_msg.level = OK;
 
 }
 

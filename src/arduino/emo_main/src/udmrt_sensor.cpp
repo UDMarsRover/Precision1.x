@@ -1,5 +1,5 @@
 /**
- * @file udmrt_sensor.cpp
+ * @file udmrt_sensor_.cpp
  * @author Greg Molskow
  * @brief This file contains the necessary imports for a basic sensor that is integrated into ROS1 using the rosserial arduino library. This file was created with the intention of providing a base to build a variety of custom sensors quickly and easily in a uniform fashion.
  * @version 0.1
@@ -10,19 +10,26 @@
  */
 
 
-#ifndef UDMRT_SENSOR
-#define UDMRT_SENSOR
+#ifndef UDMRT_SENSOR_
+#define UDMRT_SENSOR_
 
 #include <ros.h>
+#include <std_msgs/Float32MultiArray.h> 
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 #include <sensor_msgs/NavSatFix.h> // GPS
 
 #define DIAGNOSTIC_STATUS_LENGTH 1
-#define OK diagnostic_msgs::DiagnosticStatus::OK;
-#define WARN diagnostic_msgs::DiagnosticStatus::WARN;
-#define ERROR diagnostic_msgs::DiagnosticStatus::ERROR;
-#define STALE diagnostic_msgs::DiagnosticStatus::STALE;
+#define OK diagnostic_msgs::DiagnosticStatus::OK
+#define WARN diagnostic_msgs::DiagnosticStatus::WARN
+#define ERROR diagnostic_msgs::DiagnosticStatus::ERROR
+#define STALE diagnostic_msgs::DiagnosticStatus::STALE
+
+class SensorNotConfiguredError : public std::runtime_error {
+public:
+    SensorNotConfiguredError(const std::string& message)
+        : std::runtime_error(message) {}
+};
 
 
 template <typename ros_data_type> class UDMRT_Sensor{
@@ -35,46 +42,62 @@ template <typename ros_data_type> class UDMRT_Sensor{
 
 
     public:
-        UDMRT_Sensor( char* name, char* dataTopic, char* diagnosticTopic):
-        data_pub(dataTopic, &data_msg),
-        diag_pub(diagnosticTopic,&diag_msg){
+
+        UDMRT_Sensor(char* name, 
+                     ros::NodeHandle* node){
             /**
              * @brief The constructor for the UDMRT_Sensor class
              * 
              * @param name The name of the sensor
-             * @param dataTopic The topic where the sensor data will be pushed
-             * @param diagnosticTopic The topic where the diagnostic data will be pushed
+             * @param node The ROS node that this sensor is connected too
              * 
              */
-            diag_msg.values_length = DIAGNOSTIC_STATUS_LENGTH;
-            diag_msg.name = name;
+            diag_msg.name=name;
+            diag_msg.message="Starting Up Sensor...";
+            diag_msg.hardware_id=name;
+            diag_msg.level=OK;
+
+            nh=node;
+
+            
         }
 
-        void init(ros::NodeHandle* node){
-            node->advertise(UDMRT_Sensor::diag_pub);
-            node->advertise(UDMRT_Sensor::data_pub);
+        void init(ros::Publisher* dataPublisher, ros::Publisher* diagnosticPublisher){
+            
+            diag_pub = diagnosticPublisher;
+            data_pub = dataPublisher;
+
+            nh->advertise(*diag_pub);
+            nh->advertise(*data_pub);
+
+            setUp = true;
         }
 
-    private:
-        ros::Publisher diag_pub;
-        ros::Publisher data_pub;
-        ros_data_type data_msg;
-        diagnostic_msgs::DiagnosticStatus diag_msg;
+        void spin(){
+
+            //if (!setUp) throw SensorNotConfiguredError("Senor not initalized!");
+
+            diag_pub->publish(&diag_msg);
+            data_pub->publish(&data_msg);
+        }
+
+        virtual void updateData() = 0;
+        
         diagnostic_msgs::KeyValue key;
-        
-        void publishData(){
-            UDMRT_Sensor::updateData();
-            UDMRT_Sensor::data_pub.publish(&data_msg);
-        }
-        
-        void publishDiag(){
-            UDMRT_Sensor::updateDiagnostics();
-            UDMRT_Sensor::diag_pub.publish(&diag_msg);
-        }
+        diagnostic_msgs::DiagnosticStatus diag_msg;
+        ros_data_type data_msg;
 
-        void updateData();
 
-        void updateDiagnostics();
+    protected:
+        ros::Publisher* diag_pub;
+        ros::Publisher* data_pub;
+        ros::NodeHandle* nh;
+
+        bool setUp = false;
+        
+
+
+
 
 
 };
