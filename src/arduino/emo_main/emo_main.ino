@@ -3,23 +3,39 @@
 #include <ros.h>
 
 #include <Arduino.h>
-#include "udmrt_gps.h"
-#include <sensor_msgs/NavSatFix.h>
+#include "src/udmrt_gps/udmrt_gps.h"
+#include "src/udmrt_imu/udmrt_imu.h"
+
 
 ros::NodeHandle node;
-sensor_msgs::NavSatFix test;
 
-diagnostic_msgs::DiagnosticStatus diag_msg;
+/**
+ * @brief GPS Definitions
+ * 
+ */
+UDMRT_GPS gps("gps",&node);
+ros::Publisher gpsData("/emo/gps", &(gps.data_msg));
+ros::Publisher gpsDiag("/emo/status/gps", &(gps.diag_msg));
 
-UDMRT_GPS hi("gps",&node);
-ros::Publisher dataPub("/emo/gps", &(hi.data_msg));
-ros::Publisher diagPub("/emo/status/gps", &(hi.diag_msg));
+/**
+ * @brief IMU Definitions
+ * 
+ */
+
+UDMRT_IMU imu("IMU",&node,30,60,30,60);
+ros::Publisher imuData("/emo/imu",&(imu.data_msg));
+ros::Publisher imuDiag("/emo/status/imu",&(imu.diag_msg));
+
+
 
 
 
 void setup(){
+  
   node.initNode();
-  hi.init(&dataPub,&diagPub);
+  imu.init(&imuData,&imuDiag);
+  gps.init(&gpsData,&gpsDiag);
+  
 
   pinMode(22, OUTPUT);
   pinMode(23, OUTPUT);
@@ -39,14 +55,11 @@ void setup(){
 void loop(){
   rgbControl(0,1,0);
   node.spinOnce();
-  //diag_msg_buf.message = "Unable to start serial connection with GPS sensor!!";
-  //diag_msg_buf.level = ERROR;
   delay(500);
-  hi.spin();
+  gps.spin();
+  imu.spin();
   rgbControl(1,0,1);
   delay(500);
-  //hi.diag_msg.message = "Connected to onbard sensor over serial";
-  //hi.diag_msg.level = OK;
 
 }
 

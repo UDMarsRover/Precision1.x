@@ -35,8 +35,7 @@ public:
 template <typename ros_data_type> class UDMRT_Sensor{
     /**
      * @brief This class is meant to be a parent class to all UDMRT sensors that are connected to a Arduino Nano BLE sense 33. This class initializes the required publishers and sets up the required values for the diagnostics topic. The goal of this class is to standardize the creation of custom sensors and to make development and debugging more streamlined.
-     * 
-     * NOTE: The "updateData()" and the "updateDiagnostic()" functions are intended to be created by the child class and are required for operation. These functions are not created here as the data and diagnostic collection will be different for each sensor.
+     *
      * 
      */
 
@@ -76,14 +75,16 @@ template <typename ros_data_type> class UDMRT_Sensor{
         void spin(){
 
             //if (!setUp) throw SensorNotConfiguredError("Senor not initalized!");
-
+            diag_msg.values = &errorCode;
             diag_pub->publish(&diag_msg);
             data_pub->publish(&data_msg);
         }
 
         virtual void updateData() = 0;
+
+       
         
-        diagnostic_msgs::KeyValue key;
+        diagnostic_msgs::KeyValue errorCode;
         diagnostic_msgs::DiagnosticStatus diag_msg;
         ros_data_type data_msg;
 
@@ -92,8 +93,17 @@ template <typename ros_data_type> class UDMRT_Sensor{
         ros::Publisher* diag_pub;
         ros::Publisher* data_pub;
         ros::NodeHandle* nh;
+        
 
         bool setUp = false;
+
+        void okState();
+        void warningState();
+        void errorState();
+
+        double expFilter(double alpha, double prevReading, double curReading){ 
+            return (alpha * curReading) + ((1 - alpha) * prevReading);
+        }
         
 
 

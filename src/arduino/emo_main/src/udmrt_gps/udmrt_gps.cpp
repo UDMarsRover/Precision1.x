@@ -1,11 +1,6 @@
 
 #include "udmrt_gps.h"
 
-
-//sensor_msgs::NavSatFix data_msg_buf;
-
-
-
 UDMRT_GPS::UDMRT_GPS(char* name, ros::NodeHandle* node): 
   UDMRT_Sensor<sensor_msgs::NavSatFix>(name, node)
     {
@@ -47,8 +42,7 @@ void UDMRT_GPS::updateData(){
     connectedToSatellites = !((gps.location.lat() == 0 && gps.location.lng() == 0) || (gps.location.age() > 500));
   
     if (readReady) {
-      diag_msg.message = "Connected to on-bard sensor over serial";
-      diag_msg.level = OK;
+      okState();
 
       nh->loginfo("serail connect");
     
@@ -86,10 +80,22 @@ void UDMRT_GPS::errorState(){
   diag_msg.message = "Unable to start serial connection with GPS sensor!!";
   diag_msg.level = ERROR;
   gpsError = true;
+  errorCode.key = "2";
+  errorCode.value = "Unable to communicate with sensor";
 }
 
 void UDMRT_GPS::warningState(){
   diag_msg.message = "Unable to see satellites. Location data may be inaccurate.";
   diag_msg.level = WARN;
   gpsError = true;
+  errorCode.key = "1";
+  errorCode.value = "Ubable to communicate with satellites";
+}
+
+void UDMRT_GPS::okState(){
+  diag_msg.message = "GPS connected to serial and satellites.";
+  diag_msg.level = OK;
+  gpsError = false;
+  errorCode.key = "0";
+  errorCode.value = "GPS Connected";
 }
