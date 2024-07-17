@@ -48,10 +48,10 @@ void UDMRT_IMU::updateData(){
     float roll = imu.yawPitchRoll.z;
     float pitch = imu.yawPitchRoll.y;
 
-    if (abs(roll) >= rollError) errorState(roll,4,"Roll Emergency");
-    else if (abs(pitch) >= pitchError) errorState(pitch,3,"Pitch Emergency");
-    else if (abs(roll) >= rollWarning) warningState(roll,2,"Roll Warning");
-    else if (abs(pitch) >= pitchWarning) warningState(pitch,1,"Pitch Warning");
+    if (abs(roll) >= rollError) errorState(roll,"4","Roll Emergency");
+    else if (abs(pitch) >= pitchError) errorState(pitch,"3","Pitch Emergency");
+    else if (abs(roll) >= rollWarning) warningState(roll,"2","Roll Warning");
+    else if (abs(pitch) >= pitchWarning) warningState(pitch,"1","Pitch Warning");
     else okState();
 }
 

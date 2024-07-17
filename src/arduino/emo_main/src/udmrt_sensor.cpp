@@ -16,8 +16,8 @@
 #include <ros.h>
 #include <std_msgs/Float32MultiArray.h> 
 #include <diagnostic_msgs/DiagnosticStatus.h>
+#include <avr/dtostrf.h>
 #include <diagnostic_msgs/KeyValue.h>
-#include <sensor_msgs/NavSatFix.h> // GPS
 
 #define DIAGNOSTIC_STATUS_LENGTH 1
 #define OK diagnostic_msgs::DiagnosticStatus::OK

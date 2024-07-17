@@ -17,7 +17,7 @@
 #include "MPU6050/attitude.h"
 #include "../udmrt_sensor.cpp"
 #include <sensor_msgs/Imu.h>
-#include <avr/dtostrf.h>
+
 #include <vector>
 
 class UDMRT_IMU: public UDMRT_Sensor<sensor_msgs::Imu>{

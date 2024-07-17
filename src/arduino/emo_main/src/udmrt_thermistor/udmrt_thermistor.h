@@ -24,7 +24,11 @@ class UDMRT_Thermistor: public UDMRT_Sensor<sensor_msgs::Temperature> {
                          int inputPin,
                          int thermistor_value,
                          int r_2_value,
-                         int b_coefficient);
+                         int b_coefficient,
+                         float overHeatEmergency,
+                         float underHeatEmergency,
+                         float overHeatWarning,
+                         float underHeatWarning);
 
         /**
          * @brief The function that pulls data from the sensor and updates the messages. Called by spin()
@@ -37,29 +41,18 @@ class UDMRT_Thermistor: public UDMRT_Sensor<sensor_msgs::Temperature> {
          * 
          */
         void spin();
+
+        
     private:
         int in;
         int thermVal;
         int r2;
         int bCoeff;
 
-        /**
-         * @brief This function updates the diagnostic values to inicate an error
-         * 
-         */
-        void errorState(float sensorValue, int errorKey, char* errorMessage);
-
-        /**
-         * @brief This function updates the diagnostic values to indicate a warning
-         * 
-         */
-        void warningState(float sensorValue, int warningKey,  char* warningMessage);
-
-        /**
-         * @brief This function updates the diagnotic values to indicate all OK
-         * 
-         */
-        void okState();
+        float overEmer;
+        float underEmer;
+        float overWarn;
+        float underWarn;
 
 };
 
