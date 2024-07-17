@@ -4,50 +4,56 @@
 UDMRTDrivetrain::UDMRTDrivetrain(){}
 
 UDMRTDrivetrain::UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, 
-    std::vector<MoogMotor> rightMotors,
-    float roverWidth, 
-    float tireDiameter, 
-    float max_lin_vel, 
-    float max_ang_vel){
+                                 std::vector<MoogMotor> rightMotors,
+                                 const std::vector<float> lengths,
+                                 float max_length, 
+                                 float max_lin_vel)
+{
+
   UDMRTDrivetrain::numberOfMotors = numberOfMotors;
   UDMRTDrivetrain::roverWidth     = roverWidth;
   UDMRTDrivetrain::tireDiameter   = tireDiameter;
   UDMRTDrivetrain::rightMotors    = rightMotors;
   UDMRTDrivetrain::leftMotors     = leftMotors;
-  UDMRTDrivetrain::max_ang_vel    = max_ang_vel;
-  UDMRTDrivetrain::max_lin_vel    = max_lin_vel;
-
   
+  UDMRTDrivetrain::max_lin_vel    = max_lin_vel;
+  UDMRTDrivetrain::max_ang_vel    = 10;
+  //UDMRTDrivetrain::max_lin_vel/(max_length * 60 * 60);
+  UDMRTDrivetrain::lengths        = lengths;
 }
 
 bool UDMRTDrivetrain::drive(float kmPerHour_prec, float degPerSecond_prec, float acceleration){
 
-  float mps = (UDMRTDrivetrain::max_lin_vel*1000)/60/60 * kmPerHour_prec;  //Meters per sec
-  float ds = UDMRTDrivetrain::max_ang_vel * -degPerSecond_prec;              //Dergees per sec
-  
-  float ldw = ((mps + (UDMRTDrivetrain::roverWidth/2) * ds) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // right wheel rotations / sec
-  float rdw = ((((UDMRTDrivetrain::roverWidth/2) * ds) - mps) / (3.14159 * UDMRTDrivetrain::tireDiameter));   // left wheel rotations / sec
+
+  float kmph = UDMRTDrivetrain::max_lin_vel * kmPerHour_prec;  //kmph
+
+  float radph = (UDMRTDrivetrain::max_ang_vel * degPerSecond_prec) * 60 * 60 * 0.0174533; //Rad per hour
 
   bool good = true;
 
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
-    UDMRTDrivetrain::leftMotors[i].setVelocity(ldw, acceleration);
+
+    UDMRTDrivetrain::leftMotors[i].setVelocity(-1 * (kmph + (radph * UDMRTDrivetrain::lengths[i])));
+    digitalWrite(24, LOW);
+    digitalWrite(22, LOW);
+    digitalWrite(23, HIGH);
   }
   
   for (int i = 0; i < UDMRTDrivetrain::rightMotors.size(); i ++){
-    UDMRTDrivetrain::rightMotors[i].setVelocity(rdw, acceleration);
+    UDMRTDrivetrain::rightMotors[i].setVelocity( -1 * ((radph * UDMRTDrivetrain::lengths[i]) - kmph));
   }
   return good;
 }
 
 void UDMRTDrivetrain::reset(){
-  
-  for (int i = 0; i <= UDMRTDrivetrain::leftMotors.size(); i ++){
-    UDMRTDrivetrain::rightMotors[i].resetStatusCodes();
-  }
-  for (int i = 0; i <= UDMRTDrivetrain::rightMotors.size(); i ++){
+  for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
     UDMRTDrivetrain::leftMotors[i].resetStatusCodes();
   }
+  delay(100);
+  for (int i = 0; i < UDMRTDrivetrain::rightMotors.size(); i ++){
+    UDMRTDrivetrain::rightMotors[i].resetStatusCodes();
+  }
+
 
 }
 

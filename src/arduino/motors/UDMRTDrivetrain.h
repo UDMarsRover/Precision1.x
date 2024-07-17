@@ -1,21 +1,26 @@
-
-
-
 #ifndef UDMRTDrivetrain_h
 #define UDMRTDrivetrain_h
+
+#include "MoogMotor.h"
+#include <vector>
 
 #define PARK 0
 #define DRIVE 1
 #define NEUTRAL 2
 
 
-#include "MoogMotor.h"
-#include <vector>
 
- class UDMRTDrivetrain{
+
+
+class UDMRTDrivetrain{
 
   public:
-    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, std::vector<MoogMotor> rightMotors,float roverWidth=1.2, float tireDiameter=0.254, float max_lin_vel=5, float max_ang_vel=1);
+    UDMRTDrivetrain(std::vector<MoogMotor> leftMotors, 
+                    std::vector<MoogMotor> rightMotors, 
+                    const std::vector<float> lengths, 
+                    float max_length=0.00065855, 
+                    float max_lin_vel=1);
+  
     UDMRTDrivetrain();
     void ESTOP();
     void stop();
@@ -35,6 +40,8 @@
     float tireDiameter;
     float max_lin_vel;
     float max_ang_vel;
+
+    std::vector<float> lengths;
 
 };
 
