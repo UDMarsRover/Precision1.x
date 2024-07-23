@@ -22,8 +22,8 @@ class VideoStreamApp(QWidget):
         self.label.setGeometry(0, 0, self.width, self.height)
 
         # Set up the video capture
-        self.cap = cv2.VideoCapture('http://192.168.8.121:5000')  # Replace with your actual video stream URL
-
+        # self.cap = cv2.VideoCapture('http://192.168.8.121:5000')  # Replace with your actual video stream URL
+        self.cap = cv2.VideoCapture(0) # Replace with your actual video stream URL
         # Create a timer to update the video frame
         # self.timer = QTimer(self)
         # self.timer.timeout.connect(self.update_frame)
@@ -37,23 +37,30 @@ class VideoStreamApp(QWidget):
             bytes_per_line = ch * w
             convert_to_qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(convert_to_qt_format)
+            pixmap = pixmap.scaled(self.width, self.height, Qt.KeepAspectRatio)
             self.label.setPixmap(pixmap)
+
 
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = VideoStreamApp()
-
+    keep_streaming = True
     def start_camera_thread():
         camera_thread = threading.Thread(target=update_stream)
         camera_thread.start()
+    def stop_camera_thread():
+        ex.cap.release()
+
+    app.aboutToQuit.connect(stop_camera_thread)
 
     def update_stream():
-        while True:
+        while keep_streaming:
             # print()
             ex.update_frame()
             time.sleep(0.03)
+
     start_camera_thread()
     print("SHOWING")
     ex.show()
