@@ -3,13 +3,20 @@
 
 #include "udmrt_temperature.h"
 
+
 UDMRT_Temperature::UDMRT_Temperature(char* name, ros::NodeHandle* node):
     UDMRT_Sensor<sensor_msgs::Temperature>(name,node){
 
+    
+
+}
+
+void UDMRT_Temperature::init(ros::Publisher* dataPublisher, ros::Publisher* diagnosticPublisher){
     if(!HTS.begin()){
-        node->logerror("Unable to start box temperature sensor!!!");
+        nh->logerror("Unable to start box temperature sensor!!!");
         errorState(0,"1","Unable to start sensor");
     }
+    UDMRT_Sensor::init(dataPublisher,diagnosticPublisher);
 
 }
 

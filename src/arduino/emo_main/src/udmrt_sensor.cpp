@@ -55,6 +55,7 @@ template <typename ros_data_type> class UDMRT_Sensor{
             diag_msg.message="Starting Up Sensor...";
             diag_msg.hardware_id=name;
             diag_msg.level=OK;
+            diag_msg.values_length=DIAGNOSTIC_STATUS_LENGTH;
 
             nh=node;
 
@@ -99,10 +100,10 @@ template <typename ros_data_type> class UDMRT_Sensor{
 
 
         /**
-         * @brief This function updates the diagnostic values to inicate an error
+         * @brief This function updates the diagnostic values to indicate an error
          * 
          */
-        void errorState(float sensorValue, char* errorKey, char* errorMessage){
+        void errorState(double sensorValue, char* errorKey, char* errorMessage){
             char value[10];
             dtostrf(sensorValue, 5, 1, value);
             diag_msg.level = ERROR; 
@@ -115,7 +116,7 @@ template <typename ros_data_type> class UDMRT_Sensor{
          * @brief This function updates the diagnostic values to indicate a warning
          * 
          */
-        void warningState(float sensorValue, char* warningKey,  char* warningMessage){
+        void warningState(double sensorValue, char* warningKey,  char* warningMessage){
             char value[10];
             dtostrf(sensorValue, 5, 1, value);
             diag_msg.level = WARN;

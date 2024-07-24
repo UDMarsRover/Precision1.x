@@ -12,6 +12,7 @@
 #ifndef UDMRT_TEMPERATURE_H
 #define UDMRT_TEMPERATURE_H
 
+#include <Arduino.h>
 #include "../udmrt_sensor.cpp"
 #include <sensor_msgs/Temperature.h>
 #include <Arduino_HTS221.h> 
@@ -20,6 +21,8 @@ class UDMRT_Temperature : public UDMRT_Sensor<sensor_msgs::Temperature>{
 
     public:
         UDMRT_Temperature(char* name, ros::NodeHandle* node);
+
+        void init(ros::Publisher* dataPublisher, ros::Publisher* diagnosticPublisher);
 
         /**
          * @brief The function that pulls data from the sensor and updates the messages. Called by spin()

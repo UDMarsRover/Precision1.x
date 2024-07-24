@@ -9,6 +9,8 @@
 #include "src/udmrt_temperature/udmrt_temperature.h"
 #include "src/udmrt_voltage_sensor/udmrt_voltage_sensor.h"
 #include "src/udmrt_ultrasonic/udmrt_ultrasonic.h"
+#include <NewPing.h>
+
 
 
 ros::NodeHandle node;
@@ -36,7 +38,6 @@ ros::Publisher imuDiag("/emo/status/imu",&(imu.diag_msg));
 UDMRT_Thermistor batteryTemp("batteryTemperature",&node,A1,2000,2010,3965,80,0,60,30);
 ros::Publisher batTempData("/emo/batteryTemperature",&(batteryTemp.data_msg));
 ros::Publisher batTempDiag("/emo/status/batteryTemperature",&(batteryTemp.diag_msg));
-
 /**
  * @brief Box Temperature Defitions
  * 
@@ -65,24 +66,28 @@ ros::Publisher voltDiag("/emo/status/batteryVoltage",&(batteryVoltage.diag_msg))
  * @brief Ultrasonic Definitions
  * 
  */
-#define NE_TRIG 4
-#define NE_ECHO 5
-UDMRT_Ultrasonic ultraNE("ultraNE",&node,NE_TRIG,NE_ECHO);
+#define TRIG 6
+#define NE_ECHO 3
+UDMRT_Ultrasonic ultraNE("ultraNE",&node,TRIG,NE_ECHO);
+NewPing ne(TRIG,NE_ECHO,100);
 ros::Publisher ultraNEData("/emo/ultraNE",&(ultraNE.data_msg));
 ros::Publisher ultraNEDiag("/emo/status/ultraNE",&(ultraNE.diag_msg));
-#define NW_TRIG 2
-#define NW_ECHO 3
-UDMRT_Ultrasonic ultraNW("ultraNW",&node,NW_TRIG,NW_ECHO);
+
+#define NW_ECHO 2
+UDMRT_Ultrasonic ultraNW("ultraNW",&node,TRIG,NW_ECHO);
+NewPing nw(TRIG,NW_ECHO,100);
 ros::Publisher ultraNWData("/emo/ultraNW",&(ultraNW.data_msg));
 ros::Publisher ultraNWDiag("/emo/status/ultraNW",&(ultraNW.diag_msg));
-#define SE_TRIG 8
-#define SE_ECHO 9
-UDMRT_Ultrasonic ultraSE("ultraSE",&node,SE_TRIG,SE_ECHO);
+
+#define SE_ECHO 5
+UDMRT_Ultrasonic ultraSE("ultraSE",&node,TRIG,SE_ECHO);
+NewPing se(TRIG,SE_ECHO,100);
 ros::Publisher ultraSEData("/emo/ultraSE",&(ultraSE.data_msg));
 ros::Publisher ultraSEDiag("/emo/status/ultraSE",&(ultraSE.diag_msg));
-#define SW_TRIG 6
-#define SW_ECHO 7
-UDMRT_Ultrasonic ultraSW("ultraSW",&node,SW_TRIG,SW_ECHO);
+
+#define SW_ECHO 4
+UDMRT_Ultrasonic ultraSW("ultraSW",&node,TRIG,SW_ECHO);
+NewPing sw(TRIG,SW_ECHO,100);
 ros::Publisher ultraSWData("/emo/ultraSW",&(ultraSW.data_msg));
 ros::Publisher ultraSWDiag("/emo/status/ultraSW",&(ultraSW.diag_msg));
 
@@ -108,10 +113,10 @@ void setup(){
   boxTemp.init(&boxTempData,&botTempDiag);
   voltageConverterTemp.init(&voltTempData,&voltTempDiag);
   batteryVoltage.init(&voltData,&voltDiag);
-  ultraNE.init(&ultraNEData,&ultraNEDiag);
-  ultraNW.init(&ultraNWData,&ultraNWDiag);
-  ultraSE.init(&ultraSEData,&ultraSEDiag);
-  ultraSW.init(&ultraSWData,&ultraSWDiag);
+  ultraNE.init(&ne,&ultraNEData,&ultraNEDiag);
+  ultraNW.init(&nw,&ultraNWData,&ultraNWDiag);
+  ultraSE.init(&se,&ultraSEData,&ultraSEDiag);
+  ultraSW.init(&sw,&ultraSWData,&ultraSWDiag);
   
 
   rgbControl(1,0,0);

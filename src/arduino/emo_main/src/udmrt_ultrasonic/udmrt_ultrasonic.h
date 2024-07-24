@@ -17,6 +17,7 @@
 #include <NewPing.h>
 
 
+
 class UDMRT_Ultrasonic: public UDMRT_Sensor<sensor_msgs::Range>{
 
     public:
@@ -24,7 +25,7 @@ class UDMRT_Ultrasonic: public UDMRT_Sensor<sensor_msgs::Range>{
                          ros::NodeHandle* node,
                          int trigger_pin,
                          int echo_pin,
-                         int max_distance = 1000,
+                         int max_distance = 100,
                          int min_distance = 3,
                          double alpha_value = 0.5);
 
@@ -39,14 +40,16 @@ class UDMRT_Ultrasonic: public UDMRT_Sensor<sensor_msgs::Range>{
          * 
          */
         void spin();
+
+        void init(NewPing* sensor, ros::Publisher* dataPublisher, ros::Publisher* diagnosticPublisher);
     
     private:
 
         double alphaValue;
 
-        double currentDistance;
+        float currentDistance;
 
-        NewPing ultrasonicSensor;
+        NewPing* ultrasonicSensor;
 
 
 };
