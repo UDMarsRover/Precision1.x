@@ -9,6 +9,8 @@ __pycache__/
 # Ros Build Files (Must be rebuilt on every computer)
 .catkin_workspace
 
+pyniryo2/
+
 # Distribution / packaging
 .Python
 **/build/
