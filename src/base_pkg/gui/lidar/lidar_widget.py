@@ -13,7 +13,7 @@ import random
 
 
 class LidarWidget(QtWidgets.QWidget):
-    def __init__(self, dist):
+    def __init__(self, dist, size=500):
     #def __init__(self):
         """
         Initializes the 
@@ -23,7 +23,7 @@ class LidarWidget(QtWidgets.QWidget):
         # Set the pixel dimensions of the widget
         self.radius = dist
         #self.area_width = 700
-        self.area_width = 500
+        self.area_width = size
         self.area_height = self.area_width
         self.setMinimumSize(self.area_width, self.area_height)
         self.setWindowTitle("Lidar Window")
@@ -112,7 +112,7 @@ class LidarWidget(QtWidgets.QWidget):
         if value_green < 0:
             value_green = 0
         
-        return QColor(value_red, value_green, 0)
+        return QColor(int(value_red), int(value_green), 0)
 
     def random_rainbow_color(self):
         # Define the rainbow colors (ROYGBIV)

@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication
-from errors_box import ErrorBox
+from gui.elements.errors_box import ErrorBox
 import sys
 import random
 
