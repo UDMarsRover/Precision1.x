@@ -7,8 +7,13 @@ from PyQt5.QtGui import QPainter, QBrush, QColor, QImage
 import numpy as np
 import math
 import threading
+<<<<<<< HEAD
 #import rospy
 #from sensor_msgs.msg import LaserScan 
+=======
+import rospy
+from sensor_msgs.msg import LaserScan
+>>>>>>> deployed
 import random
 
 
@@ -16,10 +21,14 @@ class LidarWidget(QtWidgets.QWidget):
     def __init__(self, dist, size=500):
     #def __init__(self):
         """
-        Initializes the 
+        Initializes the
         """
         super().__init__()
+<<<<<<< HEAD
         #self.radius = dist# in m, the tangential distance to the edges of the square.
+=======
+        self.radius = dist  # in m, the tangential distance to the edges of the square.
+>>>>>>> deployed
         # Set the pixel dimensions of the widget
         self.radius = dist
         #self.area_width = 700
@@ -30,8 +39,12 @@ class LidarWidget(QtWidgets.QWidget):
         self.canvas = QtGui.QPixmap(self.area_width, self.area_height)
         self.canvas.fill(QtGui.QColor("black"))
         rover_real_height = 2
-        rover_pixel_height = int((rover_real_height / (2 * self.radius)) * self.area_height)
-        self.rover_image = QImage("src/base_pkg/gui/lidar/rover.png").scaledToHeight(rover_pixel_height, mode=Qt.FastTransformation)
+        rover_pixel_height = int(
+            (rover_real_height / (2 * self.radius)) * self.area_height
+        )
+        self.rover_image = QImage("src/base_pkg/gui/lidar/rover.png").scaledToHeight(
+            rover_pixel_height, mode=Qt.FastTransformation
+        )
         self.rover_image_x = self.area_height / 2 - self.rover_image.width() / 2
         self.rover_image_y = self.area_height / 2 - self.rover_image.height() / 2
         self.timer = QtCore.QTimer(self)
@@ -88,7 +101,11 @@ class LidarWidget(QtWidgets.QWidget):
             self.painter.setBrush(QBrush(color, Qt.SolidPattern))
             self.painter.setPen(color)
             self.painter.drawEllipse(int(x[i]), int(y[i]), 1, 1)
-        self.painter.drawImage(int(self.area_height / 2 - self.rover_image.width() / 2), int(self.area_height / 2 - self.rover_image.height() / 2), self.rover_image)
+        self.painter.drawImage(
+            int(self.area_height / 2 - self.rover_image.width() / 2),
+            int(self.area_height / 2 - self.rover_image.height() / 2),
+            self.rover_image,
+        )
         self.update()
 
     def calculate_gradient(self, dist):
@@ -111,19 +128,24 @@ class LidarWidget(QtWidgets.QWidget):
             value_red = 0
         if value_green < 0:
             value_green = 0
+<<<<<<< HEAD
         
         return QColor(int(value_red), int(value_green), 0)
+=======
+
+        return QColor(value_red, value_green, 0)
+>>>>>>> deployed
 
     def random_rainbow_color(self):
         # Define the rainbow colors (ROYGBIV)
         rainbow_colors = [
-            QColor(255, 0, 0),   # Red
-            QColor(255, 165, 0), # Orange
-            QColor(255, 255, 0), # Yellow
-            QColor(0, 255, 0),   # Green
-            QColor(0, 0, 255),   # Blue
+            QColor(255, 0, 0),  # Red
+            QColor(255, 165, 0),  # Orange
+            QColor(255, 255, 0),  # Yellow
+            QColor(0, 255, 0),  # Green
+            QColor(0, 0, 255),  # Blue
             QColor(75, 0, 130),  # Indigo
-            QColor(148, 0, 211)  # Violet
+            QColor(148, 0, 211),  # Violet
         ]
 
         # Choose a random color from the rainbow
@@ -132,7 +154,7 @@ class LidarWidget(QtWidgets.QWidget):
     def pol2cart(self, rho, phi):
         x = rho * np.cos(phi)
         y = rho * np.sin(phi)
-        return(x, y)
+        return (x, y)
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
@@ -144,7 +166,9 @@ class LidarWidget(QtWidgets.QWidget):
     def mouseMoveEvent(self, event):
         # Get the cursor position in widget coordinates
 
-        closest_distance = self.pixels_to_cm(self.distance(event.pos().x(), event.pos().y()))
+        closest_distance = self.pixels_to_cm(
+            self.distance(event.pos().x(), event.pos().y())
+        )
         cursor_pos = event.pos()
 
         # Update the pixel label text
@@ -156,28 +180,33 @@ class LidarWidget(QtWidgets.QWidget):
 
         # Show the pixel label
         self.pixel_label.show()
-    
+
     def distance(self, x, y):
         # Calculate the x distance (dx) and y distance (dy)
-        dx = max(self.rover_image_x - x,
-                 0,
-                 x - (self.rover_image_x + self.rover_image.width()))
-        dy = max(self.rover_image_y - y,
-                 0,
-                 y - (self.rover_image_y + self.rover_image.height()))
+        dx = max(
+            self.rover_image_x - x,
+            0,
+            x - (self.rover_image_x + self.rover_image.width()),
+        )
+        dy = max(
+            self.rover_image_y - y,
+            0,
+            y - (self.rover_image_y + self.rover_image.height()),
+        )
 
         # Use the distance formula
         return (dx**2 + dy**2) ** 0.5
-    
-    class point():
+
+    class point:
         def __init__(self, x, y):
             self.x = x
             self.y = y
+
         def x(self):
             return self.x
+
         def y(self):
             return self.y
-
 
 
 if __name__ == "__main__":
