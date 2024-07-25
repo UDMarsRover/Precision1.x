@@ -40,7 +40,7 @@ class ErrorBox(QWidget):
         self.scroll_area = QScrollArea()
         # scroll_layout = QVBoxLayout(scroll_widget)
         self.errors_widget.layout().addStretch(1)
-        self.scroll_area.setMinimumSize(1000, 1200)
+        self.scroll_area.setMinimumSize(600, 800)
         self.scroll_area.setWidget(self.errors_widget)
         
         self.popup_internal_widget.layout().addWidget(self.scroll_area)

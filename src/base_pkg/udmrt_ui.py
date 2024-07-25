@@ -10,6 +10,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
 import rssi
 from PyQt5.QtWidgets import QComboBox
+import threading
+import rospy
 GUI_WIDTH = 2800
 GUI_HEIGHT = 1600
 CAMERA_URLs = [0, "http://example_url.com/image.h264"]
@@ -31,12 +33,16 @@ SONAR_SE_TOPIC = "/emo/ultraSE"
 ros_controller = None
 
 class MyWindow(QWidget):
-    def __init__(self):
+    def __init__(self, width, height):
         super().__init__()
+        global GUI_WIDTH
+        global GUI_HEIGHT
+        GUI_WIDTH = width
+        GUI_HEIGHT = height
         global ros_controller
         ros_controller = ROSMagic()
+        
         self.initUI()
-
     def initUI(self):
         self.setWindowTitle('UDMRT')
         self.layout = QHBoxLayout()
@@ -91,20 +97,24 @@ class CameraLidarWidget(QWidget):
             self.dropdown.addItem(name)
 
         self.camera_layout.addWidget(self.dropdown)
-        self.camera_widget = CameraWidget(CAMERA_URLs[0], 1200, 800)
+        self.camera_widget = CameraWidget(CAMERA_URLs[0], int(GUI_WIDTH*0.4), int(GUI_HEIGHT*0.4))
         self.camera_widget.set_camera_url(0)
         self.camera_layout.addWidget(self.camera_widget)
         self.dropdown.currentIndexChanged.connect(self.camera_selected)
         self.layout.addLayout(self.camera_layout)
         self.distance_layout = QGridLayout()
-        lidar_widget = LidarWidget(LIDAR_MAX_RANGE, 600)
+        self.distance_layout.setHorizontalSpacing(10)
+        self.distance_layout.setVerticalSpacing(10)
+        self.distance_layout.setContentsMargins(10, 10, 10, 10)
+        self.distance_layout.setAlignment(Qt.AlignCenter)
+        lidar_widget = LidarWidget(LIDAR_MAX_RANGE, int(GUI_WIDTH*0.2))
         ros_controller.add_ros_subscriber("scan", LaserScan, lidar_widget.ros_callback)
         self.distance_layout.addWidget(lidar_widget, 1, 1)
         self.sonar_circles()
         self.layout.addLayout(self.distance_layout)
         self.setLayout(self.layout)
         self.setMinimumWidth(int(GUI_WIDTH * 0.8))
-        self.setMinimumHeight(600)
+        self.setMinimumHeight(GUI_HEIGHT * 0.3)
 
     def camera_selected(self, index):
         self.camera_widget.set_camera_url(CAMERA_URLs[index])
@@ -206,6 +216,7 @@ class RoverAbsPanel(QWidget):
         self.wifi_signal_strength_callback("-89db")
         self.pitch_callback(0.0)
         self.roll_callback(0.0)
+        self.setMaximumHeight(GUI_HEIGHT * 0.05)
 
     def wifi_signal_strength_callback(self, signal_strength):
         self.signal_strength_label.setText(f"Signal Strength: {signal_strength}")
@@ -351,16 +362,14 @@ class ROSMagic:
         self.subscribers = []
 
     def start_ros_thread(self):
-        #rospy.init_node("udmrt_gui_node", anonymous=True)
-        #self.ros_thread = threading.Thread(target=self.update_from_ros)
-        #self.ros_thread.start()
-        None
+        rospy.init_node("udmrt_gui_node", anonymous=True)
+        self.ros_thread = threading.Thread(target=self.update_from_ros)
+        self.ros_thread.start()
 
     def update_from_ros(self):
-        # for subscriber in self.subscribers:
-        #     ros_subscriber = rospy.Subscriber(subscriber["topic"], subscriber["datatype"], subscriber["callback"])
-        # rospy.spin()
-        None
+        for subscriber in self.subscribers:
+            ros_subscriber = rospy.Subscriber(subscriber["topic"], subscriber["datatype"], subscriber["callback"])
+        rospy.spin()
 
     """Add a ROS subscriber to the GUI. The callback function will be called when a message is received."""
     def add_ros_subscriber(self, topic, callback, datatype):
@@ -373,8 +382,8 @@ class CircleWidget(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setMinimumSize(200, 100)
-        self.setMaximumSize(200, 100)
+        self.setMinimumSize(int(GUI_WIDTH * 0.05), int(GUI_HEIGHT * 0.05))
+        self.setMaximumSize(int(GUI_WIDTH * 0.05), int(GUI_HEIGHT * 0.05))
         self.text = ""
         self.color = Qt.gray
 
@@ -405,10 +414,8 @@ class CircleWidget(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    # def cleanup():
-    #     print("Cleaning up before exit...")
-    #     exit()
+    screen_resolution = app.desktop().screenGeometry()
+    screen_width, screen_height = screen_resolution.width(), screen_resolution.height()
 
-    # app.aboutToQuit.connect(cleanup)
-    window = MyWindow()
+    window = MyWindow(screen_width, screen_height)
     sys.exit(app.exec_())
