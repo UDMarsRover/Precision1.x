@@ -95,6 +95,7 @@ class Rover:
     def shutdownCheck(self, force: bool = False):
         if not force:
             if not gpio.input(self.__shutdownPin__):
+                self.led_control(1, 1, 0)
                 currTime = time.time()
                 if (currTime - self.__button_timer__) > 1:
                     self.__kill_count__ += 1
