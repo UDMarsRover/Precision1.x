@@ -17,4 +17,14 @@
 
     <!-- Camera Server-->
     <node pkg="rover_pkg" type="camera_server.py" name="camera" required="true" />
+
+    <!-- Lidar Startup-->
+    <node name="rplidarNode"          pkg="rover_lidar"  type="rplidarNode" output="screen">
+        <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+        <param name="serial_baudrate"     type="int"    value="115200"/>
+        <param name="frame_id"            type="string" value="laser"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+    </node>
+
 </launch>
