@@ -1,6 +1,5 @@
 [Unit]
 Description=UDMRT ROS Startup Service
-After=network.target
 
 [Service]
 ExecStart=bash /home/udmrt/Precision1.x/.setup_utils/rosstart.startup
