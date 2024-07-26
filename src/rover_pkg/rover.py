@@ -8,7 +8,7 @@ import rospy
 from std_msgs.msg import String
 import RPi.GPIO as gpio
 from diagnostic_msgs.msg import DiagnosticStatus as diag
-
+import time
 
 class Rover:
     def __init__(self, refreshRate: int = 10, name: str = "precision1"):
