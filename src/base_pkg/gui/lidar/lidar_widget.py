@@ -7,28 +7,17 @@ from PyQt5.QtGui import QPainter, QBrush, QColor, QImage
 import numpy as np
 import math
 import threading
-<<<<<<< HEAD
-#import rospy
-#from sensor_msgs.msg import LaserScan 
-=======
 import rospy
 from sensor_msgs.msg import LaserScan
->>>>>>> deployed
 import random
 
 
 class LidarWidget(QtWidgets.QWidget):
     def __init__(self, dist, size=500):
-    #def __init__(self):
         """
         Initializes the
         """
         super().__init__()
-<<<<<<< HEAD
-        #self.radius = dist# in m, the tangential distance to the edges of the square.
-=======
-        self.radius = dist  # in m, the tangential distance to the edges of the square.
->>>>>>> deployed
         # Set the pixel dimensions of the widget
         self.radius = dist
         #self.area_width = 700
@@ -128,13 +117,9 @@ class LidarWidget(QtWidgets.QWidget):
             value_red = 0
         if value_green < 0:
             value_green = 0
-<<<<<<< HEAD
         
         return QColor(int(value_red), int(value_green), 0)
-=======
 
-        return QColor(value_red, value_green, 0)
->>>>>>> deployed
 
     def random_rainbow_color(self):
         # Define the rainbow colors (ROYGBIV)
