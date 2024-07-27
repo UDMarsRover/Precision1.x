@@ -6,7 +6,7 @@
     <!-- Start Motor Control Node and have it restart if it dies-->
     <node pkg="rosserial_arduino" type="serial_node.py" name="motor_arduino" respawn="true">
         <param name="port" value="/dev/ttyACM0"/>
-        <param name="baud" value="57600"/>
+        <param name="baud" value="115200"/>
     </node>
 
     <!-- Start Motor Control Node and have it restart if it dies -->

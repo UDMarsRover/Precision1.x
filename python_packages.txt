@@ -5,6 +5,7 @@ catkin_pkg
 pyyaml
 rospkg
 pyserial
-pyqt5
-RPi.GPIOpygame
-
+attrs
+pyasn1
+autobahn
+pyniryo2

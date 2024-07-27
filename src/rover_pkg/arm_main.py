@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+
+import rospy
+import time
+from pyniryo2 import *
+from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Bool
+from trajectory_msgs.msg import JointTrajectoryPoint
+import sys
+sys.path.append("..")
+from src.UDMRT_datatypes import Arm_Position
+
+
+class Arm:
+    def __init__(self):
+        rospy.init_node("arm", anonymous=True)
+        self.homed = False
+        self.reset()
+        self.rate = rospy.Rate(10)
+        self.motor_run_complete = True
+
+        self.currentPosition = Arm_Position()
+        self.currentPosition.setPosition(self.robot.arm.get_pose().to_list())
+
+        # self.robot.arm.move_pose([0.2, 0.1, 0.3, 0.0, 0.0, 0.0], callback=self.callback_pose())
+
+        # publishers
+        self.joint_pub = rospy.Publisher(
+            "joint_pub", JointTrajectoryPoint, queue_size=10
+        )
+        self.pose_pub = rospy.Publisher("pose_pub", JointTrajectoryPoint, queue_size=10)
+
+        # subscribers
+        self.arm_pos_sub = rospy.Subscriber(
+            "arm/cmd/position", Float32MultiArray, self.callback_arm_command
+        )
+        self.arm_motor_sub = rospy.Subscriber(
+            "arm/cmd/motors", Float32MultiArray, self.callback_arm_motors_command
+        )
+
+        self.grip_sub = rospy.Subscriber("grip_state", Bool, self.callback_grip_command)
+        self.reset_sub = rospy.Subscriber("reset", Bool, self.callback_reset_command)
+
+    def publish(self):
+        # publish current pose values
+        pose_array = JointTrajectoryPoint()
+        pose = self.robot.arm.get_pose().to_list()
+        pose_array.positions = pose
+        self.pose_pub.publish(pose_array)
+
+        # publish current joint values
+        joint_array = JointTrajectoryPoint()
+        joint = self.robot.arm.get_joints()
+        joint_array.positions = joint
+        self.joint_pub.publish(joint_array)
+
+    # recieve command and move arm by specified value
+    def callback_arm_command(self, msg):
+        
+        jog_values = msg.data
+
+        #self.currentPosition.updateState(jog_values)
+
+        if jog_values != 0:
+            #print("Published ", self.currentPosition.getState())
+            #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
+            print("Published ", jog_values)
+    
+            self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
+            #self.robot.arm.jog_joints(jog_values,callback=self.temp_callback)
+
+       
+        #print("Ran")
+
+    def callback_arm_motors_command(self, msg):
+        
+        jog_values = msg.data
+        
+
+        #self.currentPosition.updateState(jog_values)
+        if (jog_values != 0) and self.motor_run_complete:
+            self.motor_run_complete = False
+            self.currentPosition.setMotors(self.robot.arm.get_joints())
+            self.currentPosition.updateMotors(jog_values)
+            #print("Published ", self.currentPosition.getState())
+            #self.robot.arm.move_pose(self.currentPosition.getState(),callback=self.temp_callback)
+            print("Published Motors", self.currentPosition.getMotors())
+    
+            #self.robot.arm.jog_pose(jog_values,callback=self.temp_callback)
+            self.robot.arm.move_joints(self.currentPosition.getMotors(),callback=self.motor_command_callback)
+      
+        #print("Ran")
+
+    def motor_command_callback(self,_):
+        self.motor_run_complete = True
+
+
+    def callback_grip_command(self, msg):
+        if msg.data:
+            self.robot.tool.grasp_with_tool()
+            print("pressed")
+        else:
+            self.robot.tool.release_with_tool()
+
+    def callback_reset_command(self, msg):
+        if msg.data:
+            self.robot.end()
+            self.reset()
+
+    def reset(self):
+        # connect to arm
+        robot_ip_address = "192.168.2.114"
+        self.robot = NiryoRobot(robot_ip_address)
+
+        while not self.robot.client.is_connected:
+            print("Trying to connect...")
+            self.robot.wait(5)
+        
+        print("Calibrating Motors...")
+        self.robot.arm.calibrate_auto()  # calibrate motors
+
+       
+
+        self.robot.tool.update_tool()
+        print("Starting homing")
+        self.robot.arm.move_to_home_pose(callback=self.homing_callback)
+
+        while not self.homed: 
+            if not rospy.is_shutdown():
+                self.robot.wait(1)
+                print("Homing...")
+            else: 
+                print(" Canceling...")
+                exit(1)
+
+        self.robot.arm.set_jog_control(True)
+        print("Homing Complete")
+
+
+
+        
+
+    # def callback_pose(self):
+    # print("current pose:",self.robot.arm.get_pose())
+
+    def spin(self):
+        #arm.robot.client.is_connected:
+        self.publish()
+        self.currentPosition.setPosition(self.robot.arm.get_pose().to_list())
+        self.currentPosition.setMotors(self.robot.arm.get_joints())
+        self.rate.sleep()
+
+    def temp_callback(self,_):
+        print("Running a function")
+
+    def homing_callback(self,_):
+       
+        #self.robot.arm.set_learning_mode(False)
+        
+        self.homed = True
+
+arm = Arm()
+
+print("Done Setting Up Arm")
+
+while not rospy.is_shutdown():
+    arm.spin()
+
+
+print("super done")
+arm.robot.arm.set_jog_control(False)
+arm.robot.end()  # disconnect from arm and ros
