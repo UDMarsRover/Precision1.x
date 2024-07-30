@@ -1,7 +1,7 @@
 //#include "HardwareSerial.h"
 //#include "SoftwareSerial.h"
-#include "UDMRTDrivetrain.h"
-#include "MoogMotor.h"
+#include "src/UDMRTDrivetrain/UDMRTDrivetrain.h"
+//#include "src/MoogMotor/MoogMotor.h"
 #include <ros.h>
 #include <ros/time.h>
 #include <std_msgs/String.h>
@@ -268,13 +268,24 @@ void setup() {
 
 void loop() {
   //delay(1000); // To Avoid improper startup
-  
+  digitalWrite(BLUE, HIGH);
+  digitalWrite(RED, HIGH);
+  digitalWrite(GREEN, LOW);
   driverNode.spinOnce();
-  delay(10);
-  //driveTrain.drive(5, 0, 0.25);
-  //digitalWrite(BLUE, HIGH);
-  //digitalWrite(RED, HIGH);
-  //digitalWrite(GREEN, LOW);
+  delay(100);
+  
+  if (driveTrain.statusCheck().empty()){
+    digitalWrite(BLUE, LOW);
+    digitalWrite(RED, LOW);
+    digitalWrite(GREEN, HIGH);
+
+  }else{
+    driverNode.loginfo("Motor Error!");
+    digitalWrite(BLUE, LOW);
+    digitalWrite(RED, HIGH);
+    digitalWrite(GREEN, LOW);
+  }
+  delay(100);
   //DriveStatus.publish(&currentDriveStatus);
 /*
   

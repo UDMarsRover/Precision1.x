@@ -1,8 +1,12 @@
-/*
+/** 
  * MoogMotor.cpp - Library for controlling Moog Smart Motors via HardwareSerial.
  * Created by Joe Ditz on Jan 27, 2021
- * Edited by Greg Moldkow Mar 27, 2021
+ * Edited by Greg Molskow Mar 27, 2021
  */
+
+#ifndef MOOGMOTOR_CPP
+#define MOOGMOTOR_CPP
+
 #include "MoogMotor.h"
 
 float rps;
@@ -77,6 +81,8 @@ void MoogMotor::enable(){
   MoogMotor::sendCommand("X");        // Send Stop Request'
   MoogMotor::sendCommand("AT="+String(MoogMotor::acc * ACCMAX));      //Set the acceration/deceleration
   MoogMotor::sendCommand("BAUD115200");
+
+  MoogMotor::statusCheck();
 }
 
 bool MoogMotor::sendCommand(String command, bool global){
@@ -102,14 +108,24 @@ void MoogMotor::closePort(){
 }
 
 void MoogMotor::statusCheck(){
-  statusCode = getData("RW(0)");
-  statusCode1 = getData("RW(1)");
-  statusCode2 = getData("RW(2)");
-  statusCode3 = getData("RW(3)");
-  statusCode4 = getData("RW(4)");
-  statusCode5 = getData("RW(5)");
-  statusCode6 = getData("RW(6)");
-  statusCode7 = getData("RW(7)");
+
+  
+  statusCodes.push_back(getData("RW(0)"));
+  statusCodes.push_back(getData("RW(1)"));
+  statusCodes.push_back(getData("RW(2)"));
+  statusCodes.push_back(getData("RW(3)"));
+  statusCodes.push_back(getData("RW(4)"));
+  statusCodes.push_back(getData("RW(5)"));
+  statusCodes.push_back(getData("RW(6)"));
+  statusCodes.push_back(getData("RW(7)"));
+
+  while (statusCodes.size() > 8){
+    statusCodes.erase(statusCodes.begin());
+  }
+
+  // If status word 0 is even (inicating bit zero is false), then the dirve is not ready and errored
+  MoogMotor::errored = (statusCodes[0] % 2 == 0) && MoogMotor::connected;
+
 }
 
 int MoogMotor::getData(char command[]){
@@ -121,7 +137,7 @@ int MoogMotor::getData(char command[]){
 }
 
 unsigned int MoogMotor::getStatusCode(){
-  return MoogMotor::statusCode;
+  return MoogMotor::statusCodes[0];
 }
 
 bool MoogMotor::isConnected(){
@@ -133,7 +149,7 @@ bool MoogMotor::resetStatusCodes(){
   MoogMotor::enable();
   delay(100);
   //park();
-  return statusCode == 1;
+  return statusCodes[0] == 1;
 }
 
 void MoogMotor::stop()
@@ -203,3 +219,5 @@ void MoogMotor::holdON(){
   sendCommand("X");        // Send Stop Request
 }
 
+
+#endif

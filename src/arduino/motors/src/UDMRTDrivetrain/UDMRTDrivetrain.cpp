@@ -1,4 +1,7 @@
 
+#ifndef UDMRT_DRIVE_CPP
+#define UDMRT_DRIVE_CPP
+
 #include "UDMRTDrivetrain.h"
 
 UDMRTDrivetrain::UDMRTDrivetrain(){}
@@ -55,16 +58,18 @@ void UDMRTDrivetrain::reset(){
 
 }
 
-unsigned int UDMRTDrivetrain::statusCheck(){
-  
+std::vector<MoogMotor> UDMRTDrivetrain::statusCheck(){
+  std::vector<MoogMotor> erroredMotors;
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
-    UDMRTDrivetrain::rightMotors[i].getStatusCode();
+    UDMRTDrivetrain::rightMotors[i].statusCheck();
+    if (UDMRTDrivetrain::rightMotors[i].errored) erroredMotors.push_back(UDMRTDrivetrain::rightMotors[i]);
   }
   for (int i = 0; i < UDMRTDrivetrain::leftMotors.size(); i ++){
-    UDMRTDrivetrain::leftMotors[i].getStatusCode();
+    UDMRTDrivetrain::leftMotors[i].statusCheck();
+    if (UDMRTDrivetrain::leftMotors[i].errored) erroredMotors.push_back(UDMRTDrivetrain::leftMotors[i]);
   }
 
-  return 1;
+  return erroredMotors;
   
 }
 
@@ -79,3 +84,4 @@ void UDMRTDrivetrain::ESTOP(){
   
 }
 
+#endif

@@ -1,4 +1,4 @@
-/*
+/** 
  * MoogMotor.h - Library for controlling Moog Smart Motors via HardwareSerial.
  * Created by Joe Ditz on Jan 27, 2021
  * Edited by Greg Molskow on Mar 27, 2021
@@ -10,7 +10,8 @@
 #include "Arduino.h"
 #include "HardwareSerial.h"
 //#include "SoftwareSerial.h"
-#include "MoogMotorStatusWords.h"
+#include "../MoogMotorStatusWords.h"
+#include <vector>
 
 #define ACCMAX 1000
 #define RPMMAX 4423680
@@ -45,6 +46,8 @@ class MoogMotor
 
     boolean setTorque(float torque);
     boolean setPosition(float value,float velocity);
+
+    boolean errored = true;
     
     
     void ESTOP();
@@ -64,17 +67,19 @@ class MoogMotor
     void openPort();
     void closePort();
 
+
     
     
   private:
-    unsigned int statusCode:17;
-    unsigned int statusCode1:17;
-    unsigned int statusCode2:17;
-    unsigned int statusCode3:17;
-    unsigned int statusCode4:17;
-    unsigned int statusCode5:17;
-    unsigned int statusCode6:17;
-    unsigned int statusCode7:17;
+    std::vector<unsigned int> statusCodes;
+    //unsigned int statusCode:17;
+    //unsigned int statusCode1:17;
+    //unsigned int statusCode2:17;
+    //unsigned int statusCode3:17;
+    //unsigned int statusCode4:17;
+    //unsigned int statusCode5:17;
+    //unsigned int statusCode6:17;
+    //unsigned int statusCode7:17;
     HardwareSerial* serial;
     bool connected;
     float gearRatio;

@@ -1,7 +1,7 @@
 #ifndef UDMRTDrivetrain_h
 #define UDMRTDrivetrain_h
 
-#include "MoogMotor.h"
+#include "../MoogMotor/MoogMotor.h"
 #include <vector>
 
 #define PARK 0
@@ -23,7 +23,7 @@ class UDMRTDrivetrain{
   
     UDMRTDrivetrain();
     void ESTOP();
-    unsigned int statusCheck();
+    std::vector<MoogMotor> statusCheck();
     void stop();
     void off();
     void setGear(int gear = PARK);
