@@ -67,8 +67,8 @@ class CameraWidget(QWidget):
     def update_frame(self):
         ret, frame = self.cap.read()
         if ret:
-            # rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            rgb_image = frame
+            rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # rgb_image = frame
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
             convert_to_qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)

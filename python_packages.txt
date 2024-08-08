@@ -5,4 +5,10 @@ catkin_pkg
 pyyaml
 rospkg
 pyserial
+attrs
+pyasn1
+autobahn
+pyniryo2
+pyqt5
+flask
 piexif
