@@ -1,10 +1,14 @@
 import sys
 import cv2
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 import time
 import threading
+import os
+from numpy import float64
+from PIL import Image
+import piexif
 
 class CameraWidget(QWidget):
     def __init__(self, camera_url=0, width=640, height=480):
@@ -12,6 +16,8 @@ class CameraWidget(QWidget):
         self.title = 'http Video Stream'
         self.left, self.top, self.width, self.height = 0, 0, width, height
         self.camera_url = camera_url
+        self.lat = float64(0)
+        self.lon = float64(0)
         self.setStyleSheet("background-color: black;")
         self.initUI()
         self.run()
@@ -21,10 +27,32 @@ class CameraWidget(QWidget):
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setMaximumSize(self.width, self.height)
 
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.setStyleSheet("background-color: grey;")
+
         # Create a label to display the video stream
         self.label = QLabel(self)
-        self.label.setGeometry(0, 0, self.width, self.height)
-        self.label.setContentsMargins(0, 0, 0, 0)
+        # self.label.setGeometry(0, 0, self.width, self.height)
+        # self.label.setContentsMargins(0, 0, 0, 0)
+
+        # Create a camera control layout
+        self.camera_control_layout = QHBoxLayout()
+
+
+        # Create a capture button widget
+        self.capture_button = QPushButton("Capture", self)
+        self.capture_button.clicked.connect(self.capture_image)
+        self.camera_control_layout.addWidget(self.capture_button)
+
+        # Create a button to open file explorer
+        self.open_button = QPushButton("Select Directory", self)
+        self.open_button.clicked.connect(self.open_image)
+        self.camera_control_layout.addWidget(self.open_button)
+
+        self.layout.addWidget(self.label)
+        self.layout.addLayout(self.camera_control_layout)
+        self.setLayout(self.layout)
 
         # Set up the video capture
         # self.cap = cv2.VideoCapture('http://192.168.8.121:5000')  # Replace with your actual video stream URL
@@ -74,12 +102,70 @@ class CameraWidget(QWidget):
             self.update_frame()
             time.sleep(0.03)
 
+    def capture_image(self):
+        # Read a frame from the webcam
+        ret, frame = self.cap.read()
+
+        if ret:
+            # Save the frame as an image file
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # Go through the directory, incrementing a number to see if the directory has that file name
+            file_name = "captured_image.jpg"
+            i = 1
+            while True:
+                file_name = f"captured_image_{i}.jpg"
+                if not os.path.exists(os.path.join(self.image_path, file_name)):
+                    break
+                i += 1
+
+            # Save the frame as an image file with the unique file name
+            cv2.imwrite(os.path.join(self.image_path, file_name), frame)
+            # Open the captured image using PIL
+            image = Image.open(os.path.join(self.image_path, file_name))
+
+            gps_ifd = {
+                piexif.GPSIFD.GPSLatitudeRef: 'N' if self.lat >= 0 else 'S',
+                piexif.GPSIFD.GPSLatitude: self.convert_to_exif_gps(abs(self.lat)),
+                piexif.GPSIFD.GPSLongitudeRef: 'E' if self.lon >= 0 else 'W',
+                piexif.GPSIFD.GPSLongitude: self.convert_to_exif_gps(abs(self.lon)),
+            }
+            
+            exif_dict = {"GPS": gps_ifd}
+            exif_bytes = piexif.dump(exif_dict)
+
+            # Update the image with the GPS EXIF data
+            image.save(os.path.join(self.image_path, file_name), format='JPEG', exif=exif_bytes)
+
+
+
+            # Save the image with the updated GPS info
+            # image.save(os.path.join(self.image_path, file_name), format='JPEG', exif=data_bytes)
+
+    def convert_to_exif_gps(self, coord):
+        """Convert a float coordinate to EXIF GPS format."""
+        degrees = int(coord)
+        minutes = int((coord - degrees) * 60)
+        seconds = (coord - degrees - minutes / 60) * 3600
+        return [(degrees, 1), (minutes, 1), (int(seconds * 100), 100)]
+
+    def open_image(self):
+        # Open a file dialog to select an image file
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.Directory)
+        if dialog.exec_():
+            self.image_path = dialog.selectedFiles()[0]
+        print(self.image_path)
+
+    def set_gps_coords(self, lat, lon):
+        self.lat = lat
+        self.lon = lon
+
 
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = CameraWidget()
+    ex = CameraWidget(width=1280, height=720)
 
     print("SHOWING")
     ex.show()
