@@ -86,6 +86,8 @@ class MyWindow(QWidget):
 class CameraLidarWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.camera_widget = CameraWidget(CAMERA_URLs[0], int(GUI_WIDTH*0.4), int(GUI_HEIGHT*0.4))
+
         self.initUI()
 
     def initUI(self):
@@ -97,7 +99,6 @@ class CameraLidarWidget(QWidget):
             self.dropdown.addItem(name)
 
         self.camera_layout.addWidget(self.dropdown)
-        self.camera_widget = CameraWidget(CAMERA_URLs[0], int(GUI_WIDTH*0.4), int(GUI_HEIGHT*0.4))
         self.camera_widget.set_camera_url(0)
         self.camera_layout.addWidget(self.camera_widget)
         self.dropdown.currentIndexChanged.connect(self.camera_selected)
@@ -115,6 +116,9 @@ class CameraLidarWidget(QWidget):
         self.setLayout(self.layout)
         self.setMinimumWidth(int(GUI_WIDTH * 0.8))
         self.setMinimumHeight(GUI_HEIGHT * 0.3)
+
+    def get_camera_widget(self):
+        return self.camera_widget
 
     def camera_selected(self, index):
         self.camera_widget.set_camera_url(CAMERA_URLs[index])
@@ -183,8 +187,9 @@ class CameraLidarWidget(QWidget):
         self.camera_widget.close()
 
 class InfoPanel(QWidget):
-    def __init__(self):
+    def __init__(self, camera_widget=None):
         super().__init__()
+        self.camera_widget = camera_widget
         self.initUI()
 
     def initUI(self):
@@ -193,7 +198,7 @@ class InfoPanel(QWidget):
         self.setLayout(self.layout)
         self.camera_lidar_widget = CameraLidarWidget()
         self.layout.addWidget(self.camera_lidar_widget)
-        self.status_panel = StatusPanel()
+        self.status_panel = StatusPanel(self.camera_lidar_widget.get_camera_widget())
         self.layout.addWidget(self.status_panel)
         self.rover_abs_panel = RoverAbsPanel()
         self.layout.addWidget(self.rover_abs_panel)
@@ -229,8 +234,9 @@ class RoverAbsPanel(QWidget):
 
 
 class StatusPanel(QWidget):
-    def __init__(self):
+    def __init__(self, camera_widget=None):
         super().__init__()
+        self.camera_widget = camera_widget
         self.initUI()
 
     def initUI(self):
@@ -238,7 +244,7 @@ class StatusPanel(QWidget):
         self.setLayout(self.layout)
         self.battery_status_widget = BatteryStatusWidget()
         self.layout.addWidget(self.battery_status_widget)
-        self.gps_widget = GPSDataWidget()
+        self.gps_widget = GPSDataWidget(self.camera_widget)
         self.layout.addWidget(self.gps_widget)
         self.speed_widget = SpeedWidget()
         self.layout.addWidget(self.speed_widget)
@@ -265,8 +271,9 @@ class BatteryStatusWidget(QWidget):
         self.data_label.setText(f"{voltage}V")
 
 class GPSDataWidget(QWidget):
-    def __init__(self):
+    def __init__(self, camera_widget=None):
         super().__init__()
+        self.camera_widget = camera_widget
         self.initUI()
 
     def initUI(self):
@@ -277,13 +284,14 @@ class GPSDataWidget(QWidget):
         self.long_label = QLabel()
         self.layout.addWidget(self.long_label)
         empty_msg = NavSatFix()
-        empty_msg.latitude = 0.0000014
-        empty_msg.longitude = 0.00013
+        empty_msg.latitude = 0.0
+        empty_msg.longitude = 0.0
         self.gps_data_callback(empty_msg)
         ros_controller.add_ros_subscriber(GPS_DATA_TOPIC, NavSatFix, self.gps_data_callback)
         
     def gps_data_callback(self, navsatfix_msg):
-        
+        if self.camera_widget is not None:
+            self.camera_widget.set_gps_coords = (navsatfix_msg.latitude, navsatfix_msg.longitude)
         self.lat_label.setText(f"{round(navsatfix_msg.latitude, 10):.10f} N")
         self.long_label.setText(f"{round(navsatfix_msg.longitude, 10):.10f} W")
 
