@@ -68,7 +68,7 @@ def index():
     return Response(webcam_feed(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def main():
-    app.run(host='0.0.0.0', port=15)
+    app.run(host='0.0.0.0', port=24)
 
 if __name__ == '__main__':
     main()
