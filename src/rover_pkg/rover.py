@@ -10,6 +10,7 @@ import RPi.GPIO as gpio
 from diagnostic_msgs.msg import DiagnosticStatus as diag
 import time
 import os
+import threading
 
 class Rover:
     def __init__(self, refreshRate: int = 10, name: str = "precision1"):
@@ -45,6 +46,12 @@ class Rover:
         rospy.init_node(name, anonymous=True)
         self.rate = rospy.Rate(refreshRate)  # Hz
 
+        self.shutdownThread = threading.Thred(self.shutdownCheck)
+        self.wifiThread = threading.Thread(self.wifiCheck)
+
+        self.shutdownThread.start()
+        self.wifiThread.start()
+
         self.led_control(1, 0, 0)
         while not self.wifiCheck():
             self.led_control(1, 0, 0)
@@ -65,12 +72,10 @@ class Rover:
     def spin(self):
         if rospy.is_shutdown():
             self.kill = True
-        self.shutdownCheck()
-        wifi = self.wifiCheck()
-        print(wifi)
+        print(self.wifiConnected)
         if self.__kill_count__ > 0:
             self.led_control(1, 1, 0)
-        elif not wifi:
+        elif not self.wifiConnected:
             self.led_control(1, 0, 0)
             self.log("Wifi Disconnected!")
         else:
