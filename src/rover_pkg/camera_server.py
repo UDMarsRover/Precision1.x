@@ -30,6 +30,7 @@ def webcam_feed():
         # Uncomment the line below to reduce the framerate to 1 frame per second
         # frame = np.where(frame > 1, frame - 1, frame)
         # Convert the frame to grayscale
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Detect ArUco markers
