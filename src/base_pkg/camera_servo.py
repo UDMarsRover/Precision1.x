@@ -4,7 +4,7 @@ import RPi.GPIO as gpio
 
 class ServoController:
     def __init__(self, pin):
-        self.servo_pin = 17
+        self.servo_pin = 27
         gpio.setmode(gpio.BCM)
         gpio.setup(self.servo_pin, gpio.OUT)
         self.p = gpio.PWM(self.servo_pin, 250)
