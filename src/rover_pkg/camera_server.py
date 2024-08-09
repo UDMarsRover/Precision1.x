@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 from flask import Flask, Response
 import time
+import rospy
+from std_msgs.msg import Int8
 
 app = Flask(__name__)
 
@@ -10,6 +12,12 @@ app = Flask(__name__)
 dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
 parameters =  cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(dictionary, parameters)   
+
+# Initialize the ROS node
+rospy.init_node('camera_publisher', anonymous=True)
+
+# Create a ROS publisher
+marker_pub = rospy.Publisher('/pi/camera/aruco', Int8, queue_size=10)
 
 def webcam_feed():
     cap = cv2.VideoCapture(0)
@@ -41,6 +49,8 @@ def webcam_feed():
 
                 # Draw the ID text on the frame
                 cv2.putText(frame, str(ids[i]), (center_x, center_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+                marker_id_msg = Int8(ids[i])
+                marker_pub.publish(marker_id_msg)
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
 
