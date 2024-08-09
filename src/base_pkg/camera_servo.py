@@ -1,36 +1,31 @@
-import RPi.GPIO as GPIO
 import time
 
-# Set the GPIO mode
-GPIO.setmode(GPIO.BCM)
+import RPi.GPIO as gpio
 
-# Define the GPIO pin for the servo
-servo_pin = 6
+class ServoController:
+    def __init__(self, pin):
+        self.servo_pin = 6
+        gpio.setmode(gpio.BCM)
+        gpio.setup(self.servo_pin, gpio.OUT)
+        self.p = gpio.PWM(self.servo_pin, 50)
+        self.p.start(0) # duty cycle 2.5%
 
-# Set up the servo pin as an output
-GPIO.setup(servo_pin, GPIO.OUT)
+    def set_angle(self, angle):
+        # duty_cycle = 34.6 + angle / 50.0
+        # duty_cycle = angle
+        self.p.ChangeDutyCycle(angle)
+        time.sleep(0.5)
 
-# Set up PWM on the servo pin with a frequency of 50Hz
-pwm = GPIO.PWM(servo_pin, 50)
-pwm.start(0)
+    def cleanup(self):
+        self.p.stop()
+        gpio.cleanup()
 
-try:
-    while True:
-        # Move the servo to 0 degrees
-        pwm.ChangeDutyCycle(2.5)
-        time.sleep(1)
-        
-        # Move the servo to 90 degrees
-        pwm.ChangeDutyCycle(7.5)
-        time.sleep(1)
-        
-        # Move the servo to 180 degrees
-        pwm.ChangeDutyCycle(12.5)
-        time.sleep(1)
+if __name__ == "__main__":
+    servo = ServoController(17)
 
-except KeyboardInterrupt:
-    pass
-
-# Clean up the GPIO
-pwm.stop()
-GPIO.cleanup()
+    try:
+        while True:
+            angle = float(input("Enter angle (-100 - 100): "))
+            servo.set_angle(angle)
+    except KeyboardInterrupt:
+        servo.cleanup()
