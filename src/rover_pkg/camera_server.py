@@ -49,7 +49,8 @@ def webcam_feed():
 
                 # Draw the ID text on the frame
                 cv2.putText(frame, str(ids[i]), (center_x, center_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-                marker_id_msg = Int8(ids[i])
+                marker_id_msg = Int8()
+                marker_id_msg.data = int(ids[i])
                 marker_pub.publish(marker_id_msg)
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
