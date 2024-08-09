@@ -99,6 +99,7 @@ class Rover:
 
     def shutdownThread(self):
         while not rospy.is_shutdown():
+            print("checikng shutdown")
             self.shutdownCheck(False)
             time.sleep(0.5)
         
@@ -132,6 +133,7 @@ class Rover:
 
     def wifiCheckThread(self):
         while not rospy.is_shutdown():
+            print("checking wifi")
             self.wifiCheck()
             time.sleep(0.5)
 
