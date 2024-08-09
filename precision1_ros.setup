@@ -58,8 +58,8 @@ echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 
     # Setup ROS IPs
     echo "Setting up ROS IP commands ..." 
-    sudo echo "export ROS_MASTER_URI=http://192.168.8.100:11311" >> ~/.bashrc
-    sudo echo "export ROS_IP=192.168.8.223" >> ~/.bashrc
+    sudo echo "export ROS_MASTER_URI=http://192.168.8.28:11311" >> ~/.bashrc
+    sudo echo "export ROS_IP=192.168.8.28" >> ~/.bashrc
     fi
 # Set flag to ensure no issues if this script is run twice
 sudo echo "export UDMRT_SETUP=1" >> ~/.bashrc
