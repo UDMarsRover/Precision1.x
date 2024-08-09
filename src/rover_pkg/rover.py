@@ -31,7 +31,7 @@ class Rover:
         gpio.setup(self.__indicatorLED__["blue"], gpio.OUT)
         gpio.setup(self.__relay__, gpio.OUT)
         gpio.output(self.__relay__, 1)
-        
+        gpio.setup(self.__shutdownPin__, gpio.IN)
 
         self.led_control(1, 0, 0)
         time.sleep(0.5)
@@ -99,9 +99,9 @@ class Rover:
 
     def shutdownThread(self):
         while not rospy.is_shutdown():
-            print("checikng shutdown")
+            print("checking shutdown")
             self.shutdownCheck(False)
-            time.sleep(0.5)
+            time.sleep(0.5 )
         
     
 
@@ -133,7 +133,7 @@ class Rover:
 
     def wifiCheckThread(self):
         while not rospy.is_shutdown():
-            print("checking wifi")
+            print("checking shutdown")
             self.wifiCheck()
             time.sleep(0.5)
 
