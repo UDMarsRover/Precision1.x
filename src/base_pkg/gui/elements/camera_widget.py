@@ -108,7 +108,7 @@ class CameraWidget(QWidget):
 
         if ret:
             # Save the frame as an image file
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # Go through the directory, incrementing a number to see if the directory has that file name
             file_name = "captured_image.jpg"
             i = 1
@@ -168,7 +168,7 @@ class CameraWidget(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = CameraWidget(width=1280, height=720)
+    ex = CameraWidget(width=1280, height=720, camera_url="http://192.168.8.223:8080")
 
     print("SHOWING")
     ex.show()
