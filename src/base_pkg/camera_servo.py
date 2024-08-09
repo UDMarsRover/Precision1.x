@@ -13,6 +13,8 @@ class ServoController:
     def set_angle(self, angle):
         setting = 35 + angle * (25 / 90.0)
         self.p.ChangeDutyCycle(setting)
+        time.sleep(0.05)
+        self.p.ChangeDutyCycle(0)
 
     
 
