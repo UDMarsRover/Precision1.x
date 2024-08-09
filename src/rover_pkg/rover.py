@@ -46,8 +46,8 @@ class Rover:
         rospy.init_node(name, anonymous=True)
         self.rate = rospy.Rate(refreshRate)  # Hz
 
-        self.shutdownThread = threading.Thread(target=self.shutdownCheck)
-        self.wifiThread = threading.Thread(target=self.wifiCheck)
+        self.shutdownThread = threading.Thread(target=self.shutdownThread)
+        self.wifiThread = threading.Thread(target=self.wifiCheckThread)
 
         self.shutdownThread.start()
         self.wifiThread.start()
@@ -97,6 +97,12 @@ class Rover:
         self.log("Rollover Detected - Kill Requested")
         self.kill = data.level == 2
 
+    def shutdownThread(self):
+        while not rospy.is_shutdown():
+            self.shutdownCheck(False)
+        
+    
+
     def shutdownCheck(self, force: bool = False):
         if not force:
             if not gpio.input(self.__shutdownPin__):
@@ -122,6 +128,10 @@ class Rover:
             time.sleep(0.5)
             self.shutdown()
             return True
+
+    def wifiCheckThread(self):
+        while not rospy.is_shutdown():
+            self.wifiCheck()
 
     def wifiCheck(self, ip: str = "192.168.8.1"):
         self.wifiConnected = os.system(f"ping -c 1 -W 100 " + ip) == 0
