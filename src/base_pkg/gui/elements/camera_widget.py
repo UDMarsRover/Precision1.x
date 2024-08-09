@@ -18,6 +18,7 @@ class CameraWidget(QWidget):
         self.camera_url = camera_url
         self.lat = float64(0)
         self.lon = float64(0)
+        self.camera_mode = 0
         self.setStyleSheet("background-color: black;")
         self.initUI()
         self.run()
@@ -39,6 +40,9 @@ class CameraWidget(QWidget):
         # Create a camera control layout
         self.camera_control_layout = QHBoxLayout()
 
+        self.camera_mode_button = QPushButton("Camera Mode", self)
+        self.camera_mode_button.clicked.connect(self.set_camera_mode)
+        self.camera_control_layout.addWidget(self.camera_mode_button)
 
         # Create a capture button widget
         self.capture_button = QPushButton("Capture", self)
@@ -65,10 +69,11 @@ class CameraWidget(QWidget):
         self.start_camera_thread()
 
     def update_frame(self):
-        ret, frame = self.cap.read()
-        if ret:
+        self.ret, self.frame = self.cap.read()
+        if self.ret:
+            self.frame = self.apply_color_correction(self.frame)
             # rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            rgb_image = frame
+            rgb_image = self.frame
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
             convert_to_qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
@@ -94,6 +99,19 @@ class CameraWidget(QWidget):
         self.camera_thread.join()
         self.cap.release()
         
+    def set_camera_mode(self):
+        if self.camera_mode == 0:
+            self.camera_mode = 1
+        else:
+            self.camera_mode = 0
+
+    def apply_color_correction(self, frame):
+        if self.camera_mode == 1:
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        else:
+            None
+        return frame
+    
     
 
     def update_stream(self):
@@ -103,10 +121,12 @@ class CameraWidget(QWidget):
             time.sleep(0.03)
 
     def capture_image(self):
+        print("SAVING")
         # Read a frame from the webcam
-        ret, frame = self.cap.read()
+        # ret, frame = self.cap.read()
+        print("GOT FRAME")
 
-        if ret:
+        if self.ret:
             # Save the frame as an image file
             # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # Go through the directory, incrementing a number to see if the directory has that file name
@@ -122,7 +142,7 @@ class CameraWidget(QWidget):
             # cv2.imwrite(os.path.join(self.image_path, file_name), frame)
             # Open the captured image using PIL
             # Convert the OpenCV image to PIL image
-            image = Image.fromarray(frame)
+            image = Image.fromarray(self.frame)
 
             # image = Image.open(os.path.join(self.image_path, file_name))
 
