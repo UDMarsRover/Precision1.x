@@ -5,7 +5,7 @@ Use Case:   To be used by the University of Dayton Mars Rover Team as a base cla
 """
 
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32
 import RPi.GPIO as gpio
 from diagnostic_msgs.msg import DiagnosticStatus as diag
 
@@ -64,7 +64,7 @@ class Rover:
 
         rospy.Subscriber("/emo/status/imu", diag, self.rollOverCheck)
 
-        rospy.Subscriber("/pi/camera/servo", String, self.set_camera_angle)
+        rospy.Subscriber("/pi/camera/servo", Float32, self.set_camera_angle)
 
         self.log("Rover Started!")
 
