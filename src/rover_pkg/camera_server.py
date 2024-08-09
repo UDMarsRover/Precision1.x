@@ -18,11 +18,11 @@ rospy.init_node('camera_publisher', anonymous=True)
 
 # Create a ROS publisher
 marker_pub = rospy.Publisher('/pi/camera/aruco', Int8, queue_size=10)
-
+rate = rospy.Rate(15)
 def webcam_feed():
     cap = cv2.VideoCapture(0)
     
-    while True:
+    while not rospy.is_shutdown():
         ret, frame = cap.read()
 
         # Apply color correction for weird windows blue shift
@@ -61,8 +61,8 @@ def webcam_feed():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
         # cv2.waitKey(100)
-        time.sleep(0.03)
-
+        
+        rate.sleep()
 @app.route('/')
 def index():
     return Response(webcam_feed(), mimetype='multipart/x-mixed-replace; boundary=frame')
