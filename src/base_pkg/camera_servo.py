@@ -16,7 +16,7 @@ class ServoController:
         if angle > 100:
             self.p.ChangeFrequency(50)
             self.p.ChangeDutyCycle(12.5)
-            time.sleep(0.01)
+            # time.sleep(0.01)
             self.p.ChangeDutyCycle(0)
         else:
             self.p.ChangeFrequency(250)
