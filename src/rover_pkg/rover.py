@@ -46,8 +46,8 @@ class Rover:
         rospy.init_node(name, anonymous=True)
         self.rate = rospy.Rate(refreshRate)  # Hz
 
-        self.shutdownThread = threading.Thread(self.shutdownCheck)
-        self.wifiThread = threading.Thread(self.wifiCheck)
+        self.shutdownThread = threading.Thread(target=self.shutdownCheck)
+        self.wifiThread = threading.Thread(target=self.wifiCheck)
 
         self.shutdownThread.start()
         self.wifiThread.start()
