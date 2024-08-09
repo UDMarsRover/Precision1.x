@@ -40,7 +40,7 @@ def webcam_feed():
 
                 # Draw the ID text on the frame
                 cv2.putText(frame, str(ids[i]), (center_x, center_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
 
         # Compress the frame for low latency
