@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export ROS_MASTER_URI=http://192.168.8.28:11311
-export ROS_IP=192.168.8.28
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_IP=192.168.8.223
 source /home/udmrt/p1x/bin/activate
 source /home/udmrt/Precision1.x/devel/setup.bash
 roslaunch /home/udmrt/Precision1.x/rover.launch

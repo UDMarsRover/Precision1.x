@@ -4,7 +4,7 @@ After=networking.service
 
 
 [Service]
-ExecStart=bash /home/udmrt/Precision1.x/.setup_utils/rosstart.startup
+ExecStart=/bin/bash /home/udmrt/Precision1.x/.setup_utils/rosstart.startup
 Restart=always
 
 [Install]
