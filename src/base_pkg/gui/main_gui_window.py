@@ -22,7 +22,6 @@ class udmrt_gui(QtWidgets.QWidget):
         self.layout.addWidget(self.lidar_widget, 0, 0)  # Add to the layout
         self.layout.addWidget(self.lidar_widget_2, 0, 1)  # Add to the layout
         self.start_ros_thread()
-<<<<<<< HEAD
         self.lidar_widget = LidarWidget(6.0) # Your widget
         self.lidar_widget_2 = LidarWidget(2.0) # Your widget
         self.layout.addWidget(self.lidar_widget, 0, 1) # Add to the layout
@@ -56,24 +55,6 @@ class udmrt_gui(QtWidgets.QWidget):
     #def update_from_ros(self):
         #laser_subscriber = rospy.Subscriber("scan", LaserScan, self.lidar_widget.ros_callback)
         #rospy.spin()
-=======
-        self.lidar_widget = LidarWidget(6.0)  # Your widget
-        self.lidar_widget_2 = LidarWidget(2.0)  # Your widget
-        self.layout.addWidget(self.lidar_widget, 0, 0)  # Add to the layout
-        self.layout.addWidget(self.lidar_widget_2, 0, 1)  # Add to the layout
-        self.start_ros_thread()
-
-    def start_ros_thread(self):
-        rospy.init_node("udmrt_gui_node", anonymous=True)
-        self.ros_thread = threading.Thread(target=self.update_from_ros)
-        self.ros_thread.start()
-
-    def update_from_ros(self):
-        laser_subscriber = rospy.Subscriber(
-            "scan", LaserScan, self.lidar_widget.ros_callback
-        )
-        rospy.spin()
->>>>>>> deployed
 
 
 def main():
