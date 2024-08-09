@@ -21,6 +21,7 @@ class Rover:
         self.__relay__ = 26
         self.__button_timer__ = 0
         self.__kill_count__ = 0
+        self.__camera_servo_pin__ = 6
 
         gpio.setmode(gpio.BCM)
         gpio.setwarnings(False)
@@ -30,6 +31,10 @@ class Rover:
         gpio.setup(self.__relay__, gpio.OUT)
         gpio.output(self.__relay__, 1)
         gpio.setup(self.__shutdownPin__, gpio.IN)
+        gpio.setup(self.__camera_servo_pin__, gpio.OUT)
+
+        self.camera_servo_pwm = gpio.PWM(self.__camera_servo_pin__, 250)
+        self.camera_servo_pwm.start(0)
 
         self.led_control(1, 0, 0)
         time.sleep(0.5)
@@ -58,6 +63,8 @@ class Rover:
         self.log("Connected to ROS")
 
         rospy.Subscriber("/emo/status/imu", diag, self.rollOverCheck)
+
+        rospy.Subscriber("/pi/camera/servo", String, self.set_camera_angle)
 
         self.log("Rover Started!")
 
@@ -119,6 +126,12 @@ class Rover:
     def wifiCheck(self, ip: str = "192.168.8.1"):
         self.wifiConnected = os.system(f"ping -c 1 " + ip) == 0
         return self.wifiConnected
+    
+    def set_camera_angle(self, angle):
+        setting = 35 + angle * (25 / 90.0)
+        self.p.ChangeDutyCycle(setting)
+        time.sleep(0.05)
+        self.p.ChangeDutyCycle(0)
 
 
 # end
