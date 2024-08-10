@@ -11,8 +11,8 @@ from PIL import Image
 import piexif
 import glob
 import time
-import rospy
-from std_msgs.msg import Float32
+#import rospy
+#from std_msgs.msg import Float32
 
 ################################################
 # IMPORTANT
@@ -32,9 +32,8 @@ class CameraWidget(QWidget):
         self.setStyleSheet("background-color: black;")
         self.initUI()
         self.run()
-        rospy.init_node("udmrt_camera_node", anonymous=True) 
-        self.pub = rospy.Publisher("/pi/camera/servo", Float32, queue_size=10) 
-        self.pub.publish(0)
+        #rospy.init_node("udmrt_camera_node", anonymous=True) 
+        #self.pub = rospy.Publisher("/pi/camera/servo", Float32, queue_size=10) 
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -174,13 +173,13 @@ class CameraWidget(QWidget):
         frames = 10
         increment = 180 / frames
         angle = -90
-        self.pub.publish(angle) #sets camera to -90
-        time.sleep(2)
+        #self.pub.publish(angle) #sets camera to -90
+        #time.sleep(2)
     #Capture images
         for i in range(0, frames):
             
             angle = angle + increment
-            self.pub.publish(angle)
+            #self.pub.publish(angle)
             time.sleep(1)
 
             # Read a frame from the webcam
@@ -224,7 +223,7 @@ class CameraWidget(QWidget):
                 # Save the image with the updated GPS info
                 # image.save(os.path.join(self.image_path, file_name), format='JPEG', exif=data_bytes)
     #Stitch images
-        image_paths = glob.glob("src/base_pkg/gui/elements/*.jpg")
+        image_paths = glob.glob("src/base_pkg/gui/elements/panoImg/*.jpg")
         for thing in image_paths:
             print(thing)
         images = []
