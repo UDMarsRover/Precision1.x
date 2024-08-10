@@ -5,10 +5,12 @@ Use Case:   To be used by the University of Dayton Mars Rover Team as a base cla
 """
 
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32
 import RPi.GPIO as gpio
 from diagnostic_msgs.msg import DiagnosticStatus as diag
-
+import time
+import os
+import threading
 
 class Rover:
     def __init__(self, refreshRate: int = 10, name: str = "precision1"):
@@ -21,6 +23,7 @@ class Rover:
         self.__relay__ = 26
         self.__button_timer__ = 0
         self.__kill_count__ = 0
+        self.__camera_servo_pin__ = 6
 
         gpio.setmode(gpio.BCM)
         gpio.setwarnings(False)
@@ -30,6 +33,10 @@ class Rover:
         gpio.setup(self.__relay__, gpio.OUT)
         gpio.output(self.__relay__, 1)
         gpio.setup(self.__shutdownPin__, gpio.IN)
+        gpio.setup(self.__camera_servo_pin__, gpio.OUT)
+
+        self.camera_servo_pwm = gpio.PWM(self.__camera_servo_pin__, 250)
+        self.camera_servo_pwm.start(0)
 
         self.led_control(1, 0, 0)
         time.sleep(0.5)
@@ -43,6 +50,12 @@ class Rover:
         # Initialize the Rover ROS_MAIN node
         rospy.init_node(name, anonymous=True)
         self.rate = rospy.Rate(refreshRate)  # Hz
+
+        self.shutdownThread = threading.Thread(target=self.shutdownCheckThread)
+        self.wifiThread = threading.Thread(target=self.wifiCheckThread)
+
+        self.shutdownThread.start()
+        self.wifiThread.start()
 
         self.led_control(1, 0, 0)
         while not self.wifiCheck():
@@ -59,17 +72,17 @@ class Rover:
 
         rospy.Subscriber("/emo/status/imu", diag, self.rollOverCheck)
 
+        rospy.Subscriber("/pi/camera/servo", Float32, self.set_camera_angle)
+
         self.log("Rover Started!")
 
     def spin(self):
         if rospy.is_shutdown():
             self.kill = True
-        self.shutdownCheck()
-        wifi = self.wifiCheck()
-        print(wifi)
+        print(self.wifiConnected)
         if self.__kill_count__ > 0:
             self.led_control(1, 1, 0)
-        elif not wifi:
+        elif not self.wifiConnected:
             self.led_control(1, 0, 0)
             self.log("Wifi Disconnected!")
         else:
@@ -91,9 +104,18 @@ class Rover:
         self.log("Rollover Detected - Kill Requested")
         self.kill = data.level == 2
 
+    def shutdownCheckThread(self):
+        while not rospy.is_shutdown():
+            print("checking shutdown")
+            self.shutdownCheck(False)
+            time.sleep(0.5 )
+        
+    
+
     def shutdownCheck(self, force: bool = False):
         if not force:
             if not gpio.input(self.__shutdownPin__):
+                self.led_control(1, 1, 0)
                 currTime = time.time()
                 if (currTime - self.__button_timer__) > 1:
                     self.__kill_count__ += 1
@@ -116,9 +138,21 @@ class Rover:
             self.shutdown()
             return True
 
+    def wifiCheckThread(self):
+        while not rospy.is_shutdown():
+            print("checking shutdown")
+            self.wifiCheck()
+            time.sleep(0.5)
+
     def wifiCheck(self, ip: str = "192.168.8.1"):
-        self.wifiConnected = os.system(f"ping -c 1 " + ip) == 0
+        self.wifiConnected = os.system(f"ping -c 1 -W 100 " + ip) == 0
         return self.wifiConnected
+    
+    def set_camera_angle(self, angle):
+        setting = 35 + angle * (25 / 90.0)
+        self.p.ChangeDutyCycle(setting)
+        time.sleep(0.05)
+        self.p.ChangeDutyCycle(0)
 
 
 # end
