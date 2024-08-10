@@ -4,17 +4,17 @@ from gui.elements.error_status_panel import ErrorStatusPanel
 from gui.elements.camera_widget import CameraWidget
 from gui.lidar.lidar_widget import LidarWidget
 from sensor_msgs.msg import LaserScan, BatteryState, NavSatFix, Temperature, Range
-import random
+#import random
 from PyQt5.QtWidgets import QDial, QLabel, QVBoxLayout, QWidget, QStackedLayout
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
-import rssi
+#import rssi
 from PyQt5.QtWidgets import QComboBox
 import threading
 import rospy
 GUI_WIDTH = 2800
 GUI_HEIGHT = 1600
-CAMERA_URLs = [0, "http://example_url.com/image.h264"]
+CAMERA_URLs = [0, "http://192.168.8.223:8080"]
 CAMERA_NAMES = ["WebCam", "Main Camera", "Arm Camera"]
 MAX_SPEED = 6
 SONAR_RANGE_GOOD = 1.5
