@@ -13,3 +13,4 @@ pyqt5
 flask
 piexif
 pillow
+glob
