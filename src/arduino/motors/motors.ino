@@ -196,8 +196,8 @@ void keyboard_teleop_ros(std_msgs::String msg){
 }
 */
 
-ros::Subscriber<geometry_msgs::Twist> velocityIn("motors/cmd/drive", runTankDrive);
-ros::Subscriber<geometry_msgs::Twist> collectIn("motors/cmd/collect", collectDirt);
+ros::Subscriber<geometry_msgs::Twist> velocityIn("/motors/cmd/drive", runTankDrive);
+ros::Subscriber<geometry_msgs::Twist> collectIn("/motors/cmd/collect", collectDirt);
 
 
 
