@@ -11,8 +11,8 @@ from PIL import Image
 import piexif
 import glob
 import time
-#import rospy
-#from std_msgs.msg import Float32
+import rospy
+from std_msgs.msg import Float32
 
 ################################################
 # IMPORTANT
@@ -32,8 +32,8 @@ class CameraWidget(QWidget):
         self.setStyleSheet("background-color: black;")
         self.initUI()
         self.run()
-        #rospy.init_node("udmrt_camera_node", anonymous=True) 
-        #self.pub = rospy.Publisher("/pi/camera/servo", Float32, queue_size=10) 
+        rospy.init_node("udmrt_camera_node", anonymous=True) 
+        self.pub = rospy.Publisher("/pi/camera/servo", Float32, queue_size=10) 
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -173,14 +173,14 @@ class CameraWidget(QWidget):
         frames = 10
         increment = 180 / frames
         angle = -90
-        #self.pub.publish(angle) #sets camera to -90
-        #time.sleep(2)
+        self.pub.publish(angle) #sets camera to -90
+        time.sleep(2)
     #Capture images
         for i in range(0, frames):
             
             angle = angle + increment
-            #self.pub.publish(angle)
-            time.sleep(1)
+            self.pub.publish(angle)
+            time.sleep(2)
 
             # Read a frame from the webcam
             ret, frame = self.cap.read()
@@ -224,30 +224,23 @@ class CameraWidget(QWidget):
                 # image.save(os.path.join(self.image_path, file_name), format='JPEG', exif=data_bytes)
     #Stitch images
         image_paths = glob.glob("src/base_pkg/gui/elements/panoImg/*.jpg")
-        for thing in image_paths:
-            print(thing)
         images = []
 
         for image in image_paths:
             img = cv2.imread(image)
             images.append(img)
-            cv2.imshow("Image", img)
-            cv2.waitKey(0)
-
-        print(images)
 
         imageStitcher = cv2.Stitcher_create()
 
         error, stitched_img = imageStitcher.stitch(images)
 
-        if error: 
-            print("sad")
-            print(error)
+        #if error: 
+        #    print("sad")
+        #    print(error)
 
         if not error:
 
-            cv2.imwrite("stitchedOutput.png", stitched_img)
-            cv2.imshow("Stitch", stitched_img)
+            cv2.imwrite("src/base_pkg/gui/elements/panoImg/stitchedOutput.jpg", stitched_img)
             cv2.waitKey(0)
 
     def open_image(self):
