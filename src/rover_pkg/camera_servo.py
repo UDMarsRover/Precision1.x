@@ -3,8 +3,8 @@ import time
 import RPi.GPIO as gpio
 
 class ServoController:
-    def __init__(self, pin):
-        self.servo_pin = 6
+    def __init__(self, pin=6):
+        self.servo_pin = pin
         gpio.setmode(gpio.BCM)
         gpio.setup(self.servo_pin, gpio.OUT)
         self.p = gpio.PWM(self.servo_pin, 250)
@@ -23,7 +23,7 @@ class ServoController:
         gpio.cleanup()
 
 if __name__ == "__main__":
-    servo = ServoController(17)
+    servo = ServoController(6)
 
     try:
         while True:
