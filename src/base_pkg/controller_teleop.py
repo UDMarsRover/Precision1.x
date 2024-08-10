@@ -20,7 +20,7 @@ class udmrtController:
         self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
         self.collectPub = rospy.Publisher("motors/cmd/collect", Twist, queue_size=1)
-        self.camControl = rospy.Publisher("pi/camera/servo", Float32, queue_size=1)
+        self.camControl = rospy.Publisher("/pi/camera/servo", Float32, queue_size=1)
 
         self.rate = rospy.Rate(60)
         self.armRate = rospy.Rate(5)
@@ -95,10 +95,10 @@ class udmrtController:
         cam_temp_l = self.controller.lt
         cam_temp_r = self.controller.rt
 
-        self.camval.data = -1 if self.controller.lt else 1 if self.controller.rt else 0 * 10
+        self.camval.data =(-1 if self.controller.lt else 1 if self.controller.rt else 0) * 10
         self.camControl.publish(self.camval)
 
-        print(self.controller.left_joy_x)
+        print(self.camval.data)
 
 
 

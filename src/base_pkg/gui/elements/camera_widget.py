@@ -7,7 +7,7 @@ import time
 import threading
 
 class CameraWidget(QWidget):
-    def __init__(self, camera_url=0, width=640, height=480):
+    def __init__(self, camera_url="http://192.168.8.223:8080", width=640, height=480):
         super().__init__()
         self.title = 'http Video Stream'
         self.left, self.top, self.width, self.height = 0, 0, width, height

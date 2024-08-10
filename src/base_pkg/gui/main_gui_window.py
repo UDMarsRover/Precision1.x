@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout
 from lidar.lidar_widget import LidarWidget
