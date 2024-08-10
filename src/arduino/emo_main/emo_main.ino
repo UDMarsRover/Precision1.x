@@ -10,6 +10,7 @@
 #include "src/udmrt_voltage_sensor/udmrt_voltage_sensor.h"
 #include "src/udmrt_ultrasonic/udmrt_ultrasonic.h"
 #include <NewPing.h>
+#include <nav_msgs/Odometry.h>
 
 
 
@@ -92,6 +93,12 @@ ros::Publisher ultraSWData("/emo/ultraSW",&(ultraSW.data_msg));
 ros::Publisher ultraSWDiag("/emo/status/ultraSW",&(ultraSW.diag_msg));
 
 
+/**
+ * @brief odom message
+ * 
+ */
+geometry_msgs::Odometry odom_msg;
+ros::Publisher odomPub("/emo/odom",&odom_msg);
 
 void setup(){
 
@@ -127,6 +134,7 @@ void loop(){
   node.spinOnce();
   delay(500);
   gps.spin();
+  odom_msg.pose. gps.data_msg.latitude;
   imu.spin();
   batteryTemp.spin();
   boxTemp.spin();
