@@ -11,6 +11,7 @@ from diagnostic_msgs.msg import DiagnosticStatus as diag
 import time
 import os
 import threading
+from camera_servo import ServoController
 
 class Rover:
     def __init__(self, refreshRate: int = 10, name: str = "precision1"):
@@ -33,7 +34,8 @@ class Rover:
         gpio.setup(self.__relay__, gpio.OUT)
         gpio.output(self.__relay__, 1)
         gpio.setup(self.__shutdownPin__, gpio.IN)
-        gpio.setup(self.__camera_servo_pin__, gpio.OUT)
+        
+        self.cameraServo = ServoController()
 
         self.camera_servo_pwm = gpio.PWM(self.__camera_servo_pin__, 250)
         self.camera_servo_pwm.start(0)
@@ -72,7 +74,7 @@ class Rover:
 
         rospy.Subscriber("/emo/status/imu", diag, self.rollOverCheck)
 
-        rospy.Subscriber("/pi/camera/servo", Float32, self.set_camera_angle)
+        rospy.Subscriber("/pi/camera/servo", Float32, self.cameraServo.set_angle)
 
         self.log("Rover Started!")
 
@@ -148,11 +150,5 @@ class Rover:
         self.wifiConnected = os.system(f"ping -c 1 -W 100 " + ip) == 0
         return self.wifiConnected
     
-    def set_camera_angle(self, angle):
-        setting = 35 + angle * (25 / 90.0)
-        self.p.ChangeDutyCycle(setting)
-        time.sleep(0.05)
-        self.p.ChangeDutyCycle(0)
-
 
 # end
