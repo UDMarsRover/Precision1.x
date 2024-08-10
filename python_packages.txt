@@ -12,3 +12,4 @@ pyniryo2
 pyqt5
 flask
 piexif
+pillow
