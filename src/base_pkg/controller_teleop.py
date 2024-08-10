@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
+from std_msgs.msg import Float32
 import time
 import numpy as np
 import sys
@@ -19,6 +20,7 @@ class udmrtController:
         self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
         self.collectPub = rospy.Publisher("motors/cmd/collect", Twist, queue_size=1)
+        self.camControl = rospy.Publisher("pi/camera/servo", Float32, queue_size=1)
 
         self.rate = rospy.Rate(60)
         self.armRate = rospy.Rate(5)
@@ -47,6 +49,8 @@ class udmrtController:
         self.collect3 = 0
         self.sec = time.time()
         self.velOut = Twist()
+        self.camval = Float32()
+        self.camval.data = 0.0
         self.velOut.linear.y = 0
         self.velOut.angular.z = 0
         self.velOut.angular.x = 0
@@ -65,6 +69,7 @@ class udmrtController:
         motorRunning = self.__motor_command_check__()
         #self.__arm_command_check__()
         self.rate.sleep()
+    
 
     def __motor_command_check__(self):
         """
@@ -87,6 +92,11 @@ class udmrtController:
         collect1_temp = self.controller.a
         collect2_temp = self.controller.b
         collect3_temp = self.controller.x
+        cam_temp_l = self.controller.lt
+        cam_temp_r = self.controller.rt
+
+        self.camval.data = -1 if self.controller.lt else 1 if self.controller.rt else 0 * 10
+        self.camControl.publish(self.camval)
 
         print(self.controller.left_joy_x)
 
@@ -100,6 +110,7 @@ class udmrtController:
             (self.collect1 != collect1_temp) or (self.collect2 !=collect2_temp) or (self.collect3 != collect3_temp)
         )
 
+        
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
 
