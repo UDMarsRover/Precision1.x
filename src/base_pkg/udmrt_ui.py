@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QLineEdit, QVBoxLayout, QHBoxLayout
 from gui.elements.error_status_panel import ErrorStatusPanel
@@ -14,7 +16,7 @@ import threading
 import rospy
 GUI_WIDTH = 2800
 GUI_HEIGHT = 1600
-CAMERA_URLs = [0, "http://example_url.com/image.h264"]
+CAMERA_URLs = [0, "http://192.168.8.223:8080"]
 CAMERA_NAMES = ["WebCam", "Main Camera", "Arm Camera"]
 MAX_SPEED = 6
 SONAR_RANGE_GOOD = 1.5
@@ -43,6 +45,7 @@ class MyWindow(QWidget):
         ros_controller = ROSMagic()
         
         self.initUI()
+
     def initUI(self):
         self.setWindowTitle('UDMRT')
         self.layout = QHBoxLayout()
@@ -51,6 +54,7 @@ class MyWindow(QWidget):
         self.info_panel = InfoPanel()
         self.layout.addWidget(self.info_panel)
         self.setLayout(self.layout)
+        ros_controller.start_ros_thread()
         self.show()
 
     def init_error_panel(self):
@@ -264,11 +268,15 @@ class BatteryStatusWidget(QWidget):
         self.data_label = QLabel()
         self.layout.addWidget(self.data_label)
         self.data_label.setStyleSheet("font-size: 60px;")
-        self.battery_status_callback(0.0)
+        empty_voltage_msg = BatteryState()
+        empty_voltage_msg.voltage = 0.0
+        self.battery_status_callback(empty_voltage_msg)
         ros_controller.add_ros_subscriber(BATTERY_STATE_TOPIC, BatteryState, self.battery_status_callback)
         
-    def battery_status_callback(self, voltage):
-        self.data_label.setText(f"{voltage}V")
+    def battery_status_callback(self, voltage_msg):
+        voltage = voltage_msg.voltage
+        self.data_label.setText(f"{voltage:.2f}V")
+
 
 class GPSDataWidget(QWidget):
     def __init__(self, camera_widget=None):
@@ -375,13 +383,16 @@ class ROSMagic:
         self.ros_thread.start()
 
     def update_from_ros(self):
+        print(self.subscribers)
         for subscriber in self.subscribers:
+            print("Generating Subscriber: ", subscriber["topic"])
             ros_subscriber = rospy.Subscriber(subscriber["topic"], subscriber["datatype"], subscriber["callback"])
         rospy.spin()
 
     """Add a ROS subscriber to the GUI. The callback function will be called when a message is received."""
-    def add_ros_subscriber(self, topic, callback, datatype):
-        self.subscribers.append({"topic":topic, "datatype":datatype, "callaback":callback})
+    def add_ros_subscriber(self, topic, datatype, callback):
+        self.subscribers.append({"topic":topic, "datatype":datatype, "callback":callback})
+        
         None
         
 class CircleWidget(QWidget):
