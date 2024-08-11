@@ -37,9 +37,6 @@ class Rover:
         
         self.cameraServo = ServoController()
 
-        self.camera_servo_pwm = gpio.PWM(self.__camera_servo_pin__, 250)
-        self.camera_servo_pwm.start(0)
-
         self.led_control(1, 0, 0)
         time.sleep(0.5)
         self.led_control(0, 1, 0)
