@@ -14,7 +14,7 @@ from src.UDMRT_datatypes import Arm_Position, LogitechF310
 class udmrtController:
     def __init__(self):
         rospy.init_node("Controller_teleop", anonymous=True)
-        self.drivePub = rospy.Publisher("DriveVelocity", Twist, queue_size=1)
+        self.drivePub = rospy.Publisher("/motors/cmd/drive", Twist, queue_size=1)
         self.armPosPub = rospy.Publisher("arm/cmd/position", Float32MultiArray, queue_size=1)
         self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
