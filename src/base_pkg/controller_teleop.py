@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
+from std_msgs.msg import Float32
 import time
 import numpy as np
 import sys
@@ -18,6 +19,8 @@ class udmrtController:
         self.armPosPub = rospy.Publisher("arm/cmd/position", Float32MultiArray, queue_size=1)
         self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
         self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
+        self.collectPub = rospy.Publisher("motors/cmd/collect", Twist, queue_size=1)
+        self.camControl = rospy.Publisher("/pi/camera/servo", Float32, queue_size=1)
 
         self.rate = rospy.Rate(60)
         self.armRate = rospy.Rate(5)
@@ -41,11 +44,20 @@ class udmrtController:
 
         self.linVelY = 0
         self.angVelZ = 0
+        self.collect1 = 0
+        self.collect2 = 0
+        self.collect3 = 0
         self.sec = time.time()
         self.velOut = Twist()
+        self.camval = Float32()
+        self.camval.data = 0.0
         self.velOut.linear.y = 0
         self.velOut.angular.z = 0
         self.velOut.angular.x = 0
+        self.collectOut = Twist()
+        self.collectOut.linear.x = 0
+        self.collectOut.linear.y = 0
+        self.collectOut.linear.z = 0
         self.drivePub.publish(self.velOut)
         self.current_start_state = 0
 
@@ -57,6 +69,7 @@ class udmrtController:
         motorRunning = self.__motor_command_check__()
         #self.__arm_command_check__()
         self.rate.sleep()
+    
 
     def __motor_command_check__(self):
         """
@@ -76,19 +89,53 @@ class udmrtController:
         linVelY_temp = linVelY_temp if np.abs(linVelY_temp) > 0.1 else 0
         angVelZ_temp = angVelZ_temp if np.abs(angVelZ_temp) > 0.1 else 0
 
+        collect1_temp = self.controller.a
+        collect2_temp = self.controller.b
+        collect3_temp = self.controller.x
+        cam_temp_l = self.controller.lt
+        cam_temp_r = self.controller.rt
+
+        self.camval.data =(-1 if self.controller.lt else 1 if self.controller.rt else 0) * 10
+        self.camControl.publish(self.camval)
+
+        print(self.camval.data)
+
+
+
         valueCheck = bool(
             (self.linVelY != linVelY_temp) or (angVelZ_temp != self.angVelZ) or (self.current_start_state)
         )
+
+        collectCheck = bool (
+            (self.collect1 != collect1_temp) or (self.collect2 !=collect2_temp) or (self.collect3 != collect3_temp)
+        )
+
+        
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
 
-        print(valueCheck)
+        self.collect1 = collect1_temp
+        self.collect2 = collect2_temp
+        self.collect3 = collect3_temp
 
-        if valueCheck:
-            self.velOut.linear.y = self.linVelY
-            self.velOut.angular.z = self.angVelZ
-            self.velOut.angular.x = self.current_start_state
-            self.drivePub.publish(self.velOut)
+        print(valueCheck)
+        print(collectCheck)
+
+        if collectCheck:
+            self.collectOut.linear.x = -1.5 * float(self.controller.a)
+            self.collectOut.linear.y = -1.5 * float(self.controller.b)
+            self.collectOut.linear.z = 1.5 * float(self.controller.x)
+            self.collectPub.publish(self.collectOut)
+            
+        else:
+            if valueCheck:
+                self.velOut.linear.y = self.linVelY
+                self.velOut.angular.z = self.angVelZ
+                self.velOut.angular.x = self.current_start_state
+                self.drivePub.publish(self.velOut)
+        
+        
+        
 
         return (self.velOut.linear.y != 0) and (self.velOut.angular.z != 0)
 

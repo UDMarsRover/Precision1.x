@@ -28,17 +28,19 @@ class UDMRTDrivetrain{
     void setGear(int gear = PARK);
     bool drive(float kmPerHour_prec, float degPerSecond_prec, float acc);
     void reset();
+    std::vector<MoogMotor> leftMotors;
+    std::vector<MoogMotor> rightMotors;
+    float max_lin_vel;
 
 
   private:
-    std::vector<MoogMotor> leftMotors;
-    std::vector<MoogMotor> rightMotors;
+    
     bool sendCommand(String command, int id=0);
     bool rosSetup;
     int numberOfMotors;
     float roverWidth;
     float tireDiameter;
-    float max_lin_vel;
+    
     float max_ang_vel;
 
     std::vector<float> lengths;

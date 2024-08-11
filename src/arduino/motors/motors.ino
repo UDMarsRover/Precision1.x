@@ -65,6 +65,14 @@ ros::Publisher DriveGear("DriveGear", &currentDriveGear);
 ros::Publisher DriveStatus("DriveStatus", &currentDriveStatus);
 
 
+void collectDirt(const geometry_msgs::Twist& command){
+
+  driveTrain.rightMotors[0].setVelocity(command.linear.y * driveTrain.max_lin_vel);
+  driveTrain.rightMotors[2].setVelocity(command.linear.x * driveTrain.max_lin_vel);
+  driveTrain.leftMotors[2].setVelocity(command.linear.z * driveTrain.max_lin_vel);
+
+}
+
 void runTankDrive(const geometry_msgs::Twist& command){
 
 
@@ -188,7 +196,8 @@ void keyboard_teleop_ros(std_msgs::String msg){
 }
 */
 
-ros::Subscriber<geometry_msgs::Twist> velocityIn("DriveVelocity", runTankDrive);
+ros::Subscriber<geometry_msgs::Twist> velocityIn("/motors/cmd/drive", runTankDrive);
+ros::Subscriber<geometry_msgs::Twist> collectIn("/motors/cmd/collect", collectDirt);
 
 
 
@@ -249,6 +258,7 @@ void setup() {
   driverNode.advertise(DriveGear);
   driverNode.advertise(DriveStatus);
   driverNode.subscribe(velocityIn);
+  driverNode.subscribe(collectIn);
 
   //pinMode(led,OUTPUT);
   currentDriveStatus.name = "Drivetrain Motors Status";
