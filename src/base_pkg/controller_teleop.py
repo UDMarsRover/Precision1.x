@@ -63,6 +63,9 @@ class udmrtController:
 
         self.controller = LogitechF310()
 
+        self.cam_time = 0
+        self.cam_temp = 0
+
         print("Controller TeleOp Started Successfully!")
 
     def spin(self):
@@ -92,13 +95,17 @@ class udmrtController:
         collect1_temp = self.controller.a
         collect2_temp = self.controller.b
         collect3_temp = self.controller.x
-        cam_temp_l = self.controller.lt
-        cam_temp_r = self.controller.rt
+        
+        if time.time() - self.cam_time > 0.5:
+            self.cam_temp = self.camval.data
+            self.camval.data += (-1 if self.controller.lt else 1 if self.controller.rt else 0) * 10
+            
+            self.camval.data = self.camval.data if (self.camval.data < 90 and self.camval.data > -90) else self.cam_temp
 
-        self.camval.data =(-1 if self.controller.lt else 1 if self.controller.rt else 0) * 10
-        self.camControl.publish(self.camval)
+            self.cam_time = time.time()
 
-        print(self.camval.data)
+
+        
 
 
 
@@ -110,6 +117,10 @@ class udmrtController:
             (self.collect1 != collect1_temp) or (self.collect2 !=collect2_temp) or (self.collect3 != collect3_temp)
         )
 
+        camCheck = bool(
+            #self.camval.data != self.cam_temp
+            False
+        )
         
         self.linVelY = linVelY_temp
         self.angVelZ = angVelZ_temp
@@ -133,6 +144,10 @@ class udmrtController:
                 self.velOut.angular.z = self.angVelZ
                 self.velOut.angular.x = self.current_start_state
                 self.drivePub.publish(self.velOut)
+
+        if camCheck:
+            print(self.camval.data)
+            #self.camControl.publish(self.camval)
         
         
         
