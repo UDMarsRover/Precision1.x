@@ -26,7 +26,7 @@
 
 
 int input;
-float acceleration = 0.25;
+float acceleration = 0.5;
 float positionM = 0;
 boolean goodl = false;
 boolean goodr = false;
