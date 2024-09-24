@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import rospy
+import rclpy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
@@ -13,14 +13,26 @@ from src.UDMRT_datatypes import Arm_Position, LogitechF310
 
 class udmrtController:
     def __init__(self):
-        rospy.init_node("Controller_teleop", anonymous=True)
-        self.drivePub = rospy.Publisher("DriveVelocity", Twist, queue_size=1)
-        self.armPosPub = rospy.Publisher("arm/cmd/position", Float32MultiArray, queue_size=1)
-        self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
-        self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
+        # rospy.init_node("Controller_teleop", anonymous=True)
+        with rclpy.init(args=sys.argv):
+            node = rclpy.create_node('Controller_teleop')
 
-        self.rate = rospy.Rate(60)
-        self.armRate = rospy.Rate(5)
+        # ros1 - self.drivePub = rospy.Publisher("DriveVelocity", Twist, queue_size=1)
+        self.drivePub = node.create_publisher(Twist, "DriveVelocity",1)
+
+        # self.armPosPub = rospy.Publisher("arm/cmd/position", Float32MultiArray, queue_size=1)
+        self.armPosPub = node.create_publisher(Float32MultiArray,"arm/cmd/position",1)
+
+        # self.armMotorPub = rospy.Publisher("arm/cmd/motors", Float32MultiArray, queue_size=1)
+        self.armMotorPub = node.create_publisher(Float32MultiArray,"arm/cmd/motors",1)
+
+        # self.armGripPub = rospy.Publisher("arm/cmd/grip", Bool, queue_size=1)
+        self.armGripPub = node.create_publisher(Bool,"arm/cmd/grip",1)
+
+        #changed ros to rclpy, may not work
+        self.rate = rclpy.Rate(60)
+        self.armRate = rclpy.Rate(5)
+
         self.jog_pose_value = 0.02  # meters
         self.arm_jog_count = 0
         self.arm_reset_count = 0
@@ -139,5 +151,5 @@ class udmrtController:
 
 controller = udmrtController()
 
-while not rospy.is_shutdown():
+while not rclpy.is_shutdown():
     controller.spin()
