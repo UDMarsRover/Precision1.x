@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/home/udmrt/p1x/bin/python3
+
 # ^ Always put this in the first line so the interpereter knows where to find python.
 
 import rospy
